@@ -26,7 +26,9 @@ Store Material Files 1.7.4 package. A live cover-to-inner-to-cover transition pa
 the same process and activity remained resumed at 1080x2520 and 1968x2184 with
 no fatal exception. Synthetic rename and copy-then-delete actions were verified;
 the move result still needs a controlled retest because both source and
-destination remain. No changes have been pushed or published.
+destination remain. The validated source checkpoint is pushed to private
+Forgejo and the public GitHub fork `vincent71711/FM-Plus-Ultra`. No APK release
+has been published.
 
 The installed UI checkpoint has a pinned black toolbar, gray clickable
 breadcrumbs, divided file rows, an editable Home dashboard, a single Remote

@@ -1,12 +1,13 @@
 # New thread handoff
 
-- Product: FM Plus Ultra, a private-use Android file manager
+- Product: FM Plus Ultra, an Android file manager
   derivative for a Galaxy Z Fold7.
 - Base: official Material Files, GPLv3, full history preserved.
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
-- Work branch: `codex/private-derivative`; no push or publication.
+- Work branch: `codex/private-derivative`; validated checkpoint is on Forgejo
+  `main` and the public GitHub fork `vincent71711/FM-Plus-Ultra`.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
 - Validated gate: JDK 21 plus
@@ -24,8 +25,9 @@
   `docs/branding/file-manager-plus-ultra-icon-source.png`; use the checked-in
   generation script for launcher densities. Do not regenerate the mascot. The
   adaptive foreground is currently scaled to 64% for additional breathing room.
-- The private name is not approved public branding due similarity to an
-  existing commercial app. No distribution is authorized.
+- Vincent approved FM Plus Ultra as the public source-fork name on 2026-08-16.
+  The project must not imply affiliation with similarly named commercial apps.
+  Public APK distribution and release signing remain undecided.
 - Version 52 is installed and running on the explicitly selected Fold7 and
   coexists with Play Store Material Files. Do not record the wireless-ADB serial.
 - A live cover (1080x2520) to inner (1968x2184) to cover transition retained the

@@ -31,7 +31,8 @@
 - Filename preference migration: version 41 converts the inherited saved Middle
   ellipsis default to End; the installed preference was verified as value `2`.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
-- Push/publication: none
+- Push/publication: validated source checkpoint pushed to private Forgejo and
+  the public GitHub fork `vincent71711/FM-Plus-Ultra`. No APK release was published.
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
 - SMB packet findings: File Manager Plus held its captured 4 GiB upload near

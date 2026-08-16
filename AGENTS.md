@@ -4,7 +4,7 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 ## Product and upstream baseline
 
-- This is **FM Plus Ultra**, a private-use, history-preserving GPLv3 derivative of
+- This is **FM Plus Ultra**, a history-preserving GPLv3 derivative of
   [Material Files](https://github.com/zhanghai/MaterialFiles).
 - The immutable upstream baseline is commit
   `fc1250038496ebf4d4c139f62d16f0071f2c995a`, tagged locally as
@@ -13,14 +13,14 @@ These instructions apply throughout `/srv/file-manager-app`.
   work must use `codex/<short-description>` branches.
 - Preserve `LICENSE`, copyright headers, attribution, Git history, and
   third-party notices. Mark material modifications and relevant dates.
-- The private working identity is `FM Plus Ultra`; release ID is
+- The recorded identity is `FM Plus Ultra`; release ID is
   `com.froslabs.filemanagerplusultra` and development builds use the `.debug`
   suffix. The upstream Kotlin namespace remains unchanged intentionally.
 - The derivative Android version code begins at 40 and must increase
   monotonically. Never reset it below inherited Material Files migration
   thresholds; doing so can rerun destructive legacy preference migrations.
-- The working name is not approved for public distribution because it is close
-  to an existing commercial product name. Revisit public branding first.
+- Vincent approved `FM Plus Ultra` as the public source-fork name on 2026-08-16.
+  Do not imply affiliation with similarly named commercial applications.
 - The primary physical target is a Samsung Galaxy Z Fold7 connected through
   wireless ADB. Select its explicit current serial; never assume the first ADB
   device.
@@ -50,8 +50,8 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 - Never push, force-push, publish, release, upload an APK/AAB, or contact
   external parties unless Vincent explicitly requests it.
-- Do not change the recorded private branding/application IDs, or choose public
-  branding, signing, an update channel, or distribution without recording the
+- Do not change the recorded branding/application IDs, or choose signing, an
+  update channel, binary distribution, or release terms without recording the
   decision in `CONTEXT/REVISION_QUEUE.md`.
 - Do not add analytics, tracking, servers, cloud infrastructure, or automatic
   uploads. Firebase was removed from the derivative and must not be restored.

@@ -4,7 +4,9 @@
 
 - **Application ID:** release ID `com.froslabs.filemanagerplusultra`; debug ID
   `com.froslabs.filemanagerplusultra.debug`.
-- **Visible name:** FM Plus Ultra for private use.
+- **Visible name and public source branding:** FM Plus Ultra. Vincent approved
+  this name for the public GitHub source fork on 2026-08-16; do not imply
+  affiliation with similarly named commercial applications.
 - **Launcher art:** selected version-2 librarian mascot with glasses, high red
   ponytail, gold folder, and no headphones. The canonical source is
   `docs/branding/file-manager-plus-ultra-icon-source.png`. Its adaptive launcher
@@ -26,15 +28,13 @@
 
 ## Decisions still required
 
-- **Public branding:** the private working name is too close to an existing
-  commercial application name to assume for public distribution. Choose a
-  distinct name before sharing or publishing.
 - **Signing:** debug keystore for development; private release key and backup
   process must be decided before any release build is distributed.
 - **Updates:** no automatic update channel. Decide later whether updates are
   manual APK installs or a private repository.
-- **Distribution:** private use only at present. Any future recipient triggers a
-  GPLv3 source-delivery review.
+- **Distribution:** public source publication as a GPLv3 GitHub fork is approved.
+  APK/AAB publication remains unapproved and requires a signing and GPLv3
+  corresponding-source delivery decision.
 
 ## Remaining bootstrap work
 

@@ -6,13 +6,17 @@
 - `origin`: `https://git.computersmarts.org/vincent/file-manager-app.git`
   (the local display may use an SSH rewrite)
 - `upstream`: `https://github.com/zhanghai/MaterialFiles.git`
+- `github`: `https://github.com/vincent71711/FM-Plus-Ultra.git`
+  (public GitHub fork of `zhanghai/MaterialFiles`)
 - Upstream branch: `master`
 - Mod integration branch: `main`
 - Working branches: `codex/<short-description>`
 - Baseline commit: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Baseline tag: `mod-baseline/2026-08-16-material-files-fc12500`
 
-No pushing, publishing, release tagging, or artifact upload is authorized.
+The 2026-08-16 source checkpoint is authorized on private Forgejo and the public
+GitHub fork. Future pushing, release tagging, or artifact upload still requires
+explicit authorization.
 
 ## Toolchain and baseline validation
 
@@ -43,7 +47,7 @@ Build output belongs under Gradle `build/` directories and must not be committed
 
 The derivative identity is:
 
-- Visible private-use name: `FM Plus Ultra`
+- Visible and public source-fork name: `FM Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
 - Reserved release ID: `com.froslabs.filemanagerplusultra`
 - Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (52). Android
@@ -52,9 +56,9 @@ The derivative identity is:
   preference-migration thresholds.
 - Upstream code namespace: `me.zhanghai.android.files` (retained intentionally)
 
-The separate IDs coexist with the Play/F-Droid Material Files package. The
-private working name must be reconsidered before public distribution because it
-is close to an existing commercial product name.
+The separate IDs coexist with the Play/F-Droid Material Files package. Vincent
+approved FM Plus Ultra as the public source-fork name on 2026-08-16; project
+materials must not imply affiliation with similarly named commercial products.
 
 The debug APK was installed and cold-launched successfully on the explicitly
 selected Fold7 on 2026-08-16. Always resolve and pass the current serial with

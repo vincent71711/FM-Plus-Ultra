@@ -1,15 +1,14 @@
 # FM Plus Ultra
 
-FM Plus Ultra is a private-use Android file manager derivative based
+FM Plus Ultra is an open-source Android file manager derivative based
 on the official Material Files project. Its goal is to retain Material Files'
 capable local/NAS provider architecture while delivering fast SMB transfers,
 stable and detailed transfer monitoring, a visually structured file list,
 obvious file actions, and a dependable unfolded experience on Samsung
 foldables.
 
-The current name is private working branding and is not a claim of affiliation
-with any similarly named commercial application. Choose distinct public
-branding before any distribution outside the private-use scope.
+FM Plus Ultra is independent software and is not affiliated with similarly
+named commercial applications.
 
 The project preserves Material Files' Git history, GPLv3 license, copyright
 notices, and attribution. The app's About screen identifies the upstream author
