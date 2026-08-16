@@ -12,7 +12,7 @@ import androidx.annotation.AttrRes
 import androidx.annotation.StyleRes
 import me.zhanghai.android.foregroundcompat.ForegroundLinearLayout
 
-class CheckableForegroundLinearLayout : ForegroundLinearLayout, Checkable {
+open class CheckableForegroundLinearLayout : ForegroundLinearLayout, Checkable {
     private var _isChecked = false
         set(value) {
             if (field == value) {

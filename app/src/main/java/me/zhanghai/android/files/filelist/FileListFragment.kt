@@ -47,7 +47,6 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -123,7 +122,6 @@ import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.extraPathList
 import me.zhanghai.android.files.util.fadeToVisibilityUnsafe
 import me.zhanghai.android.files.util.getDimensionDp
-import me.zhanghai.android.files.util.getDrawableByAttr
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.hasSw600Dp
 import me.zhanghai.android.files.util.isOrientationLandscape
@@ -188,7 +186,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private lateinit var adapter: FileListAdapter
 
-    private lateinit var listDividerDecoration: DividerItemDecoration
 
     private lateinit var homeDashboardAdapter: HomeDashboardAdapter
 
@@ -262,9 +259,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.recyclerView.layoutManager = layoutManager
         adapter = FileListAdapter(this)
         binding.recyclerView.adapter = adapter
-        listDividerDecoration = DividerItemDecoration(activity, RecyclerView.VERTICAL).apply {
-            setDrawable(activity.getDrawableByAttr(android.R.attr.listDivider))
-        }
         homeDashboardAdapter = HomeDashboardAdapter(navigationFragment)
         binding.homeRecyclerView.layoutManager = GridLayoutManager(
             activity, resources.getInteger(R.integer.home_dashboard_span_count)
@@ -741,10 +735,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onViewTypeChanged(viewType: FileViewType) {
-        binding.recyclerView.removeItemDecoration(listDividerDecoration)
-        if (viewType == FileViewType.LIST) {
-            binding.recyclerView.addItemDecoration(listDividerDecoration)
-        }
         updateSpanCount()
         adapter.viewType = viewType
         updateViewSortMenuItems()

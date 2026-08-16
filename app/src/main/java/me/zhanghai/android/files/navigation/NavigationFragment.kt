@@ -24,6 +24,8 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
 
     lateinit var listener: Listener
 
+    private var selectedItemId: Long? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -68,6 +70,14 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
 
     override val isHomeScreen: Boolean
         get() = listener.isHomeScreen
+
+    override val checkedNavigationItemId: Long?
+        get() = selectedItemId
+
+    override fun selectNavigationItem(id: Long) {
+        selectedItemId = id
+        notifyCheckedChanged()
+    }
 
     override fun showHome() {
         listener.showHome()

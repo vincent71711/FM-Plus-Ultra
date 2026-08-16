@@ -37,6 +37,8 @@ abstract class NavigationItem {
     interface Listener {
         val currentPath: Path
         val isHomeScreen: Boolean
+        val checkedNavigationItemId: Long?
+        fun selectNavigationItem(id: Long)
         fun showHome()
         fun navigateTo(path: Path)
         fun navigateToRoot(path: Path)

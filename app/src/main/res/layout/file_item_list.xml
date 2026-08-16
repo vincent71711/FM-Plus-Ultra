@@ -5,7 +5,7 @@
   ~ All Rights Reserved.
   -->
 
-<me.zhanghai.android.files.ui.CheckableForegroundLinearLayout
+<me.zhanghai.android.files.ui.DividedCheckableForegroundLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/itemLayout"
@@ -111,4 +111,4 @@
         android:foreground="@drawable/selectable_item_background_oval"
         android:src="@drawable/more_vertical_icon_white_24dp"
         app:tint="?colorControlNormal" />
-</me.zhanghai.android.files.ui.CheckableForegroundLinearLayout>
+</me.zhanghai.android.files.ui.DividedCheckableForegroundLinearLayout>

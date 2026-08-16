@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
+import android.text.TextUtils
 import androidx.annotation.StringRes
 import androidx.core.content.edit
 import me.zhanghai.android.files.R
@@ -628,5 +629,16 @@ private fun readWriteLengthPrefixedValue(oldParcel: Parcel, newParcel: Parcel, b
         newParcel.setDataPosition(lengthPosition)
         newParcel.writeInt(endPosition - startPosition)
         newParcel.setDataPosition(endPosition)
+    }
+}
+
+/** Changes the inherited middle-ellipsis default while preserving other explicit choices. */
+internal fun upgradeAppToFileManagerPlusUltraEndEllipsis() {
+    val key = application.getString(R.string.pref_key_file_name_ellipsize)
+    val middle = TextUtils.TruncateAt.MIDDLE.ordinal.toString()
+    if (defaultSharedPreferences.getString(key, null) == middle) {
+        defaultSharedPreferences.edit {
+            putString(key, TextUtils.TruncateAt.END.ordinal.toString())
+        }
     }
 }

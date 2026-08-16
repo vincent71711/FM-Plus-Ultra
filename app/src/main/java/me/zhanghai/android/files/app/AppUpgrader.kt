@@ -18,6 +18,9 @@ private const val VERSION_CODE_1_4_0 = 26
 private const val VERSION_CODE_1_5_0 = 29
 private const val VERSION_CODE_1_6_0 = 32
 private const val VERSION_CODE_1_7_2 = 37
+// File Manager Plus Ultra modification (2026): migrate derivative UI defaults without rerunning
+// inherited storage migrations.
+private const val VERSION_CODE_FILE_MANAGER_PLUS_ULTRA_END_ELLIPSIS = 41
 private const val VERSION_CODE_LATEST = BuildConfig.VERSION_CODE
 
 private var lastVersionCode: Int
@@ -59,6 +62,9 @@ private fun upgradeAppFrom(lastVersionCode: Int) {
     }
     if (lastVersionCode < VERSION_CODE_1_7_2) {
         upgradeAppTo1_7_2()
+    }
+    if (lastVersionCode < VERSION_CODE_FILE_MANAGER_PLUS_ULTRA_END_ELLIPSIS) {
+        upgradeAppToFileManagerPlusUltraEndEllipsis()
     }
     // Continue with new `if`s on lastVersionCode instead of `else if`.
 }

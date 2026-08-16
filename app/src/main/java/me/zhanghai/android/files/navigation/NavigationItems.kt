@@ -119,6 +119,7 @@ private class HomeItem : NavigationItem() {
     override fun getTitle(context: Context): String = context.getString(R.string.navigation_home)
     override fun isChecked(listener: Listener): Boolean = listener.isHomeScreen
     override fun onClick(listener: Listener) {
+        listener.selectNavigationItem(id)
         listener.showHome()
         listener.closeNavigationDrawer()
     }
@@ -133,9 +134,11 @@ private val storageItems: List<NavigationItem>
 
 private abstract class PathItem(val path: Path) : NavigationItem() {
     override fun isChecked(listener: Listener): Boolean =
-        !listener.isHomeScreen && listener.currentPath == path
+        !listener.isHomeScreen && listener.currentPath == path &&
+            listener.checkedNavigationItemId == id
 
     override fun onClick(listener: Listener) {
+        listener.selectNavigationItem(id)
         if (this is NavigationRoot) {
             listener.navigateToRoot(path)
         } else {
@@ -274,27 +277,33 @@ private class AddStorageItem : NavigationItem() {
 
 private val recentLocationItems: List<NavigationItem>
     get() = Settings.RECENT_LOCATIONS.valueCompat
-        .filterNot { isNavigationRootPath(it.path) }
-        .map { RecentLocationItem(it.path) }
+        .mapNotNull { recentLocation ->
+            val source = findRecentLocationSource(recentLocation.path) ?: return@mapNotNull null
+            if (recentLocation.path == source.path) {
+                return@mapNotNull null
+            }
+            RecentLocationItem(recentLocation.path, source)
+        }
+        .distinctBy { it.sourceId }
+        .take(5)
 
-internal fun isNavigationRootPath(path: Path): Boolean {
-    if (path.toString() == FileSystemRoot.LINUX_PATH) {
-        return true
-    }
-    return sequenceOf(storageItems, storageVolumeItems, standardDirectoryItems)
-        .flatten()
-        .filterIsInstance<PathItem>()
-        .any { it.path == path }
-}
-
-private class RecentLocationItem(path: Path) : PathItem(path) {
+private class RecentLocationItem(
+    path: Path,
+    private val source: Storage
+) : PathItem(path) {
+    val sourceId: Long
+        get() = source.id
     override val id: Long = path.hashCode().toLong() xor RECENT_LOCATION_ID_MASK
     override val iconRes: Int = R.drawable.history_icon_white_24dp
 
-    override fun getTitle(context: Context): String =
-        path.fileName?.toString() ?: path.toString()
-
-    override fun getSubtitle(context: Context): String = path.toString()
+    override fun getTitle(context: Context): String {
+        val relativePath = source.path!!.relativize(path).toString().trimStart('/', '\\')
+        return if (relativePath.isEmpty()) {
+            source.getName(context)
+        } else {
+            "${source.getName(context)} / $relativePath"
+        }
+    }
 }
 
 private const val RECENT_LOCATION_ID_MASK = -0x3500000000000000L

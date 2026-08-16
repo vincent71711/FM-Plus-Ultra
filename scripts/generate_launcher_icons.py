@@ -19,6 +19,10 @@ DENSITIES = {
     "xxxhdpi": 4.0,
 }
 
+# Keep the subject comfortably inside Android's adaptive-icon safe zone. Samsung launchers apply
+# an additional mask/zoom, so a full-canvas foreground crops most of the folder at the bottom.
+FOREGROUND_CONTENT_SCALE = 0.82
+
 
 def remove_connected_black_border(image: Image.Image) -> Image.Image:
     """Make only the near-black region connected to the canvas edge transparent."""
@@ -66,12 +70,28 @@ def write_icon(image: Image.Image, size: int, destination: Path) -> None:
     resized.save(destination, format="PNG", optimize=True)
 
 
+def inset_foreground(image: Image.Image) -> Image.Image:
+    """Center a scaled copy on the original transparent canvas for adaptive launchers."""
+    image = image.convert("RGBA")
+    content_size = round(image.width * FOREGROUND_CONTENT_SCALE)
+    content = image.resize((content_size, content_size), Image.Resampling.LANCZOS)
+    foreground = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    offset = (image.width - content_size) // 2
+    foreground.alpha_composite(content, (offset, offset))
+    return foreground
+
+
 def main() -> None:
     source = remove_connected_black_border(Image.open(SOURCE))
+    adaptive_foreground = inset_foreground(source)
     for density, scale in DENSITIES.items():
         directory = RESOURCE_ROOT / f"mipmap-{density}"
         write_icon(source, round(48 * scale), directory / "launcher_icon.png")
-        write_icon(source, round(108 * scale), directory / "launcher_icon_foreground.png")
+        write_icon(
+            adaptive_foreground,
+            round(108 * scale),
+            directory / "launcher_icon_foreground.png",
+        )
 
 
 if __name__ == "__main__":

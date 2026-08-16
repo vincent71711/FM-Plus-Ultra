@@ -56,7 +56,8 @@
     <string name="pref_key_file_list_animation">key_file_list_animation</string>
     <bool name="pref_default_value_file_list_animation">true</bool>
     <string name="pref_key_file_name_ellipsize">key_file_name_ellipsize</string>
-    <string name="pref_default_value_file_name_ellipsize">1</string>
+    <!-- File Manager Plus Ultra default: preserve the readable beginning and truncate the end. -->
+    <string name="pref_default_value_file_name_ellipsize">2</string>
     <string-array name="pref_entry_values_file_name_ellipsize">
         <item>0</item>
         <item>1</item>
