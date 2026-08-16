@@ -23,3 +23,18 @@ object NavigationItemListLiveData : MediatorLiveData<List<NavigationItem?>>() {
         value = navigationItems
     }
 }
+
+object HomeNavigationItemListLiveData : MediatorLiveData<List<NavigationItem>>() {
+    init {
+        loadValue()
+        addSource(Settings.STORAGES) { loadValue() }
+        addSource(Settings.HOME_SHORTCUT_STORAGE_IDS) { loadValue() }
+        addSource(StorageVolumeListLiveData) { loadValue() }
+        addSource(StandardDirectoriesLiveData) { loadValue() }
+        addSource(Settings.BOOKMARK_DIRECTORIES) { loadValue() }
+    }
+
+    private fun loadValue() {
+        value = homeNavigationItems
+    }
+}

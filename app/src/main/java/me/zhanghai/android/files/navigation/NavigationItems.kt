@@ -28,6 +28,7 @@ import me.zhanghai.android.files.settings.SettingsActivity
 import me.zhanghai.android.files.settings.StandardDirectoryListActivity
 import me.zhanghai.android.files.storage.AddStorageDialogActivity
 import me.zhanghai.android.files.storage.FileSystemRoot
+import me.zhanghai.android.files.storage.RemoteStorageListActivity
 import me.zhanghai.android.files.storage.Storage
 import me.zhanghai.android.files.storage.StorageVolumeListLiveData
 import me.zhanghai.android.files.util.createIntent
@@ -39,6 +40,7 @@ import me.zhanghai.android.files.util.valueCompat
 val navigationItems: List<NavigationItem?>
     get() =
         mutableListOf<NavigationItem?>().apply {
+            add(HomeItem())
             addAll(storageItems)
             if (Environment::class.supportsExternalStorageManager()) {
                 // Starting with R, we can get read/write access to non-primary storage volumes with
@@ -48,6 +50,7 @@ val navigationItems: List<NavigationItem?>
                 addAll(storageVolumeItems)
             }
             add(AddStorageItem())
+            add(RecentActivityItem())
             val standardDirectoryItems = standardDirectoryItems
             if (standardDirectoryItems.isNotEmpty()) {
                 add(null)
@@ -61,6 +64,65 @@ val navigationItems: List<NavigationItem?>
             add(null)
             addAll(menuItems)
         }
+
+val homeNavigationItems: List<NavigationItem>
+    get() =
+        mutableListOf<NavigationItem>().apply {
+            val pinnedStorageIds = Settings.HOME_SHORTCUT_STORAGE_IDS.valueCompat
+            addAll(
+                Settings.STORAGES.valueCompat
+                    .filter {
+                        it.isVisible && it !is FileSystemRoot && !it.isRemote
+                    }
+                    .map { if (it.path != null) PathStorageItem(it) else IntentStorageItem(it) }
+            )
+            if (Environment::class.supportsExternalStorageManager()) {
+                addAll(storageVolumeItems)
+            }
+            addAll(standardDirectoryItems)
+            add(RemoteConnectionsItem())
+            addAll(
+                Settings.STORAGES.valueCompat
+                    .filter {
+                        it.isVisible && it.isRemote && it.id.toString() in pinnedStorageIds
+                    }
+                    .map { PathStorageItem(it) }
+            )
+            addAll(bookmarkDirectoryItems)
+        }
+
+private class RemoteConnectionsItem : NavigationItem() {
+    override val id: Long = R.string.navigation_remote.toLong()
+    override val showOnHome: Boolean = true
+    override val iconRes: Int = R.drawable.computer_icon_white_24dp
+    override fun getTitle(context: Context): String = context.getString(R.string.navigation_remote)
+    override fun onClick(listener: Listener) {
+        listener.launchIntent(RemoteStorageListActivity::class.createIntent())
+    }
+}
+
+private class HomeItem : NavigationItem() {
+    override val id: Long = R.string.navigation_home.toLong()
+    override val iconRes: Int = R.drawable.home_icon_control_normal_24dp
+    override fun getTitle(context: Context): String = context.getString(R.string.navigation_home)
+    override fun isChecked(listener: Listener): Boolean = listener.isHomeScreen
+    override fun onClick(listener: Listener) {
+        listener.showHome()
+        listener.closeNavigationDrawer()
+    }
+}
+
+private class RecentActivityItem : NavigationItem() {
+    override val id: Long = R.string.navigation_recent_activity.toLong()
+    override val iconRes: Int = R.drawable.history_icon_white_24dp
+    override fun getTitle(context: Context): String =
+        context.getString(R.string.navigation_recent_activity)
+    override fun isChecked(listener: Listener): Boolean = listener.isRecentActivityScreen
+    override fun onClick(listener: Listener) {
+        listener.showRecentActivity()
+        listener.closeNavigationDrawer()
+    }
+}
 
 private val storageItems: List<NavigationItem>
     @Size(min = 0)
@@ -85,6 +147,9 @@ private abstract class PathItem(val path: Path) : NavigationItem() {
 private class PathStorageItem(
     private val storage: Storage
 ) : PathItem(storage.path!!), NavigationRoot {
+    override val showOnHome: Boolean
+        get() = !storage.isRemote || storage.id.toString() in
+            Settings.HOME_SHORTCUT_STORAGE_IDS.valueCompat
     init {
         require(storage.isVisible)
     }
@@ -112,6 +177,7 @@ private class PathStorageItem(
 private class IntentStorageItem(
     private val storage: Storage
 ) : NavigationItem() {
+    override val showOnHome: Boolean = true
     init {
         require(storage.isVisible)
     }
@@ -145,6 +211,7 @@ private val storageVolumeItems: List<NavigationItem>
 private class StorageVolumeItem(
     private val storageVolume: StorageVolume
 ) : PathItem(Paths.get(storageVolume.pathCompat)), NavigationRoot {
+    override val showOnHome: Boolean = true
     override val id: Long
         get() = storageVolume.hashCode().toLong()
 
@@ -210,6 +277,7 @@ private val standardDirectoryItems: List<NavigationItem>
 private class StandardDirectoryItem(
     private val standardDirectory: StandardDirectory
 ) : PathItem(Paths.get(getExternalStorageDirectory(standardDirectory.relativePath))), NavigationRoot {
+    override val showOnHome: Boolean = true
     init {
         require(standardDirectory.isEnabled)
     }
@@ -336,6 +404,7 @@ private val bookmarkDirectoryItems: List<NavigationItem>
 private class BookmarkDirectoryItem(
     private val bookmarkDirectory: BookmarkDirectory
 ) : PathItem(bookmarkDirectory.path) {
+    override val showOnHome: Boolean = true
     // We cannot simply use super.getId() because different bookmark directories may have
     // the same path.
     override val id: Long

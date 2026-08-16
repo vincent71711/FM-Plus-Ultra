@@ -57,8 +57,28 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
         adapter.notifyCheckedChanged()
     }
 
+    fun notifyCheckedChanged() {
+        if (this::adapter.isInitialized) {
+            adapter.notifyCheckedChanged()
+        }
+    }
+
     override val currentPath: Path
         get() = listener.currentPath
+
+    override val isHomeScreen: Boolean
+        get() = listener.isHomeScreen
+
+    override val isRecentActivityScreen: Boolean
+        get() = listener.isRecentActivityScreen
+
+    override fun showHome() {
+        listener.showHome()
+    }
+
+    override fun showRecentActivity() {
+        listener.showRecentActivity()
+    }
 
     override fun navigateTo(path: Path) {
         listener.navigateTo(path)
@@ -78,6 +98,10 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
 
     interface Listener {
         val currentPath: Path
+        val isHomeScreen: Boolean
+        val isRecentActivityScreen: Boolean
+        fun showHome()
+        fun showRecentActivity()
         fun navigateTo(path: Path)
         fun navigateToRoot(path: Path)
         fun navigateToDefaultRoot()

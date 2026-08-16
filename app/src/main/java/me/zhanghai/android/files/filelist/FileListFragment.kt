@@ -47,7 +47,9 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.leinardi.android.speeddial.SpeedDialView
@@ -78,6 +80,7 @@ import me.zhanghai.android.files.filelist.FileSortOptions.Order
 import me.zhanghai.android.files.fileproperties.FilePropertiesDialogFragment
 import me.zhanghai.android.files.navigation.BookmarkDirectories
 import me.zhanghai.android.files.navigation.BookmarkDirectory
+import me.zhanghai.android.files.navigation.HomeNavigationItemListLiveData
 import me.zhanghai.android.files.navigation.NavigationFragment
 import me.zhanghai.android.files.navigation.NavigationRootMapLiveData
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
@@ -119,6 +122,7 @@ import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.extraPathList
 import me.zhanghai.android.files.util.fadeToVisibilityUnsafe
 import me.zhanghai.android.files.util.getDimensionDp
+import me.zhanghai.android.files.util.getDrawableByAttr
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.hasSw600Dp
 import me.zhanghai.android.files.util.isOrientationLandscape
@@ -183,6 +187,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private lateinit var adapter: FileListAdapter
 
+    private lateinit var listDividerDecoration: DividerItemDecoration
+
+    private lateinit var homeDashboardAdapter: HomeDashboardAdapter
+
+    private lateinit var recentActivityAdapter: RecentActivityAdapter
+
     private val debouncedSearchRunnable = DebouncedRunnable(Handler(Looper.getMainLooper()), 1000) {
         if (!isResumed || !viewModel.isSearchViewExpanded) {
             return@DebouncedRunnable
@@ -240,11 +250,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.appBarLayout.syncBackgroundColorTo(binding.overlayToolbar)
         binding.appBarLayout.isLifted = true
         binding.breadcrumbLayout.setListener(this)
-        binding.homeButton.setOnClickListener {
-            val rootPath = viewModel.breadcrumbLiveData.valueCompat.paths.firstOrNull()
-                ?: return@setOnClickListener
-            navigateTo(rootPath)
-        }
+        binding.homeButton.setOnClickListener { showHome() }
         if (!(activity.hasSw600Dp && activity.isOrientationLandscape)) {
             binding.swipeRefreshLayout.setProgressViewEndTarget(
                 true, binding.swipeRefreshLayout.progressViewEndOffset
@@ -255,6 +261,22 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.recyclerView.layoutManager = layoutManager
         adapter = FileListAdapter(this)
         binding.recyclerView.adapter = adapter
+        listDividerDecoration = DividerItemDecoration(activity, RecyclerView.VERTICAL).apply {
+            setDrawable(activity.getDrawableByAttr(android.R.attr.listDivider))
+        }
+        homeDashboardAdapter = HomeDashboardAdapter(navigationFragment)
+        binding.homeRecyclerView.layoutManager = GridLayoutManager(
+            activity, resources.getInteger(R.integer.home_dashboard_span_count)
+        )
+        binding.homeRecyclerView.adapter = homeDashboardAdapter
+        recentActivityAdapter = RecentActivityAdapter { navigateToRoot(it) }
+        binding.recentActivityRecyclerView.layoutManager = LinearLayoutManager(activity)
+        binding.recentActivityRecyclerView.adapter = recentActivityAdapter
+        binding.recentActivityRecyclerView.addItemDecoration(
+            DividerItemDecoration(activity, RecyclerView.VERTICAL).apply {
+                setDrawable(activity.getDrawableByAttr(android.R.attr.listDivider))
+            }
+        )
         val fastScroller = ThemedFastScroller.create(binding.recyclerView)
         binding.recyclerView.setOnApplyWindowInsetsListener(
             ScrollingViewOnApplyWindowInsetsListener(binding.recyclerView, fastScroller)
@@ -275,14 +297,39 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         addOnBackPressedCallback(
             object : OnBackPressedCallback(false) {
                 override fun handleOnBackPressed() {
-                    viewModel.navigateUp()
+                    if (viewModel.canNavigateUpBreadcrumb) {
+                        viewModel.navigateUp()
+                    } else {
+                        showHome()
+                    }
                 }
             }
                 .also { callback ->
+                    fun updateEnabled() {
+                        callback.isEnabled = viewModel.screen == FileListScreen.FILES &&
+                            (viewModel.canNavigateUpBreadcrumb || viewModel.pickOptions == null)
+                    }
                     viewModel.breadcrumbLiveData.observe(viewLifecycleOwner) {
-                        callback.isEnabled = viewModel.canNavigateUpBreadcrumb
+                        updateEnabled()
+                    }
+                    viewModel.screenLiveData.observe(viewLifecycleOwner) {
+                        updateEnabled()
+                    }
+                    viewModel.pickOptionsLiveData.observe(viewLifecycleOwner) {
+                        updateEnabled()
                     }
                 }
+        )
+        addOnBackPressedCallback(
+            object : OnBackPressedCallback(false) {
+                override fun handleOnBackPressed() {
+                    showHome()
+                }
+            }.also { callback ->
+                viewModel.screenLiveData.observe(viewLifecycleOwner) {
+                    callback.isEnabled = it == FileListScreen.RECENT_ACTIVITY
+                }
+            }
         )
         addOnBackPressedCallback(overlayActionMode.onBackPressedCallback)
         addOnBackPressedCallback(SpeedDialViewOnBackPressedCallback(binding.speedDialView))
@@ -350,6 +397,21 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             if (pickOptions != null) {
                 viewModel.pickOptions = pickOptions
             }
+            viewModel.screen = if (pickOptions == null && intent.action == Intent.ACTION_MAIN) {
+                FileListScreen.HOME
+            } else {
+                FileListScreen.FILES
+            }
+        }
+        viewModel.screenLiveData.observe(viewLifecycleOwner) { onScreenChanged(it) }
+        HomeNavigationItemListLiveData.observe(viewLifecycleOwner) {
+            homeDashboardAdapter.replace(it)
+        }
+        viewModel.recentPathsLiveData.observe(viewLifecycleOwner) {
+            recentActivityAdapter.replace(it)
+            val hasRecentActivity = it.isNotEmpty()
+            binding.recentActivityRecyclerView.isVisible = hasRecentActivity
+            binding.recentActivityEmptyView.isVisible = !hasRecentActivity
         }
         viewModel.currentPathLiveData.observe(viewLifecycleOwner) { onCurrentPathChanged(it) }
         viewModel.searchViewExpandedLiveData.observe(viewLifecycleOwner) {
@@ -450,6 +512,13 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
 
+        val isFileList = viewModel.screen == FileListScreen.FILES
+        for (index in 0..<menu.size()) {
+            menu.getItem(index).isVisible = isFileList
+        }
+        if (!isFileList) {
+            return
+        }
         updateViewSortMenuItems()
         updateSelectAllMenuItem()
         updateShowHiddenFilesMenuItem()
@@ -589,7 +658,23 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         updateSpanCount()
     }
 
+    private fun onScreenChanged(screen: FileListScreen) {
+        val isFileList = screen == FileListScreen.FILES
+        binding.fileContentLayout.isVisible = isFileList
+        binding.homeRecyclerView.isVisible = screen == FileListScreen.HOME
+        binding.recentActivityLayout.isVisible = screen == FileListScreen.RECENT_ACTIVITY
+        binding.breadcrumbBar.isVisible = isFileList
+        binding.speedDialView.isVisible = isFileList
+        if (!isFileList) {
+            collapseSearchView()
+        }
+        updateActivityTitle()
+        requireActivity().invalidateOptionsMenu()
+        navigationFragment.notifyCheckedChanged()
+    }
+
     private fun onCurrentPathChanged(path: Path) {
+        viewModel.recordRecentPath(path)
         updateOverlayToolbar()
         updateBottomToolbar()
     }
@@ -629,6 +714,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onViewTypeChanged(viewType: FileViewType) {
+        binding.recyclerView.removeItemDecoration(listDividerDecoration)
+        if (viewType == FileViewType.LIST) {
+            binding.recyclerView.addItemDecoration(listDividerDecoration)
+        }
         updateSpanCount()
         adapter.viewType = viewType
         updateViewSortMenuItems()
@@ -747,6 +836,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     override fun navigateTo(path: Path) {
         collapseSearchView()
+        viewModel.screen = FileListScreen.FILES
         val state = layoutManager.onSaveInstanceState()
         viewModel.navigateTo(state!!, path)
     }
@@ -770,12 +860,17 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun updateActivityTitle(
-        breadcrumbData: BreadcrumbData = viewModel.breadcrumbLiveData.valueCompat
+        breadcrumbData: BreadcrumbData? = viewModel.breadcrumbLiveData.value
     ) {
         val pickOptions = viewModel.pickOptions
         val title = if (pickOptions == null) {
-            breadcrumbData.nameProducers.firstOrNull()?.invoke(requireContext())
-                ?: getString(R.string.app_name)
+            when (viewModel.screen) {
+                FileListScreen.HOME -> getString(R.string.app_name)
+                FileListScreen.RECENT_ACTIVITY -> getString(R.string.navigation_recent_activity)
+                FileListScreen.FILES ->
+                    breadcrumbData?.nameProducers?.firstOrNull()?.invoke(requireContext())
+                        ?: getString(R.string.app_name)
+            }
         } else {
             val count = if (pickOptions.allowMultiple) Int.MAX_VALUE else 1
             when (pickOptions.mode) {
@@ -1434,8 +1529,23 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override val currentPath: Path
         get() = viewModel.currentPath
 
+    override val isHomeScreen: Boolean
+        get() = viewModel.screen == FileListScreen.HOME
+
+    override val isRecentActivityScreen: Boolean
+        get() = viewModel.screen == FileListScreen.RECENT_ACTIVITY
+
+    override fun showHome() {
+        viewModel.screen = FileListScreen.HOME
+    }
+
+    override fun showRecentActivity() {
+        viewModel.screen = FileListScreen.RECENT_ACTIVITY
+    }
+
     override fun navigateToRoot(path: Path) {
         collapseSearchView()
+        viewModel.screen = FileListScreen.FILES
         viewModel.resetTo(path)
     }
 
@@ -1652,14 +1762,20 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val appBarLayout: CoordinatorAppBarLayout,
         val toolbar: Toolbar,
         val overlayToolbar: Toolbar,
+        val breadcrumbBar: View,
         val homeButton: View,
         val breadcrumbLayout: BreadcrumbLayout,
         val contentLayout: ViewGroup,
+        val fileContentLayout: View,
         val progress: ProgressBar,
         val errorText: TextView,
         val emptyView: View,
         val swipeRefreshLayout: SwipeRefreshLayout,
         val recyclerView: RecyclerView,
+        val homeRecyclerView: RecyclerView,
+        val recentActivityLayout: View,
+        val recentActivityEmptyView: View,
+        val recentActivityRecyclerView: RecyclerView,
         val bottomBarLayout: ViewGroup,
         val bottomToolbar: Toolbar,
         val bottomCreateFileNameEdit: EditText,
@@ -1682,10 +1798,15 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     bindingRoot, includeBinding.drawerLayout, includeBinding.persistentDrawerLayout,
                     includeBinding.persistentBarLayout, appBarBinding.appBarLayout,
                     appBarBinding.toolbar, appBarBinding.overlayToolbar,
-                    appBarBinding.homeButton, appBarBinding.breadcrumbLayout,
+                    appBarBinding.breadcrumbBar, appBarBinding.homeButton,
+                    appBarBinding.breadcrumbLayout,
                     contentBinding.contentLayout,
+                    contentBinding.fileContentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
+                    contentBinding.homeRecyclerView, contentBinding.recentActivityLayout,
+                    contentBinding.recentActivityEmptyView,
+                    contentBinding.recentActivityRecyclerView,
                     bottomBarBinding.bottomBarLayout, bottomBarBinding.bottomToolbar,
                     bottomBarBinding.bottomCreateFileNameEdit, speedDialBinding.speedDialView
                 )

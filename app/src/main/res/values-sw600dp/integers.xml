@@ -6,6 +6,7 @@
   -->
 
 <resources>
+    <integer name="home_dashboard_span_count">4</integer>
 
     <integer name="file_list_toolbar_scroll_flags">@integer/scrollFlags_noScroll</integer>
 </resources>

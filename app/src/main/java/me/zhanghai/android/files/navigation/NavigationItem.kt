@@ -15,6 +15,8 @@ import me.zhanghai.android.files.compat.getDrawableCompat
 abstract class NavigationItem {
     abstract val id: Long
 
+    open val showOnHome: Boolean = false
+
     fun getIcon(context: Context): Drawable = context.getDrawableCompat(iconRes!!)
 
     @get:DrawableRes
@@ -32,6 +34,10 @@ abstract class NavigationItem {
 
     interface Listener {
         val currentPath: Path
+        val isHomeScreen: Boolean
+        val isRecentActivityScreen: Boolean
+        fun showHome()
+        fun showRecentActivity()
         fun navigateTo(path: Path)
         fun navigateToRoot(path: Path)
         fun launchIntent(intent: Intent)

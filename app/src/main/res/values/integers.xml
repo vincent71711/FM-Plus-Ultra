@@ -16,6 +16,7 @@
 
     <!-- File Manager Plus Ultra: Keep file-list navigation and actions reachable while scrolling. -->
     <integer name="file_list_toolbar_scroll_flags">@integer/scrollFlags_noScroll</integer>
+    <integer name="home_dashboard_span_count">3</integer>
 
     <!-- SevenZOutputFile requires SeekableByteChannel which requires Android N. -->
     <integer name="create_archive_type_seven_z_visibility">@integer/visibility_gone</integer>

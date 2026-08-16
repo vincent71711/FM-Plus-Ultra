@@ -32,6 +32,12 @@ object Settings {
             listOf(FileSystemRoot(null, true), PrimaryStorageVolume(null, true))
         )
 
+    val HOME_SHORTCUT_STORAGE_IDS: SettingLiveData<Set<String>> =
+        StringSetSettingLiveData(
+            R.string.pref_key_home_shortcut_storage_ids,
+            R.array.pref_default_value_home_shortcut_storage_ids
+        )
+
     val FILE_LIST_DEFAULT_DIRECTORY: SettingLiveData<Path> =
         ParcelValueSettingLiveData(
             R.string.pref_key_file_list_default_directory,

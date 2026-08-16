@@ -25,6 +25,7 @@ class FtpServer(
     val password: String,
     val relativePath: String
 ) : Storage() {
+    override val isRemote: Boolean = true
     constructor(
         id: Long?,
         customName: String?,

@@ -10,6 +10,8 @@
     <string name="pref_default_value_empty" />
 
     <string name="pref_key_storages">key_storages</string>
+    <string name="pref_key_home_shortcut_storage_ids">key_home_shortcut_storage_ids</string>
+    <string-array name="pref_default_value_home_shortcut_storage_ids" />
     <string name="pref_key_file_list_default_directory">key_file_list_default_directory</string>
     <string name="pref_key_file_list_persistent_drawer_open">key_file_list_persistent_drawer_open</string>
     <bool name="pref_default_value_file_list_persistent_drawer_open">true</bool>

@@ -34,6 +34,8 @@ abstract class Storage : Parcelable {
 
     open val isVisible: Boolean = true
 
+    open val isRemote: Boolean = false
+
     open fun createIntent(): Intent? = null
 
     abstract fun createEditIntent(): Intent

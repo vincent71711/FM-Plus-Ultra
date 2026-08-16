@@ -26,6 +26,7 @@ class SftpServer(
     val authentication: Authentication,
     val relativePath: String
 ) : Storage() {
+    override val isRemote: Boolean = true
     constructor(
         id: Long?,
         customName: String?,
