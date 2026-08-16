@@ -9,7 +9,7 @@
 
     <item>
         <shape>
-            <solid android:color="?colorSurface" />
+            <solid android:color="@color/fmpu_surface_container_high" />
             <corners
                 android:bottomLeftRadius="4dp"
                 android:bottomRightRadius="4dp"
@@ -18,14 +18,4 @@
         </shape>
     </item>
 
-    <item>
-        <shape>
-            <solid android:color="@color/m3_popupmenu_overlay_color" />
-            <corners
-                android:bottomLeftRadius="4dp"
-                android:bottomRightRadius="4dp"
-                android:topLeftRadius="4dp"
-                android:topRightRadius="4dp" />
-        </shape>
-    </item>
 </layer-list>

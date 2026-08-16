@@ -5,8 +5,11 @@
 
 package me.zhanghai.android.files.filelist
 
+import java8.nio.file.Path
+
 // TODO: Make immutable?
 class PasteState(
     var copy: Boolean = false,
-    val files: FileItemSet = fileItemSetOf()
+    val files: FileItemSet = fileItemSetOf(),
+    var sourceRoot: Path? = null
 )

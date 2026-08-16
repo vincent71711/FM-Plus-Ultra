@@ -28,10 +28,9 @@ open class FitsSystemWindowsAppBarLayout : OnWindowInsetChangedAppBarLayout {
     }
 
     override fun onWindowInsetChanged(insets: WindowInsetsCompat): WindowInsetsCompat {
-        val windowInsets = insets.toWindowInsets()!!
-        updatePadding(
-            left = windowInsets.systemWindowInsetLeft, right = windowInsets.systemWindowInsetRight
-        )
+        // This bar sits below the status-bar cutout. Applying its horizontal safe inset shifts the
+        // whole header out of alignment and leaves a visible gap on a rotated cover display.
+        updatePadding(left = 0, right = 0)
         return super.onWindowInsetChanged(insets)
     }
 }

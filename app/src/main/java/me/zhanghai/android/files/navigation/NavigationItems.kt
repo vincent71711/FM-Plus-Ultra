@@ -13,8 +13,16 @@ import android.os.storage.StorageVolume
 import androidx.annotation.DrawableRes
 import androidx.annotation.Size
 import androidx.annotation.StringRes
+import java8.nio.file.FileVisitResult
+import java8.nio.file.SimpleFileVisitor
+import java8.nio.file.Files
 import java8.nio.file.Path
 import java8.nio.file.Paths
+import java8.nio.file.attribute.BasicFileAttributes
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.withContext
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.about.AboutActivity
 import me.zhanghai.android.files.compat.getDescriptionCompat
@@ -86,6 +94,7 @@ val homeNavigationItems: List<NavigationItem>
             }
             addAll(standardDirectoryItems)
             add(RemoteConnectionsItem())
+            add(AccessFromNetworkItem())
             addAll(
                 Settings.STORAGES.valueCompat
                     .filter {
@@ -108,8 +117,24 @@ private class RemoteConnectionsItem : NavigationItem() {
     override val showOnHome: Boolean = true
     override val iconRes: Int = R.drawable.computer_icon_white_24dp
     override fun getTitle(context: Context): String = context.getString(R.string.navigation_remote)
+    override fun getSubtitle(context: Context): String = context.getString(
+        R.string.home_item_count_format,
+        Settings.STORAGES.valueCompat.count { it.isVisible && it.isRemote }
+    )
     override fun onClick(listener: Listener) {
         listener.launchIntent(RemoteStorageListActivity::class.createIntent())
+    }
+}
+
+private class AccessFromNetworkItem : NavigationItem() {
+    override val id: Long = R.string.home_access_from_network.toLong()
+    override val showOnHome: Boolean = true
+    override val iconRes: Int = R.drawable.shared_directory_icon_white_24dp
+    override fun getTitle(context: Context): String =
+        context.getString(R.string.home_access_from_network)
+
+    override fun onClick(listener: Listener) {
+        listener.launchIntent(FtpServerActivity::class.createIntent())
     }
 }
 
@@ -174,6 +199,9 @@ private class PathStorageItem(
     override fun getSubtitle(context: Context): String? =
         storage.linuxPath?.let { getStorageSubtitle(it, context) }
 
+    override suspend fun getHomeSubtitle(context: Context): String? =
+        storage.linuxPath?.let { getStorageUsageSubtitle(it, context) }
+
     override fun onLongClick(listener: Listener): Boolean {
         listener.launchIntent(storage.createEditIntent())
         return true
@@ -232,6 +260,9 @@ private class StorageVolumeItem(
     override fun getSubtitle(context: Context): String? =
         getStorageSubtitle(storageVolume.pathCompat, context)
 
+    override suspend fun getHomeSubtitle(context: Context): String? =
+        getStorageUsageSubtitle(storageVolume.pathCompat, context)
+
     override fun getName(context: Context): String = getTitle(context)
 }
 
@@ -258,6 +289,19 @@ private fun getStorageSubtitle(linuxPath: String, context: Context): String? {
     val totalSpaceString = totalSpace.asFileSize().formatHumanReadable(context)
     return context.getString(
         R.string.navigation_storage_subtitle_format, freeSpaceString, totalSpaceString
+    )
+}
+
+private fun getStorageUsageSubtitle(linuxPath: String, context: Context): String? {
+    val totalSpace = JavaFile.getTotalSpace(linuxPath)
+    if (totalSpace == 0L) {
+        return null
+    }
+    val usedSpace = (totalSpace - JavaFile.getFreeSpace(linuxPath)).coerceAtLeast(0)
+    return context.getString(
+        R.string.home_storage_usage_format,
+        usedSpace.asFileSize().formatHumanReadable(context),
+        totalSpace.asFileSize().formatHumanReadable(context)
     )
 }
 
@@ -331,6 +375,39 @@ private class StandardDirectoryItem(
         get() = standardDirectory.iconRes
 
     override fun getTitle(context: Context): String = standardDirectory.getTitle(context)
+
+    override suspend fun getHomeSubtitle(context: Context): String = withContext(Dispatchers.IO) {
+        var size = 0L
+        var count = 0L
+        val scanContext = currentCoroutineContext()
+        try {
+            Files.walkFileTree(path, object : SimpleFileVisitor<Path>() {
+                override fun visitFile(
+                    file: Path,
+                    attributes: BasicFileAttributes
+                ): FileVisitResult {
+                    scanContext.ensureActive()
+                    if (attributes.isRegularFile) {
+                        size += attributes.size()
+                        count += 1
+                    }
+                    return FileVisitResult.CONTINUE
+                }
+
+                override fun visitFileFailed(file: Path, exception: java.io.IOException) =
+                    FileVisitResult.CONTINUE
+            })
+        } catch (_: java.io.IOException) {
+            // Keep the summary from entries that remained readable.
+        } catch (_: SecurityException) {
+            // Android may hide isolated subtrees; the visible portion is still useful.
+        }
+        context.getString(
+            R.string.home_directory_statistics_format,
+            size.asFileSize().formatHumanReadable(context),
+            count
+        )
+    }
 
     override fun getName(context: Context): String = getTitle(context)
 

@@ -5,12 +5,15 @@
 
 package me.zhanghai.android.files.provider.smb.client
 
+import android.os.SystemClock
+import android.util.Log
 import com.hierynomus.mserref.NtStatus
 import com.hierynomus.msfscc.fileinformation.FileStandardInformation
 import com.hierynomus.mssmb2.SMBApiException
 import com.hierynomus.smbj.common.SMBRuntimeException
 import com.hierynomus.smbj.share.File
 import com.hierynomus.smbj.share.FileAccessor
+import me.zhanghai.android.files.BuildConfig
 import me.zhanghai.android.files.provider.common.AbstractFileByteChannel
 import me.zhanghai.android.files.provider.common.EMPTY
 import me.zhanghai.android.files.provider.common.map
@@ -28,14 +31,24 @@ import java.util.concurrent.Future
 
 class FileByteChannel(
     private val file: File,
-    isAppend: Boolean
-// Cancelling reads leads to TransportException: Received response with unknown sequence number
-) : AbstractFileByteChannel(isAppend, shouldCancelRead = false) {
+    isAppend: Boolean,
+    private val initialReadSizeHint: Long? = null
+// Cancelling reads leads to TransportException: Received response with unknown sequence number.
+// Keep multiple ordered reads in flight so receive latency does not stall each block.
+) : AbstractFileByteChannel(
+    isAppend,
+    shouldCancelRead = false,
+    readPipelineDepth = READ_PIPELINE_DEPTH,
+    readBufferSize = READ_BUFFER_SIZE,
+    initialReadSizeHint = initialReadSizeHint
+) {
     private val pendingWrites = ArrayDeque<PendingWrite>()
 
     @Throws(IOException::class)
-    override fun onReadAsync(position: Long, size: Int, timeoutMillis: Long): Future<ByteBuffer> =
-        try {
+    override fun onReadAsync(position: Long, size: Int, timeoutMillis: Long): Future<ByteBuffer> {
+        val submittedElapsedMillis = SystemClock.elapsedRealtime()
+        return try {
+            logRequestState("READ_SUBMIT", position, size, READ_PIPELINE_DEPTH)
             FileAccessor.readAsync(file, position, size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
@@ -44,6 +57,10 @@ class FileByteChannel(
                 { response ->
                     when (response.header.statusCode) {
                         NtStatus.STATUS_END_OF_FILE.value -> {
+                            logRequestState(
+                                "READ_COMPLETE", position, 0, READ_PIPELINE_DEPTH,
+                                SystemClock.elapsedRealtime() - submittedElapsedMillis
+                            )
                             return@map ByteBuffer::class.EMPTY
                         }
                         NtStatus.STATUS_SUCCESS.value -> {}
@@ -51,6 +68,10 @@ class FileByteChannel(
                             .toIOException()
                     }
                     val data = response.data
+                    logRequestState(
+                        "READ_COMPLETE", position, data.size, READ_PIPELINE_DEPTH,
+                        SystemClock.elapsedRealtime() - submittedElapsedMillis
+                    )
                     if (data.isEmpty()) {
                         return@map ByteBuffer::class.EMPTY
                     }
@@ -60,6 +81,7 @@ class FileByteChannel(
                     ExecutionException(SMBRuntimeException(e).toIOException())
                 }
             )
+    }
 
     @Throws(IOException::class)
     override fun onWrite(position: Long, source: ByteBuffer) {
@@ -77,7 +99,10 @@ class FileByteChannel(
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
         }
-        pendingWrites += PendingWrite(size, future)
+        pendingWrites += PendingWrite(
+            position, size.toLong(), SystemClock.elapsedRealtime(), future
+        )
+        logRequestState("WRITE_SUBMIT", position, size, pendingWrites.size)
         source.position(source.position() + size)
     }
 
@@ -183,12 +208,53 @@ class FileByteChannel(
         if (bytesWritten != pendingWrite.size) {
             throw IOException("Incomplete SMB write: $bytesWritten of ${pendingWrite.size} bytes")
         }
+        logRequestState(
+            "WRITE_COMPLETE",
+            pendingWrite.position,
+            pendingWrite.size.toInt(),
+            pendingWrites.size,
+            SystemClock.elapsedRealtime() - pendingWrite.submittedElapsedMillis
+        )
     }
 
-    private data class PendingWrite(val size: Int, val future: Future<Int>)
+    private fun logRequestState(
+        action: String,
+        position: Long,
+        size: Int,
+        inFlight: Int,
+        requestAgeMillis: Long? = null
+    ) {
+        if (!BuildConfig.DEBUG || position % REQUEST_LOG_INTERVAL != 0L) {
+            return
+        }
+        Log.i(
+            SMB_IO_TAG,
+            "$action configuration=$IO_CONFIGURATION offset=$position size=$size " +
+                "inFlight=$inFlight " +
+                "sizeHint=${initialReadSizeHint ?: "none"} " +
+                "availableCredits=${FileAccessor.getAvailableCredits(file)}" +
+                if (requestAgeMillis != null) " requestAgeMs=$requestAgeMillis" else ""
+        )
+    }
+
+    private data class PendingWrite(
+        val position: Long,
+        val size: Long,
+        val submittedElapsedMillis: Long,
+        val future: Future<Long>
+    )
 
     companion object {
-        // Bound memory use while keeping enough SMB requests in flight to hide LAN latency.
+        // Native AES-CMAC removed the prior per-byte CPU ceiling. Eight 256 KiB requests expose up
+        // to 2 MiB of useful receive window while keeping individual responses small and bounded.
+        private const val READ_BUFFER_SIZE = 256 * 1024
+        private const val READ_PIPELINE_DEPTH = 8
+        // Four 256 KiB writes allow socket output and response handling to overlap without the old
+        // 6 MiB backlog; the maximum retained write data is only 1 MiB.
         private const val WRITE_PIPELINE_DEPTH = 4
+        private const val IO_CONFIGURATION =
+            "async/native/read:256k-x8-size-aware/write:256k-x4"
+        private const val REQUEST_LOG_INTERVAL = 64L * 1024 * 1024
+        private const val SMB_IO_TAG = "FMPU.SmbIo"
     }
 }

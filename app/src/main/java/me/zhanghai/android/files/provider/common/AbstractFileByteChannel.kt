@@ -19,6 +19,7 @@ import java.io.InterruptedIOException
 import java.nio.ByteBuffer
 import java.nio.channels.ClosedChannelException
 import java.nio.channels.NonReadableChannelException
+import java.util.ArrayDeque
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
@@ -26,7 +27,10 @@ import java.util.concurrent.Future
 abstract class AbstractFileByteChannel(
     private val isAppend: Boolean,
     private val shouldCancelRead: Boolean = true,
-    private val joinCancelledRead: Boolean = false
+    private val joinCancelledRead: Boolean = false,
+    private val readPipelineDepth: Int = 1,
+    private val readBufferSize: Int = DEFAULT_READ_BUFFER_SIZE,
+    private val initialReadSizeHint: Long? = null
 ) : ForceableChannel, SeekableByteChannel {
     private var position = 0L
     private val readBuffer = ReadBuffer()
@@ -34,6 +38,12 @@ abstract class AbstractFileByteChannel(
 
     private var isOpen = true
     private val closeLock = Any()
+
+    init {
+        require(readPipelineDepth >= 1)
+        require(readBufferSize >= 1)
+        require(initialReadSizeHint == null || initialReadSizeHint >= 0)
+    }
 
     @Throws(IOException::class)
     final override fun read(destination: ByteBuffer): Int {
@@ -198,12 +208,18 @@ abstract class AbstractFileByteChannel(
     @Throws(IOException::class)
     protected open fun onClose() {}
 
-    private inner class ReadBuffer : Closeable {
-        private val buffer = ByteBuffer.allocate(BUFFER_SIZE).apply { limit(0) }
-        private var bufferedPosition = 0L
+    private data class PendingRead(
+        val position: Long,
+        val future: Future<ByteBuffer>
+    )
 
-        private var pendingRead: Future<ByteBuffer>? = null
-        private val pendingReadLock = Any()
+    private inner class ReadBuffer : Closeable {
+        private val buffer = ByteBuffer.allocate(readBufferSize).apply { limit(0) }
+        private var bufferedPosition = 0L
+        private var nextReadPosition = 0L
+        private var readSizeHint = initialReadSizeHint
+
+        private val pendingReads = ArrayDeque<PendingRead>()
 
         @Throws(IOException::class)
         fun read(destination: ByteBuffer): Int {
@@ -223,11 +239,13 @@ abstract class AbstractFileByteChannel(
 
         @Throws(IOException::class)
         private fun readIntoBuffer() {
-            val future = synchronized(pendingReadLock) {
-                pendingRead?.also { pendingRead = null }
-            } ?: readIntoBufferAsync()
+            // When the size hint has been reached, allow one request to confirm EOF. This keeps
+            // reads correct if another client grows the file after we opened it, without issuing
+            // a full speculative pipeline beyond every normal file boundary.
+            fillReadPipeline(allowSizeHintProbe = true)
+            val pendingRead = pendingReads.removeFirst()
             val newBuffer = try {
-                future.get()
+                pendingRead.future.get()
             } catch (e: CancellationException) {
                 throw InterruptedIOException().apply { initCause(e) }
             } catch (e: InterruptedException) {
@@ -244,16 +262,44 @@ abstract class AbstractFileByteChannel(
             buffer.put(newBuffer)
             buffer.flip()
             if (!buffer.hasRemaining()) {
+                cancelPendingReads()
                 return
             }
-            bufferedPosition += buffer.remaining()
-            synchronized(pendingReadLock) {
-                pendingRead = readIntoBufferAsync()
+            if (readSizeHint?.let { pendingRead.position >= it } == true) {
+                // The EOF probe found data, so the original size is stale and must no longer bound
+                // subsequent speculative reads.
+                readSizeHint = null
             }
+            bufferedPosition = pendingRead.position + buffer.remaining()
+            if (buffer.remaining() < readBufferSize) {
+                // A provider may legally return a short read. Discard speculative requests whose
+                // positions assumed a full block, then continue from the actual end position.
+                cancelPendingReads()
+                nextReadPosition = bufferedPosition
+            }
+            fillReadPipeline(allowSizeHintProbe = false)
         }
 
-        private fun readIntoBufferAsync(): Future<ByteBuffer> =
-            onReadAsync(bufferedPosition, BUFFER_SIZE, TIMEOUT_MILLIS)
+        private fun fillReadPipeline(allowSizeHintProbe: Boolean) {
+            while (pendingReads.size < readPipelineDepth) {
+                val size = readSizeHint?.let { sizeHint ->
+                    val remaining = sizeHint - nextReadPosition
+                    when {
+                        remaining > 0 -> remaining.coerceAtMost(readBufferSize.toLong()).toInt()
+                        allowSizeHintProbe && pendingReads.isEmpty() -> readBufferSize
+                        else -> 0
+                    }
+                } ?: readBufferSize
+                if (size == 0) {
+                    break
+                }
+                pendingReads += PendingRead(
+                    nextReadPosition,
+                    onReadAsync(nextReadPosition, size, TIMEOUT_MILLIS)
+                )
+                nextReadPosition += size
+            }
+        }
 
         fun reposition(oldPosition: Long, newPosition: Long) {
             if (newPosition == oldPosition) {
@@ -263,37 +309,38 @@ abstract class AbstractFileByteChannel(
             if (newBufferPosition in 0..buffer.limit()) {
                 buffer.position(newBufferPosition.toInt())
             } else {
-                cancelPendingRead()
+                cancelPendingReads()
                 buffer.limit(0)
                 bufferedPosition = newPosition
+                nextReadPosition = newPosition
             }
         }
 
         override fun close() {
-            cancelPendingRead()
+            cancelPendingReads()
         }
 
-        private fun cancelPendingRead() {
-            synchronized(pendingReadLock) {
-                pendingRead?.let {
-                    if (shouldCancelRead) {
-                        it.cancel(true)
-                        if (joinCancelledRead) {
-                            try {
-                                it.get()
-                            } catch (e: Exception) {
-                                // Ignored
-                            }
+        private fun cancelPendingReads() {
+            while (pendingReads.isNotEmpty()) {
+                pendingReads.removeFirst().future.let {
+                    if (!shouldCancelRead) {
+                        return@let
+                    }
+                    it.cancel(true)
+                    if (joinCancelledRead) {
+                        try {
+                            it.get()
+                        } catch (e: Exception) {
+                            // Ignored
                         }
                     }
-                    pendingRead = null
                 }
             }
         }
     }
 
     companion object {
-        private const val BUFFER_SIZE = 1024 * 1024
+        private const val DEFAULT_READ_BUFFER_SIZE = 1024 * 1024
         private const val TIMEOUT_MILLIS = 15_000L
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- FM Plus Ultra modification (c) 2026 Vincent Frosceno. GPL-3.0-or-later. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="?colorPrimaryContainer" android:state_checked="true" />
+    <item android:color="@android:color/transparent" />
+</selector>

@@ -244,11 +244,10 @@ class FileListAdapter(
                 }
             }
             setOnLongClickListener {
-                if (selectedFiles.isEmpty()) {
-                    selectFile(file)
-                } else {
-                    listener.openFile(file)
-                }
+                // FM Plus Ultra modification (2026): A long press is always a selection toggle.
+                // Opening a folder from a second long press was surprising and could navigate away
+                // while the user was building or reducing a multi-selection.
+                selectFile(file)
                 true
             }
         }

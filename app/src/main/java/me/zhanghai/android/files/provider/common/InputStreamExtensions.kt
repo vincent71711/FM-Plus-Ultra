@@ -10,9 +10,9 @@ import java.io.InputStream
 import java.io.InterruptedIOException
 import java.io.OutputStream
 
-// File Manager Plus Ultra modification (2026): Avoid issuing one synchronous provider write for
-// every Kotlin default 8 KiB chunk. Remote providers such as SMB split this larger block according
-// to their negotiated request size.
+// FM Plus Ultra modification (2026): Avoid issuing one provider write for every Kotlin
+// default 8 KiB chunk. Full packet captures support 256 KiB as the bounded transfer/request size
+// for the optimized SMB transport.
 private const val TRANSFER_BUFFER_SIZE = 256 * 1024
 
 // Can handle ProgressCopyOption.

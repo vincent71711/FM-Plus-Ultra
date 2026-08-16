@@ -8,22 +8,47 @@ package me.zhanghai.android.files.filelist
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.commit
 import java8.nio.file.Path
+import me.zhanghai.android.files.R
 import me.zhanghai.android.files.app.AppActivity
 import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.putArgs
+import me.zhanghai.android.files.util.showToast
 
 class FileListActivity : AppActivity() {
     private lateinit var fragment: FileListFragment
+    private lateinit var exitGuardCallback: OnBackPressedCallback
+    private var lastBackUptimeMillis = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Register before the fragment callbacks so navigation drawers, nested folders, selection
+        // modes and other transient UI continue to consume Back first. This is reached only when
+        // the launcher activity is already at its true top level.
+        exitGuardCallback = object : OnBackPressedCallback(false) {
+            override fun handleOnBackPressed() {
+                val now = SystemClock.elapsedRealtime()
+                if (lastBackUptimeMillis != 0L &&
+                    now - lastBackUptimeMillis <= EXIT_CONFIRMATION_WINDOW_MILLIS) {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = true
+                } else {
+                    lastBackUptimeMillis = now
+                    showToast(R.string.file_list_exit_confirmation)
+                }
+            }
+        }
+        onBackPressedDispatcher.addCallback(this, exitGuardCallback)
 
         // Calls ensureSubDecor().
         findViewById<View>(android.R.id.content)
@@ -43,7 +68,16 @@ class FileListActivity : AppActivity() {
         return super.onKeyUp(keyCode, event)
     }
 
+    fun setExitGuardEnabled(enabled: Boolean) {
+        if (enabled && !exitGuardCallback.isEnabled) {
+            lastBackUptimeMillis = 0L
+        }
+        exitGuardCallback.isEnabled = enabled
+    }
+
     companion object {
+        private const val EXIT_CONFIRMATION_WINDOW_MILLIS = 2500L
+
         fun createViewIntent(path: Path): Intent =
             FileListActivity::class.createIntent()
                 .setAction(Intent.ACTION_VIEW)

@@ -7,7 +7,7 @@
 
 <resources>
 
-    <string name="app_name">File Manager Plus Ultra</string>
+    <string name="app_name">FM Plus Ultra</string>
 
     <string name="close">Close</string>
     <string name="copy">Copy</string>
@@ -265,6 +265,7 @@
     <string name="file_create_directory_title">New folder</string>
 
     <string name="file_list_title">Files</string>
+    <string name="file_list_exit_confirmation">Swipe back again to exit</string>
     <string name="file_list_home">Home</string>
     <string name="navigation_home">Home</string>
     <string name="navigation_remote">Remote</string>
@@ -277,6 +278,10 @@
     <string name="home_rearrange">Rearrange Home</string>
     <string name="home_rearrange_done">Finish rearranging</string>
     <string name="home_rearrange_hint">Drag the icons into the order you want.</string>
+    <string name="home_access_from_network">Access from network</string>
+    <string name="home_item_count_format">(%1$,d)</string>
+    <string name="home_storage_usage_format" translatable="false">%1$s / %2$s</string>
+    <string name="home_directory_statistics_format" translatable="false">%1$s (%2$,d)</string>
     <plurals name="file_list_title_open_file">
         <item quantity="one">Select a file</item>
         <item quantity="other">Select files</item>
@@ -813,4 +818,25 @@
 
     <string name="shortcut_downloads_title" translatable="false">@string/navigation_standard_directory_downloads</string>
     <string name="shortcut_ftp_server_title" translatable="false">@string/ftp_server_title</string>
+
+    <string name="file_job_progress_title">File transfers</string>
+    <string name="file_job_progress_copying">Copying files</string>
+    <string name="file_job_progress_moving">Moving files</string>
+    <string name="file_job_progress_preparing">Preparing transfer…</string>
+    <string name="file_job_progress_scanning">Calculating transfer…</string>
+    <string name="file_job_progress_transferring">Transfer in progress</string>
+    <string name="file_job_progress_cancelling">Cancelling…</string>
+    <string name="file_job_progress_completed">Transfer complete</string>
+    <string name="file_job_progress_cancelled">Transfer cancelled</string>
+    <string name="file_job_progress_failed">Transfer failed</string>
+    <string name="file_job_progress_no_active">No active transfer</string>
+    <string name="file_job_progress_percent">%1$d%%</string>
+    <string name="file_job_progress_size">%1$s of %2$s</string>
+    <string name="file_job_progress_speed">%1$s/s</string>
+    <string name="file_job_progress_remaining">%1$s remaining</string>
+    <string name="file_job_progress_file_count">Item %1$d of %2$d</string>
+    <string name="file_job_progress_duration_minutes">%1$dm %2$ds</string>
+    <string name="file_job_progress_duration_seconds">%1$ds</string>
+    <string name="file_job_progress_open_details">Open transfer details</string>
+    <string name="file_job_progress_compact">%1$s  •  %2$s  •  %3$s/s</string>
 </resources>

@@ -52,7 +52,7 @@
             android:id="@+id/breadcrumbBar"
             android:layout_width="match_parent"
             android:layout_height="@dimen/tab_layout_height"
-            android:background="?colorSurfaceVariant"
+            android:background="@color/fmpu_ruby_surface_variant"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatImageButton

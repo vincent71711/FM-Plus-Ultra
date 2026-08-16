@@ -15,15 +15,38 @@
 
     <color name="color_primary">@color/color_primary_dark</color>
 
+    <color name="fmpu_ruby_primary">#FF8A9B</color>
+    <color name="fmpu_on_ruby_primary">#5F0010</color>
+    <color name="fmpu_ruby_primary_container">#3A3A3A</color>
+    <color name="fmpu_on_ruby_primary_container">#FF8A9B</color>
+    <color name="fmpu_ruby_secondary">#FFB1BD</color>
+    <color name="fmpu_on_ruby_secondary">#4A1823</color>
+    <color name="fmpu_ruby_secondary_container">#9B111E</color>
+    <color name="fmpu_on_ruby_secondary_container">#FFFFFF</color>
+    <color name="fmpu_ruby_surface">#121212</color>
+    <color name="fmpu_on_ruby_surface">#E6E1E5</color>
+    <color name="fmpu_ruby_surface_variant">#2E2E2E</color>
+    <color name="fmpu_on_ruby_surface_variant">#D0D0D0</color>
+    <color name="fmpu_ruby_outline">#969696</color>
+    <color name="fmpu_surface_bright">#363636</color>
+    <color name="fmpu_surface_dim">#101010</color>
+    <color name="fmpu_surface_container_lowest">#0E0E0E</color>
+    <color name="fmpu_surface_container_low">#121212</color>
+    <color name="fmpu_surface_container">#1E1E1E</color>
+    <color name="fmpu_surface_container_high">#252525</color>
+    <color name="fmpu_surface_container_highest">#2C2C2C</color>
+    <color name="fmpu_selection_surface">#343434</color>
+    <color name="fmpu_progress_track">#4A4A4A</color>
+
     <color name="color_surface">@color/color_surface_dark</color>
 
     <color name="activity_icon_tint">@color/secondary_text_default_material_dark</color>
     <color name="action_bar_popup_text_primary">@color/primary_text_default_material_dark</color>
     <color name="action_bar_popup_text_secondary">@color/secondary_text_default_material_dark</color>
 
-    <color name="file_icon_light_blue">#6F9EF3</color>
-    <color name="file_icon_blue">#4285F4</color>
-    <color name="file_icon_cyan">#78D9EC</color>
+    <color name="file_icon_light_blue">#FF8FA3</color>
+    <color name="file_icon_blue">#FF607A</color>
+    <color name="file_icon_cyan">#F06A83</color>
     <color name="file_icon_light_green">#81C995</color>
     <color name="file_icon_green">#4FB885</color>
     <color name="file_icon_deep_green">#3FB179</color>

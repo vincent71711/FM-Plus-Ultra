@@ -19,8 +19,10 @@ import me.zhanghai.android.files.provider.common.AbstractWatchService
 import me.zhanghai.android.files.provider.smb.client.Client
 import me.zhanghai.android.files.provider.smb.client.ClientException
 import me.zhanghai.android.files.util.closeSafe
+import me.zhanghai.android.files.util.findCauseByClass
 import java.io.IOException
 import java.io.InterruptedIOException
+import java.util.concurrent.CancellationException
 import java.util.concurrent.Future
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -150,9 +152,13 @@ internal class SmbWatchService : AbstractWatchService<SmbWatchKey>() {
                     future = Client.requestDirectoryChangeNotification(directory, COMPLETION_FILTER)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                val isCancellation = e is CancellationException || e is InterruptedException ||
+                    e is InterruptedIOException ||
+                    e.findCauseByClass<InterruptedException>() != null ||
+                    e.findCauseByClass<InterruptedIOException>() != null
                 key.setInvalid()
-                if (!(e is InterruptedException || e is InterruptedIOException)) {
+                if (!isCancellation) {
+                    e.printStackTrace()
                     key.signal()
                 }
                 watchService.removeNotifier(this)

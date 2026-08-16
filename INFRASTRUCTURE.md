@@ -43,10 +43,10 @@ Build output belongs under Gradle `build/` directories and must not be committed
 
 The derivative identity is:
 
-- Visible private-use name: `File Manager Plus Ultra`
+- Visible private-use name: `FM Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
 - Reserved release ID: `com.froslabs.filemanagerplusultra`
-- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (40). Android
+- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (52). Android
   version codes begin at 40, one above the Material Files baseline (39), and
   must increase monotonically. Do not reset them independently of the inherited
   preference-migration thresholds.
@@ -62,6 +62,12 @@ selected Fold7 on 2026-08-16. Always resolve and pass the current serial with
 
 Signing properties, keystores, passwords, and backups remain outside Git. Do
 not use upstream signing configuration for derivative distribution.
+
+For private inspection on 2026-08-16, a version-52 minified release variant was
+temporarily signed with the workstation's standard Android debug certificate and
+copied to the Fold7 Downloads folder without installation. This is not release
+signing: a future permanent key will require uninstalling that test-signed release
+package before installation. No signing property or keystore was added to Git.
 
 ## Analytics and external services
 

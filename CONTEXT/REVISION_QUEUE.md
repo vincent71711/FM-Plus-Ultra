@@ -4,14 +4,25 @@
 
 - **Application ID:** release ID `com.froslabs.filemanagerplusultra`; debug ID
   `com.froslabs.filemanagerplusultra.debug`.
-- **Visible name:** File Manager Plus Ultra for private use.
+- **Visible name:** FM Plus Ultra for private use.
 - **Launcher art:** selected version-2 librarian mascot with glasses, high red
   ponytail, gold folder, and no headphones. The canonical source is
-  `docs/branding/file-manager-plus-ultra-icon-source.png`.
+  `docs/branding/file-manager-plus-ultra-icon-source.png`. Its adaptive launcher
+  foreground is scaled to 64% to expose more of the folder under Samsung's mask.
 - **Attribution:** About screen prominently identifies the Material Files base,
   Hai Zhang, Vincent's modification, GPLv3, and the modification start date.
 - **Telemetry:** Firebase Analytics, Crashlytics, and Google Services are
   removed and are not to be replaced.
+- **Clipboard source isolation:** folders within one configured storage source
+  may accumulate, while a different source replaces the existing batch. Copy and
+  Move batches clear when Paste is initiated.
+- **Private palette:** dark-ruby actions and generic file/folder accents with
+  neutral white/gray broad surfaces; no pink tint across the navigation drawer.
+- **Temporary release test artifact:** Vincent requested a non-debug APK in the
+  Fold7 Downloads folder. Version 52 was built as the minified release variant and
+  signed with the workstation's standard Android debug certificate solely so the
+  private test artifact is installable. It is not the permanent release-signing
+  decision and cannot be upgraded in place to an APK signed by a future release key.
 
 ## Decisions still required
 
@@ -52,6 +63,8 @@
 
 ## Deferred
 
+- Optional longer transfer to characterize thermal behavior beyond the successful
+  version 45 2 GiB baseline; not required for the next product work.
 - Pause/resume support, if the underlying provider can make it reliable.
 - Multi-pane foldable navigation beyond a stable responsive single-pane layout.
 - Release automation, store listings, telemetry, servers, or cloud services.

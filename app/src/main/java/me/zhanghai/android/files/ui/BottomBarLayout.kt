@@ -26,7 +26,9 @@ class BottomBarLayout @JvmOverloads constructor(
         if (background is ColorDrawable) {
             this.background = MaterialShapeDrawable().apply {
                 fillColor = ColorStateList.valueOf(background.color)
-                initializeElevationOverlay(context)
+                // FM Plus Ultra modification (2026): Keep clipboard/paste bars neutral. Material's
+                // tonal elevation overlay mixed the ruby primary into a white surface and made the
+                // entire bottom bar appear pink.
                 elevation = this@BottomBarLayout.elevation
             }
         }

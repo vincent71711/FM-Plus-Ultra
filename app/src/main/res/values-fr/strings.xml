@@ -9,7 +9,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ImpliedQuantity,MissingQuantity">
 
-    <string name="app_name">File Manager Plus Ultra</string>
+    <string name="app_name">FM Plus Ultra</string>
 
     <string name="close">Fermer</string>
     <string name="copy">Copier</string>

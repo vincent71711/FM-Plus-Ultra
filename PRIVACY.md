@@ -1,6 +1,6 @@
 # Privacy
 
-File Manager Plus Ultra is a private-use derivative of Material Files. The mod
+FM Plus Ultra is a private-use derivative of Material Files. The mod
 does not include analytics, advertising, Firebase, Crashlytics, telemetry, or
 automatic diagnostic uploads.
 

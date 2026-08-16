@@ -26,6 +26,7 @@
         <item name="colorSecondary">?colorPrimary</item>
         <item name="colorOnSecondary">?colorOnPrimary</item>
         <item name="colorSecondaryVariant">?colorSecondary</item>
+        <item name="colorControlActivated">?colorPrimary</item>
         <item name="colorSurface">@color/color_surface</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MaterialFiles.MediumComponent</item>
         <item name="buttonBarButtonStyle">@style/Widget.MaterialComponents.Button.TextButton.Dialog</item>
@@ -77,6 +78,7 @@
         <item name="colorSecondary">?colorPrimary</item>
         <item name="colorOnSecondary">?colorOnPrimary</item>
         <item name="colorSecondaryVariant">?colorSecondary</item>
+        <item name="colorControlActivated">?colorPrimary</item>
         <item name="colorSurface">@color/color_surface_dark</item>
         <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.MaterialFiles.MediumComponent</item>
         <item name="buttonBarButtonStyle">@style/Widget.MaterialComponents.Button.TextButton.Dialog</item>

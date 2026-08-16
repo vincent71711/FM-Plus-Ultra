@@ -353,6 +353,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="me.zhanghai.android.files.filejob.FileJobProgressActivity"
+            android:exported="false"
+            android:label="@string/file_job_progress_title"
+            android:theme="@style/Theme.MaterialFiles.Translucent" />
+
         <service
             android:name="me.zhanghai.android.files.filejob.FileJobService"
             android:foregroundServiceType="dataSync" />

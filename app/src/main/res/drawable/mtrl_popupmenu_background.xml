@@ -7,7 +7,7 @@
 
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
-  <solid android:color="?colorSurface" />
+  <solid android:color="@color/fmpu_surface_container_high" />
 
   <corners
       android:bottomLeftRadius="4dp"

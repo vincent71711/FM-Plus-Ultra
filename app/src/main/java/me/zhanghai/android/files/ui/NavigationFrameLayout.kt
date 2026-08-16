@@ -37,7 +37,9 @@ class NavigationFrameLayout : FrameLayout {
         if (background is ColorDrawable) {
             this.background = MaterialShapeDrawable().apply {
                 fillColor = ColorStateList.valueOf(background.color)
-                initializeElevationOverlay(context)
+                // FM Plus Ultra modification (2026): Keep the drawer's explicit neutral surface
+                // color. Material's elevation overlay tints even a white fill toward the active
+                // theme color, which made the entire navigation panel appear pink.
                 elevation = this@NavigationFrameLayout.elevation
             }
         }

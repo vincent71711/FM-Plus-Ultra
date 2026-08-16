@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2026 Vincent Frosceno
  *
- * This file is part of File Manager Plus Ultra, a GPLv3 derivative of Material Files.
+ * This file is part of FM Plus Ultra, a GPLv3 derivative of Material Files.
  */
 
 package me.zhanghai.android.files.ui

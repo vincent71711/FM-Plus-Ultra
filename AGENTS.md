@@ -4,7 +4,7 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 ## Product and upstream baseline
 
-- This is **File Manager Plus Ultra**, a private-use, history-preserving GPLv3 derivative of
+- This is **FM Plus Ultra**, a private-use, history-preserving GPLv3 derivative of
   [Material Files](https://github.com/zhanghai/MaterialFiles).
 - The immutable upstream baseline is commit
   `fc1250038496ebf4d4c139f62d16f0071f2c995a`, tagged locally as
@@ -13,7 +13,7 @@ These instructions apply throughout `/srv/file-manager-app`.
   work must use `codex/<short-description>` branches.
 - Preserve `LICENSE`, copyright headers, attribution, Git history, and
   third-party notices. Mark material modifications and relevant dates.
-- The private working identity is `File Manager Plus Ultra`; release ID is
+- The private working identity is `FM Plus Ultra`; release ID is
   `com.froslabs.filemanagerplusultra` and development builds use the `.debug`
   suffix. The upstream Kotlin namespace remains unchanged intentionally.
 - The derivative Android version code begins at 40 and must increase

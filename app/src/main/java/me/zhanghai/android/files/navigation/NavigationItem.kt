@@ -26,6 +26,8 @@ abstract class NavigationItem {
 
     open fun getSubtitle(context: Context): String? = null
 
+    open suspend fun getHomeSubtitle(context: Context): String? = getSubtitle(context)
+
     open fun isChecked(listener: Listener): Boolean = false
 
     abstract fun onClick(listener: Listener)

@@ -205,13 +205,15 @@ class FileListViewModel : ViewModel() {
     val pasteState: PasteState
         get() = _pasteStateLiveData.valueCompat
 
-    fun addToPasteState(copy: Boolean, files: FileItemSet) {
+    fun addToPasteState(copy: Boolean, files: FileItemSet, sourceRoot: Path) {
         val pasteState = _pasteStateLiveData.valueCompat
         var changed = false
-        if (pasteState.copy != copy) {
-            changed = pasteState.files.isNotEmpty()
+        if (pasteState.copy != copy || pasteState.sourceRoot != sourceRoot) {
+            changed = pasteState.files.isNotEmpty() || pasteState.copy != copy ||
+                pasteState.sourceRoot != sourceRoot
             pasteState.files.clear()
             pasteState.copy = copy
+            pasteState.sourceRoot = sourceRoot
         }
         changed = changed or pasteState.files.addAll(files)
         if (changed) {
@@ -221,10 +223,11 @@ class FileListViewModel : ViewModel() {
 
     fun clearPasteState() {
         val pasteState = _pasteStateLiveData.valueCompat
-        if (pasteState.files.isEmpty()) {
+        if (pasteState.files.isEmpty() && pasteState.sourceRoot == null) {
             return
         }
         pasteState.files.clear()
+        pasteState.sourceRoot = null
         _pasteStateLiveData.value = pasteState
     }
 

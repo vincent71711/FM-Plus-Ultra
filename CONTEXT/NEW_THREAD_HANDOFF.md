@@ -1,6 +1,6 @@
 # New thread handoff
 
-- Product: File Manager Plus Ultra, a private-use Android file manager
+- Product: FM Plus Ultra, a private-use Android file manager
   derivative for a Galaxy Z Fold7.
 - Base: official Material Files, GPLv3, full history preserved.
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
@@ -12,7 +12,7 @@
 - Validated gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain`;
   successful with 94 tasks.
-- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (41). The derivative
+- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (52). The derivative
   Android version code must remain above inherited migration thresholds and
   increase monotonically; using 1 caused legacy storage migration to discard
   saved SMB entries on restart.
@@ -22,12 +22,12 @@
   runtime initialization are removed. Do not restore or replace telemetry.
 - The selected version-2 librarian icon source is
   `docs/branding/file-manager-plus-ultra-icon-source.png`; use the checked-in
-  generation script for launcher densities. Do not regenerate the mascot.
+  generation script for launcher densities. Do not regenerate the mascot. The
+  adaptive foreground is currently scaled to 64% for additional breathing room.
 - The private name is not approved public branding due similarity to an
   existing commercial app. No distribution is authorized.
-- The debug APK is installed on the explicitly selected Fold7. It cold-launched
-  successfully, remained alive without a fatal exception, and coexists with the
-  Play Store Material Files package. Do not record the wireless-ADB serial.
+- Version 52 is installed and running on the explicitly selected Fold7 and
+  coexists with Play Store Material Files. Do not record the wireless-ADB serial.
 - A live cover (1080x2520) to inner (1968x2184) to cover transition retained the
   same resumed process/activity and produced no fatal exception.
 - Synthetic local rename and copy-then-delete actions are verified. The move
@@ -42,20 +42,58 @@
 - The first transfer repair changes the generic copy buffer from 8 KiB to
   256 KiB; physical tests showed 6.7x to 9.8x faster upload and a byte-correct
   round trip.
-- Current uncommitted test build adds a bounded four-block asynchronous SMB
-  upload pipeline. A 256 MiB upload/download round trip matched byte count and
-  SHA-256. An app-timed upload completed in 12.074 seconds: 21.20 MiB/s
-  (22.23 MB/s). The installed debug build logs exact start, finish, and elapsed
-  time as `FMPU.TransferTiming`.
+- Full TrueNAS-side captures showed File Manager Plus using 256 KiB requests,
+  at most two writes outstanding, and a shallow read window. Its 4 GiB upload
+  held about 39 MB/s. Version 41's 512 KiB x12 upload declined from 36.8 to
+  26.4 MB/s by quarter despite approximately 8 ms responses, abundant SMB
+  credits, and no TCP window stalls. Its 4 MiB x2 download held about 32.8 MB/s
+  after ramp-up with no active-transfer retransmissions.
+- Version 42's direct 256 KiB test reached only 28.81 MB/s upload and 34.22 MB/s
+  download. The common per-byte ceiling led to SMBJ's pure-Java AES-CMAC signing.
+  Version 44 uses AndroidOpenSSL for available primitives with Bouncy Castle
+  fallback and reached 52.39 MB/s upload and 89.42 MB/s download. Version 45
+  retains that hybrid provider with bounded 256 KiB x8 reads and x4 writes;
+  its physical 2 GiB test reached 84.40 MB/s upload and 110.21 MB/s download.
+- Version 46 bounds the x8 speculative read pipeline to the opened file's size,
+  with one EOF probe for files that grow. A 25-file, 313,522,904-byte audiobook
+  download moved its post-conflict active data in about 4.87 seconds (about
+  64.4 MB/s); the raw job timer included roughly seven idle seconds before reads.
+  Its unchanged upload control reached 72.04 MB/s.
+- Version 47's later 2 GiB run reached 91.49 MB/s phone-to-SMB and 119.15 MB/s
+  SMB-to-phone without a transfer error, ANR, or crash.
+- All known diagnostic captures were deleted after analysis: 17.87 GB from
+  TrueNAS and 6.60 GB from KohlerRunner1. The TrueNAS capture wrapper remains.
+- Selections across folders within one configured storage source accumulate;
+  selecting from another source replaces the batch. Copy and Move batches clear
+  when Paste is initiated. Physical validation showed two Internal storage folders
+  accumulate as `Copying 2`, then a test-SMB selection replace them as `Copying 1`.
 - The same test build draws dividers inside animated rows, uses clicked sidebar
   item identity to prevent same-path double highlights, and defaults long file
   names to end truncation. Version 41 migrates an existing saved Middle value
   to End; the installed preference was verified as `2`. Visual confirmation is pending.
 - Provider event bursts now use trailing-edge coalescing; the installed build
-  stayed visually stable during an SMB upload. Progress notifications still
-  update about every 0.6 seconds, and there is no useful in-app transfer center.
+  stayed visually stable during an SMB upload. Transfers have a compact in-app
+  indicator and detailed progress dialog in addition to the notification.
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: confirm the three UI fixes and plan the next SMB optimization against
-  the 21.20 MiB/s baseline.
+- Rotated-cover header alignment is fixed. Unfolded landscape uses a temporary
+  drawer; an incremental-resource `drawerLayout` crash was fixed and retested.
+- Version 48 uses dark-ruby accents with neutral white/gray surfaces. The drawer
+  is exact white after disabling its Material elevation color overlay. Home edit
+  mode removes the inert grabber, jiggles tiles, and starts drag on tile touch.
+- Version 48 fixes the crash loop from disabling Material 3 with a custom color;
+  both that state and Material 3/default were physically cold-launched. Native
+  Android SMB providers are explicitly preferred per primitive with portable
+  fallback, and expected nested watch-cancellation noise is suppressed.
+- Top-level Back now prompts once and requires a second gesture within 2.5 seconds
+  to exit; the guard follows the actual Home screen even for restored/non-Main
+  root activities, while nested navigation remains single-Back.
+- Version 52 adds Home storage/category statistics, a Remote connection count,
+  an Access from network shortcut to FTP Server, neutral progress/selection/
+  clipboard surfaces, selected-row long-press deselection, and haptic feedback
+  on both states of the Home edit button.
+- Version-52 debug and minified release-test APKs were copied to the Fold7 Downloads
+  folder. The release-test package uses the reserved release ID but is signed only
+  with the local Android debug certificate; it was not installed or published.
+- Next: user final inspection, then continue correctness/UI review.

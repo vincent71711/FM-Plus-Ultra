@@ -112,6 +112,38 @@ class FileJobService : Service() {
             }
         }
 
+        @MainThread
+        private fun startTransferJob(
+            job: FileJob,
+            operation: String,
+            sources: List<Path>,
+            targetDirectory: Path,
+            context: Context
+        ) {
+            val sourceSchemes = sources.map { it.fileSystem.provider().scheme }.distinct()
+            val targetScheme = targetDirectory.fileSystem.provider().scheme
+            val direction = "${sourceSchemes.joinToString("+") { providerLabel(it) }} -> " +
+                providerLabel(targetScheme)
+            val source = sources.firstOrNull()?.let { debugEndpoint(it) } ?: "unknown"
+            FileJobProgressStore.start(
+                job.id, operation, direction, source, debugEndpoint(targetDirectory)
+            )
+            startJob(job, context)
+            FileJobProgressActivity.show(job.id, context)
+        }
+
+        private fun providerLabel(scheme: String): String = when (scheme.lowercase()) {
+            "smb" -> "SMB"
+            "file", "linux", "root" -> "PHONE"
+            else -> scheme.uppercase()
+        }
+
+        private fun debugEndpoint(path: Path): String {
+            val label = providerLabel(path.fileSystem.provider().scheme)
+            val name = path.fileName?.toString() ?: path.fileSystem.separator
+            return "$label:$name"
+        }
+
         fun archive(
             sources: List<Path>,
             archiveFile: Path,
@@ -124,7 +156,13 @@ class FileJobService : Service() {
         }
 
         fun copy(sources: List<Path>, targetDirectory: Path, context: Context) {
-            startJob(CopyFileJob(sources, targetDirectory), context)
+            startTransferJob(
+                CopyFileJob(sources, targetDirectory),
+                context.getString(me.zhanghai.android.files.R.string.file_job_progress_copying),
+                sources,
+                targetDirectory,
+                context
+            )
         }
 
         fun create(path: Path, createDirectory: Boolean, context: Context) {
@@ -136,7 +174,13 @@ class FileJobService : Service() {
         }
 
         fun move(sources: List<Path>, targetDirectory: Path, context: Context) {
-            startJob(MoveFileJob(sources, targetDirectory), context)
+            startTransferJob(
+                MoveFileJob(sources, targetDirectory),
+                context.getString(me.zhanghai.android.files.R.string.file_job_progress_moving),
+                sources,
+                targetDirectory,
+                context
+            )
         }
 
         fun installApk(file: Path, context: Context) {
@@ -197,7 +241,11 @@ class FileJobService : Service() {
 
         @MainThread
         fun cancelJob(id: Int) {
-            pendingJobs.removeFirst { it.id == id }
+            FileJobProgressStore.markCancelling(id)
+            val pendingJob = pendingJobs.removeFirst { it.id == id }
+            if (pendingJob != null) {
+                FileJobProgressStore.finish(id, FileJobProgressStatus.CANCELLED)
+            }
             instance?.cancelJob(id)
         }
     }

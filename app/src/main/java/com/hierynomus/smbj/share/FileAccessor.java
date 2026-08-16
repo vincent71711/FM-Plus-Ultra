@@ -7,6 +7,7 @@ package com.hierynomus.smbj.share;
 
 import com.hierynomus.mssmb2.messages.SMB2ReadResponse;
 import com.hierynomus.smbj.common.SMBRuntimeException;
+import com.hierynomus.smbj.connection.ConnectionAccessor;
 
 import java.util.concurrent.Future;
 
@@ -22,5 +23,10 @@ public class FileAccessor {
     public static Future<SMB2ReadResponse> readAsync(@NonNull File file, long offset, int length)
             throws SMBRuntimeException {
         return file.readAsync(offset, length);
+    }
+
+    public static int getAvailableCredits(@NonNull File file) {
+        return ConnectionAccessor.getAvailableCredits(
+                file.getDiskShare().getTreeConnect().getSession().getConnection());
     }
 }

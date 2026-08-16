@@ -1,6 +1,6 @@
-# File Manager Plus Ultra
+# FM Plus Ultra
 
-File Manager Plus Ultra is a private-use Android file manager derivative based
+FM Plus Ultra is a private-use Android file manager derivative based
 on the official Material Files project. Its goal is to retain Material Files'
 capable local/NAS provider architecture while delivering fast SMB transfers,
 stable and detailed transfer monitoring, a visually structured file list,
@@ -15,6 +15,32 @@ The project preserves Material Files' Git history, GPLv3 license, copyright
 notices, and attribution. The app's About screen identifies the upstream author
 and the modified version. Material Files features described below are inherited
 upstream functionality; mod-specific work is recorded in `CHANGELOG.md`.
+
+## Why SMB transfers are much faster
+
+Material Files already had a sound, compatible SMB implementation, but large
+transfers were spending too much time doing encryption work in portable Java
+code and waiting on one small piece of a file at a time. Modern phones contain
+highly optimized native security code that can do the same SMB signing and
+encryption work much more efficiently.
+
+FM Plus Ultra uses Android's native security provider whenever the required
+operation is available, while retaining the original portable implementation as
+a fallback for devices or older SMB servers that need it. It also transfers a
+small, controlled group of larger file pieces concurrently instead of waiting
+for every piece before requesting the next one. The group is deliberately
+bounded so the app does not consume excessive memory, overwhelm a server, or
+read needlessly beyond the end of smaller files.
+
+In the current Fold7 and TrueNAS test environment, a 2 GiB round trip reached
+about 91 MB/s uploading to SMB and 119 MB/s downloading from SMB. Actual speed
+will still depend on the phone, Wi-Fi, server, storage, encryption, and other
+network traffic. If the optimized Android path is unavailable, the app falls
+back automatically rather than sacrificing compatibility.
+
+The mod also keeps directory refresh events from repeatedly redrawing the file
+list during a transfer and provides in-app progress, speed, remaining-size,
+ETA, and cancellation controls.
 
 Development phases:
 

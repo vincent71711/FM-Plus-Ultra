@@ -22,6 +22,8 @@ abstract class FileJob {
     fun runOn(service: FileJobService) {
         this.service = service
         val startElapsedRealtime = SystemClock.elapsedRealtime()
+        var finalStatus = FileJobProgressStatus.COMPLETED
+        var finalError: String? = null
         if (BuildConfig.DEBUG) {
             Log.i(TRANSFER_TIMING_TAG, "START job=${javaClass.simpleName} id=$id")
         }
@@ -29,9 +31,12 @@ abstract class FileJob {
             run()
             // TODO: Toast
         } catch (e: InterruptedIOException) {
+            finalStatus = FileJobProgressStatus.CANCELLED
             // TODO
             e.printStackTrace()
         } catch (e: Exception) {
+            finalStatus = FileJobProgressStatus.FAILED
+            finalError = e.localizedMessage ?: e.javaClass.simpleName
             e.printStackTrace()
             service.showToast(e.toString())
         } finally {
@@ -42,6 +47,7 @@ abstract class FileJob {
                     "FINISH job=${javaClass.simpleName} id=$id elapsedMs=$elapsedMillis"
                 )
             }
+            FileJobProgressStore.finish(id, finalStatus, finalError)
             service.notificationManager.cancel(id)
         }
     }

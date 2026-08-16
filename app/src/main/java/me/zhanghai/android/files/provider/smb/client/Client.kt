@@ -5,6 +5,7 @@
 
 package me.zhanghai.android.files.provider.smb.client
 
+import android.util.Log
 import com.hierynomus.msdtyp.AccessMask
 import com.hierynomus.mserref.NtStatus
 import com.hierynomus.msfscc.FileAttributes
@@ -22,6 +23,7 @@ import com.hierynomus.mssmb2.messages.SMB2ChangeNotifyResponse
 import com.hierynomus.protocol.commons.EnumWithValue
 import com.hierynomus.smbj.ProgressListener
 import com.hierynomus.smbj.SMBClient
+import com.hierynomus.smbj.SmbConfig
 import com.hierynomus.smbj.auth.AuthenticationContext
 import com.hierynomus.smbj.common.SMBRuntimeException
 import com.hierynomus.smbj.session.Session
@@ -30,10 +32,12 @@ import com.hierynomus.smbj.share.DiskShare
 import com.hierynomus.smbj.share.PipeShare
 import com.hierynomus.smbj.share.PrinterShare
 import com.hierynomus.smbj.share.Share
+import com.hierynomus.smbj.transport.tcp.async.AsyncDirectTcpTransportFactory
 import com.rapid7.client.dcerpc.mssrvs.ServerService
 import com.rapid7.client.dcerpc.transport.SMBTransportFactories
 import java8.nio.channels.SeekableByteChannel
 import jcifs.context.SingletonContext
+import me.zhanghai.android.files.BuildConfig
 import me.zhanghai.android.files.provider.common.CloseableIterator
 import me.zhanghai.android.files.provider.common.copyTo
 import me.zhanghai.android.files.provider.common.newInputStream
@@ -53,7 +57,15 @@ object Client {
     @Volatile
     lateinit var authenticator: Authenticator
 
-    private val client = SMBClient()
+    private val client = SMBClient(
+        SmbConfig.builder()
+            .withNegotiatedBufferSize()
+            .withSecurityProvider(AndroidSecurityProvider())
+            // Keep socket output off the transfer producer. The file channel strictly bounds its
+            // request queue, avoiding the memory pressure seen with the earlier 6 MiB backlog.
+            .withTransportLayerFactory(AsyncDirectTcpTransportFactory())
+            .build()
+    )
 
     private val sessions = mutableMapOf<Authority, Session>()
 
@@ -81,7 +93,18 @@ object Client {
         } catch (e: SMBRuntimeException) {
             throw ClientException(e)
         }
-        return FileByteChannel(file, isAppend)
+        val initialReadSizeHint = if (AccessMask.GENERIC_READ in desiredAccess) {
+            try {
+                file.getFileInformation(FileStandardInformation::class.java).endOfFile
+            } catch (e: SMBRuntimeException) {
+                // The size is only an optimization hint. Preserve normal read behavior if a
+                // server does not allow the additional information query.
+                null
+            }
+        } else {
+            null
+        }
+        return FileByteChannel(file, isAppend, initialReadSizeHint)
     }
 
     @Throws(ClientException::class)
@@ -611,6 +634,14 @@ object Client {
             } catch (e: IOException) {
                 throw ClientException(e)
             }
+            if (BuildConfig.DEBUG) {
+                val protocol = connection.negotiatedProtocol
+                Log.i(
+                    SMB_NEGOTIATION_TAG,
+                    "dialect=${protocol.dialect} maxRead=${protocol.maxReadSize} " +
+                        "maxWrite=${protocol.maxWriteSize} maxTransact=${protocol.maxTransactSize}"
+                )
+            }
             val authenticationContext =
                 AuthenticationContext(authority.username, password.toCharArray(), authority.domain)
             session = try {
@@ -628,6 +659,8 @@ object Client {
             return session
         }
     }
+
+    private const val SMB_NEGOTIATION_TAG = "FMPU.SmbNegotiation"
 
     @Throws(ClientException::class)
     private fun resolveHostName(hostName: String): String {

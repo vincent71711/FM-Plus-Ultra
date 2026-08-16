@@ -303,12 +303,13 @@ private fun FileJob.scanPath(
 }
 
 private fun FileJob.postScanNotification(scanInfo: ScanInfo, @PluralsRes titleRes: Int) {
-    if (!scanInfo.shouldPostNotification()) {
-        return
-    }
     val size = scanInfo.size.asFileSize().formatHumanReadable(service)
     val fileCount: Int = scanInfo.fileCount
     val title: String = getQuantityString(titleRes, fileCount, fileCount, size)
+    FileJobProgressStore.updateScanning(id, title, fileCount, scanInfo.size)
+    if (!scanInfo.shouldPostNotification()) {
+        return
+    }
     postNotification(title, null, null, null, 0, 0, true, true)
 }
 
@@ -346,15 +347,14 @@ private fun FileJob.postTransferSizeNotification(
     @StringRes titleOneRes: Int,
     @PluralsRes titleMultipleRes: Int
 ) {
-    if (!transferInfo.shouldPostNotification()) {
-        return
-    }
     val title: String
     val text: String
     val fileCount = transferInfo.fileCount
     val target = transferInfo.target!!
     val size = transferInfo.size
     val transferredSize = transferInfo.transferredSize
+    val currentFileIndex = (transferInfo.transferredFileCount + 1)
+        .coerceAtMost(fileCount)
     if (fileCount == 1) {
         title = getString(titleOneRes, getFileName(currentSource), getFileName(target))
         val sizeString = size.asFileSize().formatHumanReadable(service)
@@ -365,12 +365,17 @@ private fun FileJob.postTransferSizeNotification(
         )
     } else {
         title = getQuantityString(titleMultipleRes, fileCount, fileCount, getFileName(target))
-        val currentFileIndex = (transferInfo.transferredFileCount + 1)
-            .coerceAtMost(fileCount)
         text = getString(
             R.string.file_job_transfer_size_notification_text_multiple_format, currentFileIndex,
             fileCount
         )
+    }
+    FileJobProgressStore.updateTransfer(
+        id, title, getFileName(currentSource), getFileName(target), fileCount, currentFileIndex,
+        size, transferredSize
+    )
+    if (!transferInfo.shouldPostNotification()) {
+        return
     }
     val max: Int
     val progress: Int

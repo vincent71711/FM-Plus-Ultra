@@ -21,7 +21,7 @@ DENSITIES = {
 
 # Keep the subject comfortably inside Android's adaptive-icon safe zone. Samsung launchers apply
 # an additional mask/zoom, so a full-canvas foreground crops most of the folder at the bottom.
-FOREGROUND_CONTENT_SCALE = 0.82
+FOREGROUND_CONTENT_SCALE = 0.64
 
 
 def remove_connected_black_border(image: Image.Image) -> Image.Image:

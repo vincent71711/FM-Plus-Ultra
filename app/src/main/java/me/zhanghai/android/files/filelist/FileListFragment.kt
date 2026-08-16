@@ -18,6 +18,8 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
+import android.text.format.Formatter
+import android.view.HapticFeedbackConstants
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -27,6 +29,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -41,6 +44,8 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.children
+import androidx.core.view.doOnLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updatePaddingRelative
 import androidx.drawerlayout.widget.DrawerLayout
@@ -74,6 +79,9 @@ import me.zhanghai.android.files.file.fileProviderUri
 import me.zhanghai.android.files.file.isApk
 import me.zhanghai.android.files.file.isImage
 import me.zhanghai.android.files.filejob.FileJobService
+import me.zhanghai.android.files.filejob.FileJobProgress
+import me.zhanghai.android.files.filejob.FileJobProgressActivity
+import me.zhanghai.android.files.filejob.FileJobProgressStore
 import me.zhanghai.android.files.filelist.FileSortOptions.By
 import me.zhanghai.android.files.filelist.FileSortOptions.Order
 import me.zhanghai.android.files.fileproperties.FilePropertiesDialogFragment
@@ -83,6 +91,7 @@ import me.zhanghai.android.files.navigation.HomeNavigationItemListLiveData
 import me.zhanghai.android.files.navigation.NavigationFragment
 import me.zhanghai.android.files.navigation.NavigationRootMapLiveData
 import me.zhanghai.android.files.navigation.RecentLocations
+import me.zhanghai.android.files.navigation.findRecentLocationSource
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
@@ -95,7 +104,6 @@ import me.zhanghai.android.files.ui.FixQueryChangeSearchView
 import me.zhanghai.android.files.ui.OverlayToolbarActionMode
 import me.zhanghai.android.files.ui.PersistentBarLayout
 import me.zhanghai.android.files.ui.PersistentBarLayoutToolbarActionMode
-import me.zhanghai.android.files.ui.PersistentDrawerLayout
 import me.zhanghai.android.files.ui.ScrollingViewOnApplyWindowInsetsListener
 import me.zhanghai.android.files.ui.SpeedDialViewOnBackPressedCallback
 import me.zhanghai.android.files.ui.ThemedFastScroller
@@ -121,7 +129,6 @@ import me.zhanghai.android.files.util.createViewIntent
 import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.extraPathList
 import me.zhanghai.android.files.util.fadeToVisibilityUnsafe
-import me.zhanghai.android.files.util.getDimensionDp
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.hasSw600Dp
 import me.zhanghai.android.files.util.isOrientationLandscape
@@ -135,7 +142,6 @@ import me.zhanghai.android.files.util.valueCompat
 import me.zhanghai.android.files.util.viewModels
 import me.zhanghai.android.files.util.withChooser
 import me.zhanghai.android.files.viewer.image.ImageViewerActivity
-import kotlin.math.roundToInt
 
 class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.Listener,
     ConfirmReplaceFileDialogFragment.Listener, OpenApkDialogFragment.Listener,
@@ -234,6 +240,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             .isAppearanceLightStatusBars = false
         activity.setTitle(R.string.file_list_title)
         activity.setSupportActionBar(binding.toolbar)
+        alignNavigationButtonWithHome(binding.toolbar)
+        alignNavigationButtonWithHome(binding.overlayToolbar)
         overlayActionMode = OverlayToolbarActionMode(binding.overlayToolbar)
         bottomActionMode = PersistentBarLayoutToolbarActionMode(
             binding.persistentBarLayout, binding.bottomBarLayout, binding.bottomToolbar
@@ -259,7 +267,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         binding.recyclerView.layoutManager = layoutManager
         adapter = FileListAdapter(this)
         binding.recyclerView.adapter = adapter
-        homeDashboardAdapter = HomeDashboardAdapter(navigationFragment)
+        homeDashboardAdapter = HomeDashboardAdapter(viewLifecycleOwner, navigationFragment)
         binding.homeRecyclerView.layoutManager = GridLayoutManager(
             activity, resources.getInteger(R.integer.home_dashboard_span_count)
         )
@@ -296,7 +304,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
                 override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
 
-                override fun isLongPressDragEnabled(): Boolean = homeDashboardAdapter.isEditing
+                override fun isLongPressDragEnabled(): Boolean = false
 
                 override fun clearView(
                     recyclerView: RecyclerView,
@@ -307,7 +315,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 }
             }
         ).also { it.attachToRecyclerView(binding.homeRecyclerView) }
-        binding.homeEditButton.setOnClickListener {
+        homeDashboardAdapter.onStartDrag = { homeItemTouchHelper.startDrag(it) }
+        binding.homeEditButton.setOnClickListener { view ->
+            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             setHomeRearranging(!homeDashboardAdapter.isEditing)
         }
         val fastScroller = ThemedFastScroller.create(binding.recyclerView)
@@ -343,7 +353,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                         callback.isEnabled = viewModel.screen == FileListScreen.FILES &&
                             (viewModel.canNavigateUpBreadcrumb ||
                                 (viewModel.pickOptions == null &&
-                                    args.intent.action == Intent.ACTION_MAIN))
+                                    (args.intent.action == Intent.ACTION_MAIN ||
+                                        requireActivity().isTaskRoot)))
                     }
                     viewModel.breadcrumbLiveData.observe(viewLifecycleOwner) {
                         updateEnabled()
@@ -358,9 +369,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         )
         addOnBackPressedCallback(overlayActionMode.onBackPressedCallback)
         addOnBackPressedCallback(SpeedDialViewOnBackPressedCallback(binding.speedDialView))
-        binding.drawerLayout?.let {
-            addOnBackPressedCallback(DrawerLayoutOnBackPressedCallback(it))
-        }
+        addOnBackPressedCallback(DrawerLayoutOnBackPressedCallback(binding.drawerLayout))
 
         if (!viewModel.hasTrail) {
             var path = argsPath
@@ -444,11 +453,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         // Live data only calls observeForever() on its sources when it is active, so we have to
         // make view type live data active first (so that it can load its initial value) before we
         // register another observer that needs to get the view type.
-        if (binding.persistentDrawerLayout != null) {
-            Settings.FILE_LIST_PERSISTENT_DRAWER_OPEN.observe(viewLifecycleOwner) {
-                onPersistentDrawerOpenChanged(it)
-            }
-        }
         viewModel.sortOptionsLiveData.observe(viewLifecycleOwner) { onSortOptionsChanged(it) }
         viewModel.viewSortPathSpecificLiveData.observe(viewLifecycleOwner) {
             onViewSortPathSpecificChanged(it)
@@ -457,9 +461,61 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         viewModel.selectedFilesLiveData.observe(viewLifecycleOwner) { onSelectedFilesChanged(it) }
         viewModel.pasteStateLiveData.observe(viewLifecycleOwner) { onPasteStateChanged(it) }
         Settings.FILE_NAME_ELLIPSIZE.observe(viewLifecycleOwner) { onFileNameEllipsizeChanged(it) }
+        FileJobProgressStore.progresses.observe(viewLifecycleOwner) {
+            onTransferProgressesChanged(it)
+        }
+        FileJobProgressStore.visibleDialog.observe(viewLifecycleOwner) {
+            onTransferProgressesChanged(FileJobProgressStore.progresses.value.orEmpty())
+        }
         viewModel.fileListLiveData.observe(viewLifecycleOwner) { onFileListChanged(it) }
         Settings.FILE_LIST_SHOW_HIDDEN_FILES.observe(viewLifecycleOwner) {
             onShowHiddenFilesChanged(it)
+        }
+    }
+
+    private fun onTransferProgressesChanged(progresses: List<FileJobProgress>) {
+        val progress = progresses.lastOrNull { !it.status.isFinished }
+        binding.transferCompactPanel.isVisible = progress != null &&
+            FileJobProgressStore.visibleDialog.value != progress.id
+        if (progress == null) {
+            return
+        }
+        val percent = progress.percent
+        val speed = Formatter.formatFileSize(requireContext(), progress.bytesPerSecond)
+        binding.transferCompactText.text = when {
+            percent != null && progress.bytesPerSecond > 0 -> getString(
+                R.string.file_job_progress_compact,
+                progress.title,
+                getString(R.string.file_job_progress_percent, percent),
+                speed
+            )
+            else -> progress.title
+        }
+        val indeterminate = percent == null && !progress.status.isFinished
+        binding.transferCompactProgress.isIndeterminate = indeterminate
+        if (!indeterminate) {
+            binding.transferCompactProgress.setProgressCompat(percent ?: 0, true)
+        }
+        binding.transferCompactPanel.setOnClickListener {
+            FileJobProgressActivity.show(progress.id, requireContext())
+        }
+    }
+
+    private fun alignNavigationButtonWithHome(toolbar: Toolbar) {
+        binding.homeButton.doOnLayout {
+            toolbar.doOnLayout toolbarLayout@{
+                val navigationButton = toolbar.children.filterIsInstance<ImageButton>()
+                    .firstOrNull { it.drawable === toolbar.navigationIcon }
+                    ?: return@toolbarLayout
+                navigationButton.translationX = 0f
+                val homeLocation = IntArray(2)
+                val navigationLocation = IntArray(2)
+                binding.homeButton.getLocationInWindow(homeLocation)
+                navigationButton.getLocationInWindow(navigationLocation)
+                val homeCenter = homeLocation[0] + binding.homeButton.width / 2f
+                val navigationCenter = navigationLocation[0] + navigationButton.width / 2f
+                navigationButton.translationX = homeCenter - navigationCenter
+            }
         }
     }
 
@@ -546,12 +602,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             android.R.id.home -> {
-                binding.drawerLayout?.openDrawer(GravityCompat.START)
-                if (binding.persistentDrawerLayout != null) {
-                    Settings.FILE_LIST_PERSISTENT_DRAWER_OPEN.putValue(
-                        !Settings.FILE_LIST_PERSISTENT_DRAWER_OPEN.valueCompat
-                    )
-                }
+                binding.drawerLayout.openDrawer(GravityCompat.START)
                 true
             }
             R.id.action_view_list -> {
@@ -666,23 +717,16 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         return false
     }
 
-    private fun onPersistentDrawerOpenChanged(open: Boolean) {
-        binding.persistentDrawerLayout?.let {
-            if (open) {
-                it.openDrawer(GravityCompat.START)
-            } else {
-                it.closeDrawer(GravityCompat.START)
-            }
-        }
-        updateSpanCount()
-    }
-
     private fun onScreenChanged(screen: FileListScreen) {
         val isFileList = screen == FileListScreen.FILES
         binding.fileContentLayout.isVisible = isFileList
         binding.homeLayout.isVisible = screen == FileListScreen.HOME
+        if (screen == FileListScreen.HOME) {
+            homeDashboardAdapter.refreshSubtitles()
+        }
         binding.breadcrumbBar.isVisible = isFileList
         binding.speedDialView.isVisible = isFileList
+        updateExitGuard()
         if (screen != FileListScreen.HOME && homeDashboardAdapter.isEditing) {
             setHomeRearranging(false)
         }
@@ -744,12 +788,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         layoutManager.spanCount = when (viewModel.viewType) {
             FileViewType.LIST -> 1
             FileViewType.GRID -> {
-                var widthDp = resources.configuration.screenWidthDp
-                val persistentDrawerLayout = binding.persistentDrawerLayout
-                if (persistentDrawerLayout != null &&
-                    persistentDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    widthDp -= getDimensionDp(R.dimen.navigation_max_width).roundToInt()
-                }
+                val widthDp = resources.configuration.screenWidthDp
                 (widthDp / 180).coerceAtLeast(2)
             }
         }
@@ -869,11 +908,18 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onPickOptionsChanged(pickOptions: PickOptions?) {
+        updateExitGuard()
         updateActivityTitle()
         updateSelectAllMenuItem()
         updateOverlayToolbar()
         updateBottomToolbar()
         adapter.pickOptions = pickOptions
+    }
+
+    private fun updateExitGuard() {
+        (requireActivity() as FileListActivity).setExitGuardEnabled(
+            viewModel.screen == FileListScreen.HOME && viewModel.pickOptions == null
+        )
     }
 
     private fun updateActivityTitle(
@@ -1074,13 +1120,20 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun cutFiles(files: FileItemSet) {
-        viewModel.addToPasteState(false, files)
+        // FM Plus Ultra modification (2026): A clipboard batch may accumulate only
+        // within one configured storage source. Switching source or operation replaces the batch.
+        viewModel.addToPasteState(false, files, getPasteSourceRoot())
         viewModel.selectFiles(files, false)
     }
 
     private fun copyFiles(files: FileItemSet) {
-        viewModel.addToPasteState(true, files)
+        viewModel.addToPasteState(true, files, getPasteSourceRoot())
         viewModel.selectFiles(files, false)
+    }
+
+    private fun getPasteSourceRoot(): Path {
+        val currentPath = viewModel.currentPath
+        return findRecentLocationSource(currentPath)?.path ?: currentPath.root ?: currentPath
     }
 
     private fun confirmDeleteFiles(files: FileItemSet) {
@@ -1574,7 +1627,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         get() = viewModel.screen == FileListScreen.HOME
 
     override fun showHome() {
-        if (args.intent.action == Intent.ACTION_VIEW) {
+        if (args.intent.action == Intent.ACTION_VIEW && !requireActivity().isTaskRoot) {
             requireActivity().finish()
         } else {
             viewModel.screen = FileListScreen.HOME
@@ -1597,7 +1650,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     override fun closeNavigationDrawer() {
-        binding.drawerLayout?.closeDrawer(GravityCompat.START)
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
     }
 
     private fun ensureStorageAccess() {
@@ -1796,8 +1849,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private class Binding private constructor(
         val root: View,
-        val drawerLayout: DrawerLayout? = null,
-        val persistentDrawerLayout: PersistentDrawerLayout? = null,
+        val drawerLayout: DrawerLayout,
         val persistentBarLayout: PersistentBarLayout,
         val appBarLayout: CoordinatorAppBarLayout,
         val toolbar: Toolbar,
@@ -1818,7 +1870,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val bottomBarLayout: ViewGroup,
         val bottomToolbar: Toolbar,
         val bottomCreateFileNameEdit: EditText,
-        val speedDialView: SpeedDialView
+        val speedDialView: SpeedDialView,
+        val transferCompactPanel: View,
+        val transferCompactText: TextView,
+        val transferCompactProgress:
+            com.google.android.material.progressindicator.LinearProgressIndicator
     ) {
         companion object {
             fun inflate(
@@ -1834,7 +1890,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                 val bottomBarBinding = FileListFragmentBottomBarIncludeBinding.bind(bindingRoot)
                 val speedDialBinding = FileListFragmentSpeedDialIncludeBinding.bind(bindingRoot)
                 return Binding(
-                    bindingRoot, includeBinding.drawerLayout, includeBinding.persistentDrawerLayout,
+                    bindingRoot, includeBinding.drawerLayout,
                     includeBinding.persistentBarLayout, appBarBinding.appBarLayout,
                     appBarBinding.toolbar, appBarBinding.overlayToolbar,
                     appBarBinding.breadcrumbBar, appBarBinding.homeButton,
@@ -1846,7 +1902,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     contentBinding.homeLayout, contentBinding.homeRecyclerView,
                     contentBinding.homeEditButton,
                     bottomBarBinding.bottomBarLayout, bottomBarBinding.bottomToolbar,
-                    bottomBarBinding.bottomCreateFileNameEdit, speedDialBinding.speedDialView
+                    bottomBarBinding.bottomCreateFileNameEdit, speedDialBinding.speedDialView,
+                    binding.transferCompactPanel, binding.transferCompactText,
+                    binding.transferCompactProgress
                 )
             }
         }

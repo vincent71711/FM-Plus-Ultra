@@ -7,7 +7,7 @@ package me.zhanghai.android.files.util
 
 import android.os.Handler
 
-// File Manager Plus Ultra modification (2026): Coalesce provider event bursts into one trailing
+// FM Plus Ultra modification (2026): Coalesce provider event bursts into one trailing
 // callback so an active remote transfer cannot continuously reload the visible directory.
 class DebouncedRunnable(
     private val handler: Handler,

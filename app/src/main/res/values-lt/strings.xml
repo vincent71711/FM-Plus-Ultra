@@ -9,7 +9,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ImpliedQuantity">
 
-    <string name="app_name">File Manager Plus Ultra</string>
+    <string name="app_name">FM Plus Ultra</string>
 
     <string name="close">Uždaryti</string>
     <string name="copy">Kopijuoti</string>
