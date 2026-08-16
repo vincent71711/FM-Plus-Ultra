@@ -2,21 +2,17 @@
 
 ## Repository
 
-- Workspace: `/srv/file-manager-app`
-- `origin`: `https://git.computersmarts.org/vincent/file-manager-app.git`
-  (the local display may use an SSH rewrite)
-- `upstream`: `https://github.com/zhanghai/MaterialFiles.git`
-- `github`: `https://github.com/vincent71711/FM-Plus-Ultra.git`
-  (public GitHub fork of `zhanghai/MaterialFiles`)
+- Public repository: [vincent71711/FM-Plus-Ultra](https://github.com/vincent71711/FM-Plus-Ultra)
+- Upstream repository: [zhanghai/MaterialFiles](https://github.com/zhanghai/MaterialFiles)
 - Upstream branch: `master`
-- Mod integration branch: `main`
+- Derivative integration/default branch: `main`
 - Working branches: `codex/<short-description>`
 - Baseline commit: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Baseline tag: `mod-baseline/2026-08-16-material-files-fc12500`
 
-The 2026-08-16 source checkpoint is authorized on private Forgejo and the public
-GitHub fork. Future pushing, release tagging, or artifact upload still requires
-explicit authorization.
+Private mirrors, workstation paths, device serials, credentials, and internal
+host names are intentionally omitted from public documentation. Contributors
+may add their own local remotes without changing the public repository layout.
 
 ## Toolchain and baseline validation
 
@@ -28,14 +24,20 @@ explicit authorization.
 - NDK: 28.1.13356709
 - Upstream application version: 1.7.4 (39)
 
-Exact validated command:
+Validated release command, assuming JDK 21 and the Android SDK are already
+installed:
 
 ```bash
-export JAVA_HOME=/home/vincent/.cache/codex-jdks/temurin-21
-export ANDROID_HOME=/home/vincent/Android/Sdk
+export JAVA_HOME=/path/to/jdk-21
+export ANDROID_HOME=/path/to/android-sdk
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
-./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain
+./gradlew assembleDebug lintVitalRelease assembleRelease \
+  --stacktrace --console=plain
 ```
+
+`assembleRelease` requires a local release signing configuration. Contributors
+who do not possess the project's private release key should run
+`assembleDebug lintVitalRelease` instead.
 
 Upstream's abbreviated `dav4jvm` JitPack SHA no longer resolves. The bootstrap
 expands it to the full SHA of the exact same commit. The first successful gate
@@ -49,31 +51,29 @@ The derivative identity is:
 
 - Visible and public source-fork name: `FM Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
-- Reserved release ID: `com.froslabs.filemanagerplusultra`
+- Release ID: `com.froslabs.filemanagerplusultra`
 - Mod version: `0.1.0-beta.1`; debug APK version: `0.1.0-beta.1-debug` (53). Android
   version codes begin at 40, one above the Material Files baseline (39), and
   must increase monotonically. Do not reset them independently of the inherited
   preference-migration thresholds.
 - Upstream code namespace: `me.zhanghai.android.files` (retained intentionally)
 
-The separate IDs coexist with the Play/F-Droid Material Files package. Vincent
-approved FM Plus Ultra as the public source-fork name on 2026-08-16; project
-materials must not imply affiliation with similarly named commercial products.
+The separate IDs allow release and development builds to coexist with each
+other and with the Play/F-Droid Material Files package. Project materials must
+not imply affiliation with similarly named commercial products.
 
 The debug APK and permanently signed `0.1.0-beta.1` release APK were installed
-and cold-launched successfully on the explicitly selected Fold7 on 2026-08-16.
-Always resolve and pass the current serial with `adb -s`; never write the
-wireless-ADB serial into repository files.
+and cold-launched successfully on a physical Galaxy Z Fold7. Device-specific
+validation must select an explicit ADB serial at runtime; serials must never be
+written into repository files.
 
 Signing properties, keystores, passwords, and backups remain outside Git. Do
 not use upstream signing configuration for derivative distribution.
 
-The permanent release key was generated outside Git on 2026-08-16. Its public
-certificate SHA-256 is
+The permanent release key is stored outside Git. Its public certificate SHA-256 is
 `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
-The ignored local signing properties and private keystore must never be committed;
-durable offline backup is required. Version `0.1.0-beta.1` (53) is the first APK
-authorized for public GitHub prerelease distribution.
+Ignored local signing properties and the private keystore must never be
+committed. Version `0.1.0-beta.1` (53) is the first public GitHub prerelease.
 
 ## Analytics and external services
 
@@ -91,8 +91,8 @@ licensed. Proprietary reference-app screenshots, recordings, icons, user file
 names, endpoints, and server information must not enter Git.
 
 The selected launcher source is
-`docs/branding/file-manager-plus-ultra-icon-source.png` (the approved version-2
-librarian concept). Regenerate density-specific launcher PNGs with:
+[the FM Plus Ultra librarian artwork](docs/branding/file-manager-plus-ultra-icon-source.png).
+Regenerate density-specific launcher PNGs with:
 
 ```bash
 ./scripts/generate_launcher_icons.py
@@ -115,5 +115,6 @@ configuration or runtime entry only.
 5. Resolve conflicts by preserving documented mod behavior and attribution.
 6. Run the complete validation gate and relevant physical-device regression
    tests.
-7. Update `docs/UPSTREAM_BASE.md`, `CHANGELOG.md`, `STATUS.md`, and handoff files.
+7. Update [the upstream baseline](docs/UPSTREAM_BASE.md),
+   [the changelog](CHANGELOG.md), [project status](STATUS.md), and handoff files.
 8. Do not push until explicitly authorized.

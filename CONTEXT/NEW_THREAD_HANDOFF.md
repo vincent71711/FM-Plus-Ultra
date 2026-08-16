@@ -65,8 +65,8 @@
   Its unchanged upload control reached 72.04 MB/s.
 - Version 47's later 2 GiB run reached 91.49 MB/s phone-to-SMB and 119.15 MB/s
   SMB-to-phone without a transfer error, ANR, or crash.
-- All known diagnostic captures were deleted after analysis: 17.87 GB from
-  TrueNAS and 6.60 GB from KohlerRunner1. The TrueNAS capture wrapper remains.
+- Temporary packet captures and diagnostics were deleted after analysis; none
+  are tracked in Git.
 - Selections across folders within one configured storage source accumulate;
   selecting from another source replaces the batch. Copy and Move batches clear
   when Paste is initiated. Physical validation showed two Internal storage folders

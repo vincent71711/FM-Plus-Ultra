@@ -59,8 +59,8 @@
   in about 4.87 seconds (about 64.4 MB/s); the raw 26.26 MB/s job average includes
   roughly seven seconds waiting before file data began. The unchanged upload
   control measured 72.04 MB/s, consistent with version 45's 71.34 MB/s result.
-- Capture cleanup: all known diagnostics were removed after analysis (17.87 GB
-  from TrueNAS and 6.60 GB from KohlerRunner1); the reusable capture wrapper remains.
+- Capture cleanup: temporary packet captures and diagnostics were removed after
+  analysis; no capture artifacts are tracked in Git.
 - Clipboard: selections within one configured storage source may accumulate;
   selecting from another source replaces the batch. Copy and Move batches clear
   when Paste is initiated. Physical validation accumulated two files from separate
