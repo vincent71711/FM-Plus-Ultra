@@ -1,6 +1,6 @@
 # FM Plus Ultra
 
-# I have no idea why this isn't a big thing in File Manager apps yet. For anyone who stumbles on this....you're welcome
+# I have no idea why this isn't a big thing in File Manager apps yet. For anyone who stumbles on this....you're welcome.
 
 FM Plus Ultra is an open-source Android file manager derivative based
 on the official Material Files project. Its goal is to retain Material Files'
