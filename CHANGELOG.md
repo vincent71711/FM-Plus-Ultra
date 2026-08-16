@@ -1,8 +1,8 @@
 # Changelog
 
-This file records File Manager App changes separately from inherited Material
-Files functionality. Upstream history remains available in Git and upstream
-release notes.
+This file records File Manager Plus Ultra changes separately from inherited
+Material Files functionality. Upstream history remains available in Git and
+upstream release notes.
 
 ## Unreleased — 0.1.0-dev
 
@@ -14,6 +14,15 @@ release notes.
   same commit's full SHA, restoring reproducible dependency resolution.
 - Added project governance, continuity, validation, infrastructure, licensing,
   upstream-integration, and decision documentation.
+- Removed Firebase Analytics, Crashlytics, Google Services build integration,
+  the upstream service configuration, and automatic crash initialization.
+- Established the private-use name File Manager Plus Ultra, debug application
+  ID `com.froslabs.filemanagerplusultra.debug`, reserved release ID
+  `com.froslabs.filemanagerplusultra`, and derivative version 0.1.0-dev.
+- Added prominent modified-version attribution and retained upstream author and
+  license access in the About screen.
+- Integrated the selected original librarian mascot artwork as reproducible
+  legacy, adaptive, and themed launcher resources.
 
 ### Inherited upstream baseline
 

@@ -41,27 +41,50 @@ Build output belongs under Gradle `build/` directories and must not be committed
 
 ## Application identity, signing, and installation
 
-Upstream currently builds `me.zhanghai.android.files` for debug and release.
-That conflicts with the Play/F-Droid app and cannot be installed over a store
-build signed by another key. Do not install until a unique derivative ID and
-debug suffix are selected.
+The derivative identity is:
+
+- Visible private-use name: `File Manager Plus Ultra`
+- Debug ID: `com.froslabs.filemanagerplusultra.debug`
+- Reserved release ID: `com.froslabs.filemanagerplusultra`
+- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (1)
+- Upstream code namespace: `me.zhanghai.android.files` (retained intentionally)
+
+The separate IDs coexist with the Play/F-Droid Material Files package. The
+private working name must be reconsidered before public distribution because it
+is close to an existing commercial product name.
+
+The debug APK was installed and cold-launched successfully on the explicitly
+selected Fold7 on 2026-08-16. Always resolve and pass the current serial with
+`adb -s`; never write the wireless-ADB serial into repository files.
 
 Signing properties, keystores, passwords, and backups remain outside Git. Do
 not use upstream signing configuration for derivative distribution.
 
 ## Analytics and external services
 
-Current upstream source compiles Firebase Analytics and Crashlytics and tracks
-an upstream `google-services.json`. These are upstream baseline facts, not
-approved derivative infrastructure. Remove them before derivative device tests.
-Do not replace them with another analytics, crash, cloud, or server service
-without explicit approval.
+Upstream compiled Firebase Analytics and Crashlytics and tracked an upstream
+`google-services.json`. Commit `48a19f19` removed those SDKs, build plugins,
+configuration, runtime initialization, and telemetry policy language from the
+derivative. Dependency inspection reports no Firebase in
+`debugRuntimeClasspath`. Do not replace them with another analytics, crash,
+cloud, or server service without explicit approval.
 
 ## Assets and fixtures
 
 Preserve upstream notices. New branding and icons must be original or properly
 licensed. Proprietary reference-app screenshots, recordings, icons, user file
 names, endpoints, and server information must not enter Git.
+
+The selected launcher source is
+`docs/branding/file-manager-plus-ultra-icon-source.png` (the approved version-2
+librarian concept). Regenerate density-specific launcher PNGs with:
+
+```bash
+./scripts/generate_launcher_icons.py
+```
+
+The script requires Pillow and removes only the near-black canvas border before
+resizing. Do not use rejected generative variants as launcher sources.
 
 SMB tests must use synthetic or redistributable files in an approved disposable
 share and unique directory. Keep credentials and endpoints in ignored local

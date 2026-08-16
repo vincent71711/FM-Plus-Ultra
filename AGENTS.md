@@ -4,7 +4,7 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 ## Product and upstream baseline
 
-- This is **File Manager App**, a history-preserving GPLv3 derivative of
+- This is **File Manager Plus Ultra**, a private-use, history-preserving GPLv3 derivative of
   [Material Files](https://github.com/zhanghai/MaterialFiles).
 - The immutable upstream baseline is commit
   `fc1250038496ebf4d4c139f62d16f0071f2c995a`, tagged locally as
@@ -13,6 +13,11 @@ These instructions apply throughout `/srv/file-manager-app`.
   work must use `codex/<short-description>` branches.
 - Preserve `LICENSE`, copyright headers, attribution, Git history, and
   third-party notices. Mark material modifications and relevant dates.
+- The private working identity is `File Manager Plus Ultra`; release ID is
+  `com.froslabs.filemanagerplusultra` and development builds use the `.debug`
+  suffix. The upstream Kotlin namespace remains unchanged intentionally.
+- The working name is not approved for public distribution because it is close
+  to an existing commercial product name. Revisit public branding first.
 - The primary physical target is a Samsung Galaxy Z Fold7 connected through
   wireless ADB. Select its explicit current serial; never assume the first ADB
   device.
@@ -35,11 +40,11 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 - Never push, force-push, publish, release, upload an APK/AAB, or contact
   external parties unless Vincent explicitly requests it.
-- Do not change final branding, release application ID, signing, update channel,
-  or distribution until `CONTEXT/REVISION_QUEUE.md` records a decision.
+- Do not change the recorded private branding/application IDs, or choose public
+  branding, signing, an update channel, or distribution without recording the
+  decision in `CONTEXT/REVISION_QUEUE.md`.
 - Do not add analytics, tracking, servers, cloud infrastructure, or automatic
-  uploads. Upstream Firebase components must be removed before a derivative APK
-  is installed or distributed.
+  uploads. Firebase was removed from the derivative and must not be restored.
 - Never clear app data, uninstall unrelated apps, change unrelated phone
   settings, access unrelated user files, root the phone, or unlock its
   bootloader.

@@ -1,13 +1,19 @@
-# File Manager App
+# File Manager Plus Ultra
 
-File Manager App is a private-use Android file manager derivative based on the
-official Material Files project. Its goal is to retain Material Files' capable
-local/NAS provider architecture while delivering fast SMB transfers, stable and
-detailed transfer monitoring, a visually structured file list, obvious file
-actions, and a dependable unfolded experience on Samsung foldables.
+File Manager Plus Ultra is a private-use Android file manager derivative based
+on the official Material Files project. Its goal is to retain Material Files'
+capable local/NAS provider architecture while delivering fast SMB transfers,
+stable and detailed transfer monitoring, a visually structured file list,
+obvious file actions, and a dependable unfolded experience on Samsung
+foldables.
+
+The current name is private working branding and is not a claim of affiliation
+with any similarly named commercial application. Choose distinct public
+branding before any distribution outside the private-use scope.
 
 The project preserves Material Files' Git history, GPLv3 license, copyright
-notices, and attribution. Material Files features described below are inherited
+notices, and attribution. The app's About screen identifies the upstream author
+and the modified version. Material Files features described below are inherited
 upstream functionality; mod-specific work is recorded in `CHANGELOG.md`.
 
 Development phases:

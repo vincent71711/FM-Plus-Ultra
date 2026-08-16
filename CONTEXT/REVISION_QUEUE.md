@@ -1,12 +1,23 @@
 # Revision queue
 
-## Decisions required before derivative installation
+## Decisions completed for private development
 
-- **Application ID:** choose a unique ID that coexists with
-  `me.zhanghai.android.files`. Recommended working direction:
-  `org.froslabs.filemanager` with a `.debug` suffix for debug builds.
-- **Visible name and branding:** working name is File Manager App. Final name,
-  icon, colors, and attribution-screen wording remain undecided.
+- **Application ID:** release ID `com.froslabs.filemanagerplusultra`; debug ID
+  `com.froslabs.filemanagerplusultra.debug`.
+- **Visible name:** File Manager Plus Ultra for private use.
+- **Launcher art:** selected version-2 librarian mascot with glasses, high red
+  ponytail, gold folder, and no headphones. The canonical source is
+  `docs/branding/file-manager-plus-ultra-icon-source.png`.
+- **Attribution:** About screen prominently identifies the Material Files base,
+  Hai Zhang, Vincent's modification, GPLv3, and the modification start date.
+- **Telemetry:** Firebase Analytics, Crashlytics, and Google Services are
+  removed and are not to be replaced.
+
+## Decisions still required
+
+- **Public branding:** the private working name is too close to an existing
+  commercial application name to assume for public distribution. Choose a
+  distinct name before sharing or publishing.
 - **Signing:** debug keystore for development; private release key and backup
   process must be decided before any release build is distributed.
 - **Updates:** no automatic update channel. Decide later whether updates are
@@ -14,10 +25,10 @@
 - **Distribution:** private use only at present. Any future recipient triggers a
   GPLv3 source-delivery review.
 
-## Required bootstrap work
+## Remaining bootstrap work
 
-- Remove Firebase Analytics, Crashlytics, Google Services build plugins, and the
-  tracked upstream service configuration before installing our derivative.
+- Complete user visual/permission review and folded/unfolded smoke tests for the
+  installed separated debug build.
 - Decide whether WebDAV remains in initial scope. It currently causes the
   `dav4jvm` build dependency but is not involved in SMB.
 - Add synthetic automated tests; upstream currently has no checked-in test

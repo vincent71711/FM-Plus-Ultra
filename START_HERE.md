@@ -4,7 +4,7 @@
 
 The active repository is the full official Material Files history at upstream
 commit `fc1250038496ebf4d4c139f62d16f0071f2c995a` on
-`codex/project-bootstrap`. The local baseline tag is
+`codex/private-derivative`. The local baseline tag is
 `mod-baseline/2026-08-16-material-files-fc12500`.
 
 Upstream's CI command initially failed because its abbreviated JitPack revision
@@ -12,21 +12,29 @@ for `dav4jvm` is unavailable. Expanding that coordinate to the exact full commit
 SHA restored the build without changing dependency content. The official gate
 then completed successfully: 94 tasks, no fatal lint findings.
 
-No project changes have been pushed or published, and the derivative APK has
-not been installed. The Play Store Material Files 1.7.4 app remains the user-test
-reference on the Fold7.
+Firebase Analytics, Crashlytics, their build plugins, runtime initializer, and
+the upstream Google Services configuration have been removed. The private
+working identity is File Manager Plus Ultra. Debug builds use
+`com.froslabs.filemanagerplusultra.debug`; the reserved release ID is
+`com.froslabs.filemanagerplusultra`. The selected version-2 librarian artwork is
+now the reproducible launcher icon source.
+
+The complete JDK 21 validation gate passes after these changes. The derivative
+debug APK was installed on the explicitly selected Fold7 and cold-launched
+successfully without a fatal exception. It coexists with the Play Store
+Material Files 1.7.4 package. No changes have been pushed or published.
 
 ## Immediate next work
 
-Before SMB implementation or device installation:
+Immediate next steps:
 
-1. Choose a development/release application ID that can coexist with upstream.
-2. Remove Firebase Analytics, Crashlytics, Google Services configuration, and
-   associated runtime/build plugins from the derivative.
+1. Have Vincent visually review the launcher identity and grant only the
+   permissions needed for the intended private test.
+2. Verify local browsing, folded/unfolded lifecycle behavior, and basic file
+   actions without touching unrelated user data.
 3. Create a synthetic, disposable SMB benchmark fixture and test path without
    storing endpoints or credentials in Git.
-4. Re-run the baseline gate and install the separated debug build.
-5. Measure local-to-SMB and SMB-to-local correctness and throughput before
+4. Measure local-to-SMB and SMB-to-local correctness and throughput before
    changing the transfer engine.
 
 See `CONTEXT/REVISION_QUEUE.md` for decisions and `INFRASTRUCTURE.md` for exact
