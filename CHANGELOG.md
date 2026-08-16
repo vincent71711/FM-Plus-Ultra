@@ -6,60 +6,79 @@ upstream release notes.
 
 ## 0.1.0-beta.1 — 2026-08-16
 
-### Mod changes
+### What changed in FM Plus Ultra
 
-- Added Home storage and category summaries, a configured Remote count, and an
-  Access from network shortcut to the existing FTP server.
-- Made transfer tracks, selected rows, and the pending copy/move bar use clear
-  neutral fills instead of ambiguous pink or fully filled progress coloring.
-- Fixed long-press on an already selected row so it deselects rather than
-  opening the item, and made the Home exit guard follow the displayed screen
-  across alternate Android launch and restore paths.
-- Added standard haptic feedback to both the pencil and confirmation states of
-  Home shortcut editing.
-- Replaced inherited blue accents with dark ruby for generic folders and active
-  controls while retaining neutral white/gray surfaces, including an exact-white
-  drawer and neutral popup menus unaffected by Material elevation tint.
-- Reworked Home shortcut editing: removed the nonfunctional drag-handle icon,
-  added a subtle edit-mode jiggle, and starts drag directly from the tile.
-- Added a top-level double-Back exit guard with a short prompt while preserving
-  normal single-Back behavior for nested navigation and transient UI.
-- Fixed the startup crash loop triggered by disabling Material 3 with a custom
-  color by removing a Material 3-only attribute from the shared breadcrumb layout.
-- Made SMB crypto provider selection explicitly Android-native-first per
-  primitive with portable fallback, and suppressed expected nested SMB watcher
-  interruption noise during navigation teardown.
-- Shortened the visible private-use name to FM Plus Ultra and reduced the
-  adaptive launcher foreground to 64% so more artwork survives Samsung's mask.
-- Accelerated SMB transfers with Android-native cryptography where available,
-  bounded asynchronous request pipelines, and a file-size-aware read boundary
-  that avoids launching a full speculative pipeline beyond each file's EOF.
-- Added a persistent Home dashboard with reorderable shortcuts, a single Remote
-  connection entry, saved recent subfolders in the drawer, and activity-backed
-  folder navigation with native Android Back transitions.
-- Added structured file-row dividers, a pinned black toolbar/gray breadcrumb
-  treatment, and corrected sort-menu contrast.
-- Prevented stale rows from the previous Home shortcut from flashing while a
-  different folder opens.
-- Corrected the derivative Android version code to preserve saved storage
-  connections across app updates and restarts.
-- Coalesced provider change-event bursts to keep file lists stable during
-  transfers.
-- Rebased the project foundation on the full official Material Files history at
-  commit `fc1250038496ebf4d4c139f62d16f0071f2c995a`.
-- Expanded the unavailable abbreviated `dav4jvm` JitPack revision to the exact
-  same commit's full SHA, restoring reproducible dependency resolution.
-- Added project governance, continuity, validation, infrastructure, licensing,
-  upstream-integration, and decision documentation.
-- Removed Firebase Analytics, Crashlytics, Google Services build integration,
-  the upstream service configuration, and automatic crash initialization.
-- Established the private-use visible name FM Plus Ultra, debug application
-  ID `com.froslabs.filemanagerplusultra.debug`, reserved release ID
-  `com.froslabs.filemanagerplusultra`, and derivative version 0.1.0-dev.
-- Added prominent modified-version attribution and retained upstream author and
-  license access in the About screen.
-- Integrated the selected original librarian mascot artwork as reproducible
-  legacy, adaptive, and themed launcher resources.
+#### Much faster SMB transfers
+
+- Reworked the security layer into a hybrid engine: Android's optimized native
+  security code is used whenever the phone supports the required SMB operation,
+  with the portable Java implementation retained as an automatic compatibility
+  fallback.
+- Replaced the tiny inherited copy blocks and mostly wait-for-each-piece transfer
+  flow with a bounded pipeline of larger requests. It stays fast without allowing
+  memory use or the number of outstanding requests to grow without control.
+- Made downloads aware of the actual file size so small files and the end of large
+  files do not launch unnecessary reads beyond the expected end.
+- Improved the observed inherited upload experience from about 1.1 MB/s to a
+  final 2 GiB checkpoint of 91.49 MB/s upload and 119.15 MB/s download in the
+  Fold7/TrueNAS test environment. See the README for comparison caveats.
+
+#### Transfers that are easy to follow
+
+- Added an in-app transfer panel showing progress, current speed, transferred and
+  remaining size, ETA, item count, and cancellation, while retaining the Android
+  notification.
+- Stopped SMB folder-watch events from repeatedly refreshing and flashing the
+  complete file list during an active transfer.
+- Corrected progress tracks and pending copy/move surfaces so completed and
+  remaining work are visually distinct.
+
+#### Faster everyday navigation
+
+- Added a real Home dashboard with reorderable shortcuts, storage/category size
+  summaries, a Remote connection count, and an Access from network shortcut to
+  the existing FTP server.
+- Added friendly recent-location shortcuts that remember the latest folder for
+  each local or remote storage without filling the list with duplicates.
+- Added native Back transitions from Home shortcuts and prevented stale rows from
+  one folder flashing while another folder opens.
+- Preserved multi-item copy/move selections within one source while preventing a
+  batch from accidentally mixing files from unrelated storage sources.
+
+#### Clearer visuals and foldable behavior
+
+- Added structured row dividers, a pinned black toolbar, clickable breadcrumbs,
+  clearer menus, and neutral selection surfaces with dark-ruby accents.
+- Added an original librarian launcher icon and adjusted its scale for Samsung's
+  launcher mask.
+- Fixed rotated-cover alignment, removed an unnecessary permanent unfolded
+  landscape sidebar, and repaired the related unfolded-landscape crash.
+- Made Home shortcut editing direct and visible with tile dragging, a subtle
+  jiggle, and haptic feedback on the edit and confirmation controls.
+
+#### Reliability and privacy
+
+- Added a guarded double-Back exit flow and fixed selection, long-press, saved-
+  connection migration, theme-toggle startup, and nested SMB watcher issues.
+- Removed Firebase Analytics, Crashlytics, Google Services integration, and
+  automatic crash reporting without replacing them with other telemetry.
+- Preserved Material Files' full Git history, GPLv3 license, author attribution,
+  copyright notices, and third-party disclosures.
+
+### Technical implementation notes
+
+- Increased the generic cross-provider copy block from 8 KiB to 256 KiB; the
+  first physical tests were 6.7x to 9.8x faster and round-trip byte-correct.
+- Selects AndroidOpenSSL/Conscrypt per cryptographic primitive, with SMBJ's
+  portable Bouncy Castle provider used when the native operation is unavailable.
+- Uses bounded 256 KiB SMB windows (up to eight reads and four writes) and a
+  file-size-aware final read boundary.
+- Coalesces provider change-event bursts and suppresses only expected watcher
+  cancellation noise during navigation teardown.
+- Uses official Material Files commit
+  `fc1250038496ebf4d4c139f62d16f0071f2c995a` as the immutable mod baseline and
+  expands the unavailable abbreviated `dav4jvm` revision to the same commit's
+  full SHA for reproducible builds.
 
 ### Inherited upstream baseline
 

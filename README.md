@@ -16,23 +16,34 @@ Public beta APKs and their checksums are available from
 The project preserves Material Files' Git history, GPLv3 license, copyright
 notices, and attribution. The app's About screen identifies the upstream author
 and the modified version. Material Files features described below are inherited
-upstream functionality; mod-specific work is recorded in `CHANGELOG.md`.
+upstream functionality.
+
+**[Read the FM Plus Ultra changelog](CHANGELOG.md)** for a plain-language list
+of the performance, navigation, transfer-monitoring, visual, and reliability
+changes made in this fork.
 
 ## Why SMB transfers are much faster
 
-Material Files already had a sound, compatible SMB implementation, but large
-transfers were spending too much time doing encryption work in portable Java
-code and waiting on one small piece of a file at a time. Modern phones contain
-highly optimized native security code that can do the same SMB signing and
-encryption work much more efficiently.
+Material Files already had a sound, compatible SMB implementation, but the
+inherited cross-provider upload path was observed at about **1.1 MB/s**. SMB has
+to sign and sometimes encrypt every block it transfers, and that work was being
+done through a portable Java security implementation. On the Fold7, the phone
+was spending more time processing security operations than moving data.
 
-FM Plus Ultra uses Android's native security provider whenever the required
-operation is available, while retaining the original portable implementation as
-a fallback for devices or older SMB servers that need it. It also transfers a
-small, controlled group of larger file pieces concurrently instead of waiting
-for every piece before requesting the next one. The group is deliberately
-bounded so the app does not consume excessive memory, overwhelm a server, or
-read needlessly beyond the end of smaller files.
+FM Plus Ultra introduces a **hybrid security engine**. For each SMB signing or
+encryption operation, it first asks Android for the phone's optimized native
+implementation (AndroidOpenSSL/Conscrypt). If that particular operation is not
+available—such as a legacy algorithm needed by an older server—it automatically
+falls back to the portable Java implementation. This is not an all-or-nothing
+mode: the app can use native acceleration where supported and compatibility
+fallbacks everywhere else during the same connection.
+
+The transfer path was improved alongside that hybrid engine. The original 8 KiB
+copy block was enlarged, and SMB reads and writes now use a small, controlled
+group of 256 KiB requests instead of repeatedly waiting for one tiny piece. The
+pipeline is deliberately bounded so it does not consume excessive memory or
+overwhelm the phone or server, and reads become file-size-aware near the end of
+small files.
 
 In the current Fold7 and TrueNAS test environment, a 2 GiB round trip reached
 about 91 MB/s uploading to SMB and 119 MB/s downloading from SMB. Actual speed
@@ -44,16 +55,25 @@ The mod also keeps directory refresh events from repeatedly redrawing the file
 list during a transfer and provides in-app progress, speed, remaining-size,
 ETA, and cancellation controls.
 
+![Measured SMB transfer checkpoints](docs/smb-performance-comparison.svg)
+
+The earliest 1.1 MB/s figure was the observed inherited cross-provider upload,
+not the same controlled 2 GiB test used for later tuning. It is included to show
+the starting user experience rather than to claim a laboratory-perfect 83x
+comparison. Within the repeatable 2 GiB tests, the final hybrid pipeline was
+about 3.2x faster for uploads and 3.5x faster for downloads than the portable
+Java checkpoint.
+
 Development phases:
 
-1. Reproducible upstream bootstrap and private application identity.
+1. Reproducible upstream bootstrap and derivative application identity.
 2. Synthetic SMB correctness and performance baseline.
 3. Transfer-engine, refresh-stability, and transfer-monitoring improvements.
 4. Structured visual presentation and direct file-operation workflows.
-5. Folded/unfolded regression testing and private release hardening.
+5. Folded/unfolded regression testing and release hardening.
 
-See `START_HERE.md`, `INFRASTRUCTURE.md`, and `docs/UPSTREAM_BASE.md` for current
-status and procedures.
+See [START_HERE.md](START_HERE.md), [INFRASTRUCTURE.md](INFRASTRUCTURE.md), and
+[docs/UPSTREAM_BASE.md](docs/UPSTREAM_BASE.md) for current status and procedures.
 
 ---
 

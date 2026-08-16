@@ -68,6 +68,8 @@
 
 ## Deferred
 
+- Add current folded, unfolded, Home, SMB, and transfer-progress screenshots to
+  the public GitHub README during the next presentation/documentation phase.
 - Optional longer transfer to characterize thermal behavior beyond the successful
   version 45 2 GiB baseline; not required for the next product work.
 - Pause/resume support, if the underlying provider can make it reliable.
