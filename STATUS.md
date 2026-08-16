@@ -11,9 +11,11 @@
 - Tests: no upstream test source sets found; lint vital and debug assembly pass
 - Device install: debug APK installed on the explicitly selected Fold7;
   successful cold launch, live process, and no fatal exception
+- Fold lifecycle: cover (1080x2520) to inner (1968x2184) to cover passed while
+  retaining the same resumed process/activity with no fatal exception
 - Coexistence: Play Store Material Files remains installed under its upstream ID
 - Push/publication: none
 - Blockers before SMB baseline: user permission/visual review and an approved
   disposable synthetic share path
-- Next work: local/fold-state smoke tests, then a private synthetic SMB
-  correctness and performance baseline
+- Next work: user visual review and synthetic local file-action smoke tests,
+  then a private synthetic SMB correctness and performance baseline

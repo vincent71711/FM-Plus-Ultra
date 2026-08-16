@@ -22,7 +22,9 @@ now the reproducible launcher icon source.
 The complete JDK 21 validation gate passes after these changes. The derivative
 debug APK was installed on the explicitly selected Fold7 and cold-launched
 successfully without a fatal exception. It coexists with the Play Store
-Material Files 1.7.4 package. No changes have been pushed or published.
+Material Files 1.7.4 package. A live cover-to-inner-to-cover transition passed:
+the same process and activity remained resumed at 1080x2520 and 1968x2184 with
+no fatal exception. No changes have been pushed or published.
 
 ## Immediate next work
 
@@ -30,8 +32,8 @@ Immediate next steps:
 
 1. Have Vincent visually review the launcher identity and grant only the
    permissions needed for the intended private test.
-2. Verify local browsing, folded/unfolded lifecycle behavior, and basic file
-   actions without touching unrelated user data.
+2. Verify local browsing and basic file actions with a unique synthetic fixture
+   without touching unrelated user data.
 3. Create a synthetic, disposable SMB benchmark fixture and test path without
    storing endpoints or credentials in Git.
 4. Measure local-to-SMB and SMB-to-local correctness and throughput before

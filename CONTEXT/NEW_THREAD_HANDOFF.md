@@ -25,6 +25,8 @@
 - The debug APK is installed on the explicitly selected Fold7. It cold-launched
   successfully, remained alive without a fatal exception, and coexists with the
   Play Store Material Files package. Do not record the wireless-ADB serial.
+- A live cover (1080x2520) to inner (1968x2184) to cover transition retained the
+  same resumed process/activity and produced no fatal exception.
 - Observed upstream defects on the Fold7: cross-provider local-to-SMB copy about
   1.1 MB/s; 8 KiB generic copy buffer; SMB modification events cause a complete
   visible directory reload every second; progress notification updates every
@@ -32,6 +34,6 @@
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: obtain the user's visual/permission review, run local and fold-state
-  smoke tests, establish the synthetic SMB benchmark baseline, then implement
-  the reviewed transfer phase.
+- Next: obtain the user's visual review, run synthetic local file-action smoke
+  tests, establish the SMB benchmark baseline, then implement the reviewed
+  transfer phase.
