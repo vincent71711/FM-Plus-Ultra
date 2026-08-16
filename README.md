@@ -1,5 +1,7 @@
 # FM Plus Ultra
 
+# I have no idea why this isn't a big thing in File Manager apps yet. For anyone who stumbles on this....you're welcome
+
 FM Plus Ultra is an open-source Android file manager derivative based
 on the official Material Files project. Its goal is to retain Material Files'
 capable local/NAS provider architecture while delivering fast SMB transfers,
@@ -62,10 +64,11 @@ ETA, and cancellation controls.
 
 The earliest 1.1 MB/s figure was the observed inherited cross-provider upload,
 not the same controlled 2 GiB test used for later tuning. The download speed was 
-simalarly slow.It is included to show the starting user experience rather than to 
-claim a laboratory-perfect 83x comparison. Within the repeatable 2 GiB tests, the 
-final hybrid pipeline wasabout 3.2x faster for uploads and 3.5x faster for downloads 
-than the portable Java checkpoint.
+similarly slow. It is included to show the starting user experience rather than to 
+claim a laboratory-perfect 83x comparison, although I think this is a fair estimation. 
+The starting SMB performance was very poor for a file manager app. Within the repeatable
+2 GiB tests, the final hybrid pipeline was about 3.2x faster for uploads and 3.5x 
+faster for downloads than the portable Java checkpoint.
 
 Development phases:
 
