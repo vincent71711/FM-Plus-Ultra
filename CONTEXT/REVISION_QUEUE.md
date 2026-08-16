@@ -27,8 +27,8 @@
 
 ## Remaining bootstrap work
 
-- Complete user visual/permission review and folded/unfolded smoke tests for the
-  installed separated debug build.
+- Complete user visual review and the remaining synthetic local move test for
+  the installed separated debug build.
 - Decide whether WebDAV remains in initial scope. It currently causes the
   `dav4jvm` build dependency but is not involved in SMB.
 - Add synthetic automated tests; upstream currently has no checked-in test
@@ -44,6 +44,8 @@
 - Add a transfer state model supporting operations list, details, speed, ETA,
   remaining bytes, item count, cancel, completion, and failure.
 - Keep the Android notification stable and substantially less frequent.
+- Pin the file-list toolbar and breadcrumbs by removing the inherited
+  `scroll|enterAlways` collapse behavior; list scrolling must not hide controls.
 - Add structured row dividers and direct Copy/Move/Rename/Delete actions after
   transfer correctness is established.
 

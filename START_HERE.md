@@ -24,7 +24,13 @@ debug APK was installed on the explicitly selected Fold7 and cold-launched
 successfully without a fatal exception. It coexists with the Play Store
 Material Files 1.7.4 package. A live cover-to-inner-to-cover transition passed:
 the same process and activity remained resumed at 1080x2520 and 1968x2184 with
-no fatal exception. No changes have been pushed or published.
+no fatal exception. Synthetic rename and copy-then-delete actions were verified;
+the move result still needs a controlled retest because both source and
+destination remain. No changes have been pushed or published.
+
+The file-list app bar currently uses inherited `scroll|enterAlways` flags, which
+allow upward list scrolling to hide all top controls. The required derivative
+behavior is a pinned toolbar and breadcrumb area.
 
 ## Immediate next work
 

@@ -33,6 +33,9 @@ These instructions apply throughout `/srv/file-manager-app`.
 - The default list presentation must have strong row structure and dividers,
   clear metadata columns, familiar folder/file visuals, and direct selection
   actions. Use original assets; do not copy proprietary application assets.
+- The file-list toolbar, navigation controls, selection actions, and breadcrumb
+  area must remain pinned and reachable while the file list scrolls. List
+  scrolling must never collapse all top controls offscreen.
 - Transfers require an in-app operations overview, an expandable detailed view,
   and a stable Android notification.
 
