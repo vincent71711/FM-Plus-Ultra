@@ -78,7 +78,36 @@ Development phases:
 See [START_HERE.md](START_HERE.md), [INFRASTRUCTURE.md](INFRASTRUCTURE.md), and
 [docs/UPSTREAM_BASE.md](docs/UPSTREAM_BASE.md) for current status and procedures.
 
+All that and there's still no Ads...
+
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Material Files (upstream documentation)
 
