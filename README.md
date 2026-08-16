@@ -24,6 +24,11 @@ changes made in this fork.
 
 ## Why SMB transfers are much faster
 
+**From an observed 1.1 MB/s inherited upload path to 91.5 MB/s upload and
+119.2 MB/s download at the final tuned checkpoint:**
+
+![Measured SMB transfer checkpoints](docs/smb-performance-comparison.svg)
+
 Material Files already had a sound, compatible SMB implementation, but the
 inherited cross-provider upload path was observed at about **1.1 MB/s**. SMB has
 to sign and sometimes encrypt every block it transfers, and that work was being
@@ -54,8 +59,6 @@ back automatically rather than sacrificing compatibility.
 The mod also keeps directory refresh events from repeatedly redrawing the file
 list during a transfer and provides in-app progress, speed, remaining-size,
 ETA, and cancellation controls.
-
-![Measured SMB transfer checkpoints](docs/smb-performance-comparison.svg)
 
 The earliest 1.1 MB/s figure was the observed inherited cross-provider upload,
 not the same controlled 2 GiB test used for later tuning. It is included to show
