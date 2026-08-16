@@ -1,16 +1,20 @@
 # Status
 
 - Phase: competitive SMB baseline achieved; continue product validation
-- Branch: `codex/private-derivative`
+- Branch: `codex/release-0.1.0-beta.1`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Identity: FM Plus Ultra; debug package
   `com.froslabs.filemanagerplusultra.debug`
 - Telemetry: Firebase/Crashlytics/Google Services removed
 - Branding: approved version-2 librarian source integrated into launcher assets;
   adaptive foreground scaled to 64% so more of the folder is visible
-- Build: version 52 passes the documented JDK 21 `assembleDebug lintVitalRelease` gate
-- Tests: no upstream test source sets found; lint vital and debug assembly pass
-- Device install: version 52 is installed and running on the explicitly selected Fold7
+- Build: version 53 passes the documented JDK 21
+  `assembleDebug lintVitalRelease assembleRelease` gate
+- Tests: no upstream test source sets found; lint vital, debug assembly, and
+  signed release assembly pass
+- Device install: version 52 debug and permanently signed version 53 release are
+  installed on the explicitly selected Fold7; the release passed a cold-launch
+  check without a fatal exception or ANR
 - Fold lifecycle: cover (1080x2520) to inner (1968x2184) to cover passed while
   retaining the same resumed process/activity with no fatal exception
 - Synthetic local actions: rename and copy-then-delete results verified; move
@@ -25,14 +29,15 @@
 - SMB transfer: increasing the generic copy buffer from 8 KiB to 256 KiB was
   physically validated at 6.7x to 9.8x faster upload with a byte-correct round
   trip.
-- Persistence repair: derivative Android version code corrected from 1 and is now 52;
+- Persistence repair: derivative Android version code corrected from 1 and is now 53;
   version 1 retriggered inherited migrations that discarded saved SMB entries.
   A saved SMB entry now survives restart.
 - Filename preference migration: version 41 converts the inherited saved Middle
   ellipsis default to End; the installed preference was verified as value `2`.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
 - Push/publication: validated source checkpoint pushed to private Forgejo and
-  the public GitHub fork `vincent71711/FM-Plus-Ultra`. No APK release was published.
+  the public GitHub fork `vincent71711/FM-Plus-Ultra`; the first public APK is
+  version `0.1.0-beta.1` (53), published as a GitHub prerelease
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
 - SMB packet findings: File Manager Plus held its captured 4 GiB upload near
@@ -79,10 +84,10 @@
 - SMB robustness: Android-native Conscrypt/OpenSSL providers are tried per
   primitive before portable Bouncy Castle fallback. Expected nested watcher
   interruptions during remote-folder exit no longer print misleading stacks.
-- APK handoff: the debug APK and a minified `BuildConfig.DEBUG=false` release
-  test build were copied to the Fold7 Downloads folder. The release test build
-  is signed with the workstation's Android debug certificate only; it is not a
-  permanent or publishable release artifact and was not installed.
+- Release signing: `0.1.0-beta.1` is minified, `BuildConfig.DEBUG=false`, and
+  signed with the permanent 4096-bit RSA release certificate whose SHA-256 is
+  `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
+  The private key and credentials remain outside Git.
 - Version 52 UI: Home displays storage used/total plus local category size and
   file count, Remote displays its configured-connection count, and Access from
   network opens the existing FTP server. Progress tracks, selection fills, and

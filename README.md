@@ -10,6 +10,9 @@ foldables.
 FM Plus Ultra is independent software and is not affiliated with similarly
 named commercial applications.
 
+Public beta APKs and their checksums are available from
+[GitHub Releases](https://github.com/vincent71711/FM-Plus-Ultra/releases).
+
 The project preserves Material Files' Git history, GPLv3 license, copyright
 notices, and attribution. The app's About screen identifies the upstream author
 and the modified version. Material Files features described below are inherited

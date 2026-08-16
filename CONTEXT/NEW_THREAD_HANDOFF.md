@@ -6,14 +6,13 @@
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
-- Work branch: `codex/private-derivative`; validated checkpoint is on Forgejo
+- Work branch: `codex/release-0.1.0-beta.1`; validated checkpoint is on Forgejo
   `main` and the public GitHub fork `vincent71711/FM-Plus-Ultra`.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
-- Validated gate: JDK 21 plus
-  `./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain`;
-  successful with 94 tasks.
-- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (52). The derivative
+- Validated release gate: JDK 21 plus
+  `./gradlew assembleDebug lintVitalRelease assembleRelease --stacktrace --console=plain`.
+- Upstream app version: 1.7.4 (39); mod version: 0.1.0-beta.1 (53). The derivative
   Android version code must remain above inherited migration thresholds and
   increase monotonically; using 1 caused legacy storage migration to discard
   saved SMB entries on restart.
@@ -27,9 +26,12 @@
   adaptive foreground is currently scaled to 64% for additional breathing room.
 - Vincent approved FM Plus Ultra as the public source-fork name on 2026-08-16.
   The project must not imply affiliation with similarly named commercial apps.
-  Public APK distribution and release signing remain undecided.
-- Version 52 is installed and running on the explicitly selected Fold7 and
-  coexists with Play Store Material Files. Do not record the wireless-ADB serial.
+  Public prerelease `v0.1.0-beta.1` and permanent signing are approved; store
+  distribution and non-beta release channels remain undecided.
+- Version 52 debug and permanently signed version 53 release are installed and
+  running on the explicitly selected Fold7. The release passed a cold-launch
+  crash/ANR check and coexists with Play Store Material Files. Do not record the
+  wireless-ADB serial.
 - A live cover (1080x2520) to inner (1968x2184) to cover transition retained the
   same resumed process/activity and produced no fatal exception.
 - Synthetic local rename and copy-then-delete actions are verified. The move
@@ -97,7 +99,8 @@
   an Access from network shortcut to FTP Server, neutral progress/selection/
   clipboard surfaces, selected-row long-press deselection, and haptic feedback
   on both states of the Home edit button.
-- Version-52 debug and minified release-test APKs were copied to the Fold7 Downloads
-  folder. The release-test package uses the reserved release ID but is signed only
-  with the local Android debug certificate; it was not installed or published.
+- Version `0.1.0-beta.1` (53) is the first public minified release APK. Its
+  permanent certificate SHA-256 is
+  `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`;
+  the private signing material remains outside Git and requires durable backup.
 - Next: user final inspection, then continue correctness/UI review.

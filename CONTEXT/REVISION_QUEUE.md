@@ -1,6 +1,6 @@
 # Revision queue
 
-## Decisions completed for private development
+## Decisions completed
 
 - **Application ID:** release ID `com.froslabs.filemanagerplusultra`; debug ID
   `com.froslabs.filemanagerplusultra.debug`.
@@ -25,16 +25,21 @@
   signed with the workstation's standard Android debug certificate solely so the
   private test artifact is installable. It is not the permanent release-signing
   decision and cannot be upgraded in place to an APK signed by a future release key.
+- **Permanent release signing:** Vincent generated the permanent release key on
+  2026-08-16. The public certificate SHA-256 is
+  `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
+  Private material is ignored and outside Git; durable backup is still required.
+- **First public binary:** GitHub prerelease `v0.1.0-beta.1`, version code 53,
+  is approved with the signed APK, checksum, tagged corresponding source, GPLv3
+  license, notices, and attribution.
 
 ## Decisions still required
 
-- **Signing:** debug keystore for development; private release key and backup
-  process must be decided before any release build is distributed.
-- **Updates:** no automatic update channel. Decide later whether updates are
-  manual APK installs or a private repository.
-- **Distribution:** public source publication as a GPLv3 GitHub fork is approved.
-  APK/AAB publication remains unapproved and requires a signing and GPLv3
-  corresponding-source delivery decision.
+- **Updates:** no automatic update channel. Decide later whether updates remain
+  manual GitHub APK installs or gain an in-app update workflow.
+- **Distribution:** public source and the first GitHub beta APK are approved.
+  Store distribution, AAB publication, and non-beta release channels remain
+  undecided.
 
 ## Remaining bootstrap work
 

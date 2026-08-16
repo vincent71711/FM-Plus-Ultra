@@ -4,7 +4,7 @@ This file records FM Plus Ultra changes separately from inherited
 Material Files functionality. Upstream history remains available in Git and
 upstream release notes.
 
-## Unreleased — 0.1.0-dev
+## 0.1.0-beta.1 — 2026-08-16
 
 ### Mod changes
 

@@ -19,16 +19,17 @@ working identity is FM Plus Ultra. Debug builds use
 `com.froslabs.filemanagerplusultra`. The selected version-2 librarian artwork is
 now the reproducible launcher icon source.
 
-The complete JDK 21 validation gate passes after these changes. Version 52 is
-installed on the explicitly selected Fold7 and
-cold-launched successfully without a fatal exception. It coexists with the Play
+The complete JDK 21 validation gate passes after these changes. Version 52
+debug and the permanently signed `0.1.0-beta.1` release (version code 53) are
+installed on the explicitly selected Fold7. The release cold-launched without
+a fatal exception or ANR and coexists with the Play
 Store Material Files 1.7.4 package. A live cover-to-inner-to-cover transition passed:
 the same process and activity remained resumed at 1080x2520 and 1968x2184 with
 no fatal exception. Synthetic rename and copy-then-delete actions were verified;
 the move result still needs a controlled retest because both source and
 destination remain. The validated source checkpoint is pushed to private
-Forgejo and the public GitHub fork `vincent71711/FM-Plus-Ultra`. No APK release
-has been published.
+Forgejo and the public GitHub fork `vincent71711/FM-Plus-Ultra`. The first public
+APK is published as GitHub prerelease `v0.1.0-beta.1`.
 
 The installed UI checkpoint has a pinned black toolbar, gray clickable
 breadcrumbs, divided file rows, an editable Home dashboard, a single Remote
@@ -38,7 +39,7 @@ top-level roots such as `/` and `/storage/emulated/0` are excluded. Home
 shortcuts use child activities so Android provides the same Back transition as
 Remote and each folder starts with a fresh list instead of stale rows.
 
-The current uncommitted test build also moves dividers with row animations,
+The installed build also moves dividers with row animations,
 uses clicked-item identity to prevent two same-path drawer rows highlighting,
 and truncates long filenames at the end. These need quick physical confirmation.
 
@@ -101,10 +102,10 @@ interruptions are suppressed without hiding real watcher failures.
 The launcher activity also requires a second Back within 2.5 seconds to exit;
 the first gesture shows a short prompt while nested navigation remains unchanged.
 
-The Fold7 Downloads folder contains clearly named version-52 debug and release-test
-APKs. The latter is a real minified release variant with diagnostic logging compiled
-out, but it is temporarily signed by the standard Android debug certificate and was
-not installed. A permanent private release key remains undecided.
+The first public APK is `0.1.0-beta.1` (53), a minified release with diagnostic
+logging compiled out and a permanent release signature. Its certificate SHA-256
+is `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
+The private signing material remains outside Git and needs durable offline backup.
 
 All known packet-capture artifacts were removed after analysis: 17.87 GB from
 TrueNAS and 6.60 GB from KohlerRunner1. The reusable TrueNAS capture wrapper was
@@ -124,7 +125,7 @@ feedback to the Home edit pencil/check control. The exit-confirmation toast now
 cancels on confirmed exit or activity destruction instead of lingering over the
 launcher; this was physically confirmed on the Fold7.
 
-The derivative Android version code is 52. Version 41 migrated an inherited
+The derivative Android version code is 53. Version 41 migrated an inherited
 saved Middle filename ellipsis to End without clearing other preferences.
 Do not reset it: version code 1 caused inherited legacy migrations to rebuild
 the storage list and discard saved SMB entries after restart.

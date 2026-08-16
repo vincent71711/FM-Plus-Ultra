@@ -50,7 +50,7 @@ The derivative identity is:
 - Visible and public source-fork name: `FM Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
 - Reserved release ID: `com.froslabs.filemanagerplusultra`
-- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (52). Android
+- Mod version: `0.1.0-beta.1`; debug APK version: `0.1.0-beta.1-debug` (53). Android
   version codes begin at 40, one above the Material Files baseline (39), and
   must increase monotonically. Do not reset them independently of the inherited
   preference-migration thresholds.
@@ -60,18 +60,20 @@ The separate IDs coexist with the Play/F-Droid Material Files package. Vincent
 approved FM Plus Ultra as the public source-fork name on 2026-08-16; project
 materials must not imply affiliation with similarly named commercial products.
 
-The debug APK was installed and cold-launched successfully on the explicitly
-selected Fold7 on 2026-08-16. Always resolve and pass the current serial with
-`adb -s`; never write the wireless-ADB serial into repository files.
+The debug APK and permanently signed `0.1.0-beta.1` release APK were installed
+and cold-launched successfully on the explicitly selected Fold7 on 2026-08-16.
+Always resolve and pass the current serial with `adb -s`; never write the
+wireless-ADB serial into repository files.
 
 Signing properties, keystores, passwords, and backups remain outside Git. Do
 not use upstream signing configuration for derivative distribution.
 
-For private inspection on 2026-08-16, a version-52 minified release variant was
-temporarily signed with the workstation's standard Android debug certificate and
-copied to the Fold7 Downloads folder without installation. This is not release
-signing: a future permanent key will require uninstalling that test-signed release
-package before installation. No signing property or keystore was added to Git.
+The permanent release key was generated outside Git on 2026-08-16. Its public
+certificate SHA-256 is
+`b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
+The ignored local signing properties and private keystore must never be committed;
+durable offline backup is required. Version `0.1.0-beta.1` (53) is the first APK
+authorized for public GitHub prerelease distribution.
 
 ## Analytics and external services
 
