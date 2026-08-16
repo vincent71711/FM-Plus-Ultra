@@ -3,10 +3,11 @@
 <!--
   ~ Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
   ~ All Rights Reserved.
+  ~ Modified 2026 by Vincent for File Manager Plus Ultra.
   -->
 
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background android:drawable="@color/color_primary_light" />
+    <background android:drawable="@color/launcher_icon_background" />
     <foreground android:drawable="@mipmap/launcher_icon_foreground" />
     <monochrome android:drawable="@drawable/launcher_icon_monochrome" />
 </adaptive-icon>

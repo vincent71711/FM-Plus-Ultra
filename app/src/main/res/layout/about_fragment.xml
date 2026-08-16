@@ -83,6 +83,16 @@
                                 android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
                         </LinearLayout>
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingStart="?android:listPreferredItemPaddingStart"
+                            android:paddingEnd="?android:listPreferredItemPaddingEnd"
+                            android:paddingTop="8dp"
+                            android:paddingBottom="8dp"
+                            android:text="@string/about_derivative_notice"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
                         <me.zhanghai.android.foregroundcompat.ForegroundLinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

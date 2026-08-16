@@ -8,23 +8,24 @@ apply plugin: 'kotlin-parcelize'
 
 apply from: '../signing.gradle'
 
+def modApplicationId = 'com.froslabs.filemanagerplusultra'
+def modVersionCode = 1
+def modVersionName = '0.1.0-dev'
+
 android {
     namespace 'me.zhanghai.android.files'
     buildToolsVersion = '37.0.0'
     compileSdk = 36
     ndkVersion '28.1.13356709'
     defaultConfig {
-        applicationId 'me.zhanghai.android.files'
+        applicationId modApplicationId
         minSdk 23
         // Not supporting foreground service timeout yet.
         //noinspection OldTargetApi
         targetSdk 34
-        versionCode 39
-        versionName '1.7.4'
-        resValue 'string', 'app_version', versionName + ' (' + versionCode + ')'
+        versionCode modVersionCode
+        versionName modVersionName
         buildConfigField 'String', 'FILE_PROVIDIER_AUTHORITY', 'APPLICATION_ID + ".file_provider"'
-        resValue 'string', 'app_provider_authority', applicationId + '.app_provider'
-        resValue 'string', 'file_provider_authority', applicationId + '.file_provider'
         externalNativeBuild {
             cmake {
                 arguments '-DANDROID_STL=none'
@@ -56,11 +57,19 @@ android {
         warning 'InvalidPackage', 'MissingTranslation'
     }
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+            resValue 'string', 'app_package_name', modApplicationId + '.debug'
+            resValue 'string', 'app_version', modVersionName + '-debug (' + modVersionCode + ')'
+        }
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+            resValue 'string', 'app_package_name', modApplicationId
+            resValue 'string', 'app_version', modVersionName + ' (' + modVersionCode + ')'
         }
     }
     packagingOptions {

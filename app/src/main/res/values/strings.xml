@@ -7,7 +7,7 @@
 
 <resources>
 
-    <string name="app_name">Material Files</string>
+    <string name="app_name">File Manager Plus Ultra</string>
 
     <string name="close">Close</string>
     <string name="copy">Copy</string>
@@ -790,7 +790,8 @@
 
     <string name="about_title">About</string>
     <string name="about_version_title">Version</string>
-    <string name="about_github_title">View on GitHub</string>
+    <string name="about_derivative_notice" translatable="false">Private GPLv3 derivative of Material Files by Hai Zhang. Modified by Vincent beginning 2026-08-16.</string>
+    <string name="about_github_title">View derivative source</string>
     <string name="about_licenses_title">Licenses</string>
     <string name="about_privacy_policy_title">Privacy policy</string>
     <string name="about_author_title">Author</string>
