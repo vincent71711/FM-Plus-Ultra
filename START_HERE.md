@@ -44,12 +44,9 @@ the storage list and discard saved SMB entries after restart.
 
 Immediate next steps:
 
-1. Commit the SMB buffer optimization and Android version-code repair.
-2. Coalesce SMB size/last-write event bursts so active uploads do not trigger a
-   visible complete directory reload every second; validate separately.
-3. Reduce and stabilize notification updates without coupling notification
+1. Reduce and stabilize notification updates without coupling notification
    cadence to the future in-app transfer-state model.
-4. Retest the remaining synthetic local move case, then pin the toolbar and
+2. Retest the remaining synthetic local move case, then pin the toolbar and
    begin the reviewed transfer-panel work.
 
 See `CONTEXT/REVISION_QUEUE.md` for decisions and `INFRASTRUCTURE.md` for exact

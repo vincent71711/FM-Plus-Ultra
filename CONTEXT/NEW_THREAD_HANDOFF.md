@@ -41,11 +41,10 @@
 - The first transfer repair changes the generic copy buffer from 8 KiB to
   256 KiB; physical tests showed 6.7x to 9.8x faster upload and a byte-correct
   round trip.
-- Remaining transfer defects: SMB modification events cause a complete visible
-  directory reload about every second; progress notification updates about
-  every 0.6 seconds; there is no useful in-app transfer center.
+- Provider event bursts now use trailing-edge coalescing; the installed build
+  stayed visually stable during an SMB upload. Progress notifications still
+  update about every 0.6 seconds, and there is no useful in-app transfer center.
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: commit the buffer/version repair, then coalesce SMB change-event
-  refreshes.
+- Next: reduce notification churn, then implement the in-app transfer model.

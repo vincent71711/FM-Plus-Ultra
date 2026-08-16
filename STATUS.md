@@ -27,6 +27,6 @@
   A saved SMB entry now survives restart.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
 - Push/publication: none
-- Remaining transfer defect: notification updates and SMB change events still
-  cause frequent system work and visible full-directory refreshes.
-- Next work: commit the buffer/version repair, then coalesce SMB refresh events.
+- Refresh stability: provider event bursts are coalesced; the installed build
+  remained visually stable during an SMB upload.
+- Next work: reduce notification churn, then build the in-app transfer model.

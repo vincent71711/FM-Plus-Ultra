@@ -7,11 +7,11 @@ package me.zhanghai.android.files.provider.common
 
 import android.os.Handler
 import android.os.HandlerThread
-import me.zhanghai.android.files.util.ThrottledRunnable
+import me.zhanghai.android.files.util.DebouncedRunnable
 import java.io.IOException
 
 abstract class AbstractPathObservable(private val intervalMillis: Long) : PathObservable {
-    private val observers = mutableMapOf<() -> Unit, ThrottledRunnable>()
+    private val observers = mutableMapOf<() -> Unit, DebouncedRunnable>()
 
     private var isClosed = false
 
@@ -20,7 +20,7 @@ abstract class AbstractPathObservable(private val intervalMillis: Long) : PathOb
     override fun addObserver(observer: () -> Unit) {
         synchronized(lock) {
             ensureOpenLocked()
-            observers[observer] = ThrottledRunnable(handler, intervalMillis, observer)
+            observers[observer] = DebouncedRunnable(handler, intervalMillis, observer)
         }
     }
 
