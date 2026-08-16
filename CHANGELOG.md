@@ -8,6 +8,13 @@ upstream release notes.
 
 ### Mod changes
 
+- Added a persistent Home dashboard with reorderable shortcuts, a single Remote
+  connection entry, saved recent subfolders in the drawer, and activity-backed
+  folder navigation with native Android Back transitions.
+- Added structured file-row dividers, a pinned black toolbar/gray breadcrumb
+  treatment, and corrected sort-menu contrast.
+- Prevented stale rows from the previous Home shortcut from flashing while a
+  different folder opens.
 - Corrected the derivative Android version code to preserve saved storage
   connections across app updates and restarts.
 - Coalesced provider change-event bursts to keep file lists stable during

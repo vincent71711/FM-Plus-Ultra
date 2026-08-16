@@ -267,7 +267,6 @@
     <string name="file_list_title">Files</string>
     <string name="file_list_home">Home</string>
     <string name="navigation_home">Home</string>
-    <string name="navigation_recent_activity">Recent activity</string>
     <string name="navigation_remote">Remote</string>
     <string name="remote_storage_list_title">Remote</string>
     <string name="remote_storage_list_empty">No remote locations</string>
@@ -275,7 +274,9 @@
     <string name="remote_storage_unpin">Remove shortcut from Home</string>
     <string name="remote_storage_pinned">Added to Home</string>
     <string name="remote_storage_unpinned">Removed from Home</string>
-    <string name="recent_activity_empty">Folders you visit will appear here.</string>
+    <string name="home_rearrange">Rearrange Home</string>
+    <string name="home_rearrange_done">Finish rearranging</string>
+    <string name="home_rearrange_hint">Drag the icons into the order you want.</string>
     <plurals name="file_list_title_open_file">
         <item quantity="one">Select a file</item>
         <item quantity="other">Select files</item>

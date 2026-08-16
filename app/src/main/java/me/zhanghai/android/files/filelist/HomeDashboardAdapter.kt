@@ -6,8 +6,10 @@
 package me.zhanghai.android.files.filelist
 
 import android.content.res.ColorStateList
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import me.zhanghai.android.files.R
 import me.zhanghai.android.files.databinding.HomeDashboardItemBinding
@@ -18,6 +20,15 @@ import me.zhanghai.android.files.util.layoutInflater
 class HomeDashboardAdapter(
     private val listener: NavigationItem.Listener
 ) : SimpleAdapter<NavigationItem, HomeDashboardAdapter.ViewHolder>() {
+    var isEditing: Boolean = false
+        set(value) {
+            if (field == value) {
+                return
+            }
+            field = value
+            notifyDataSetChanged()
+        }
+
     override val hasStableIds: Boolean = true
 
     override fun getItemId(position: Int): Long = getItem(position).id
@@ -28,8 +39,13 @@ class HomeDashboardAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
         val binding = holder.binding
-        binding.root.setOnClickListener { item.onClick(listener) }
-        binding.root.setOnLongClickListener { item.onLongClick(listener) }
+        binding.root.setOnClickListener(if (isEditing) null else View.OnClickListener {
+            item.onHomeClick(listener)
+        })
+        binding.root.setOnLongClickListener(if (isEditing) null else View.OnLongClickListener {
+            item.onLongClick(listener)
+        })
+        binding.dragHandle.isVisible = isEditing
         binding.iconImage.setImageDrawable(item.getIcon(binding.iconImage.context))
         val tintRes = ICON_TINTS[Math.floorMod(item.id.hashCode(), ICON_TINTS.size)]
         binding.iconImage.imageTintList = ColorStateList.valueOf(

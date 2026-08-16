@@ -70,7 +70,9 @@
     </style>
 
     <style name="ThemeOverlay.MaterialFiles.ActionBarPopup" parent="">
-        <item name="colorControlNormal">?android:textColorSecondary</item>
+        <item name="android:textColorPrimary">@color/action_bar_popup_text_primary</item>
+        <item name="android:textColorSecondary">@color/action_bar_popup_text_secondary</item>
+        <item name="colorControlNormal">@color/action_bar_popup_text_secondary</item>
         <item name="searchViewStyle">@style/Widget.AppCompat.SearchView</item>
     </style>
 </resources>

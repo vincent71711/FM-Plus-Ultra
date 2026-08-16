@@ -16,6 +16,7 @@ import me.zhanghai.android.files.filelist.FileSortOptions
 import me.zhanghai.android.files.filelist.FileViewType
 import me.zhanghai.android.files.filelist.OpenApkDefaultAction
 import me.zhanghai.android.files.navigation.BookmarkDirectory
+import me.zhanghai.android.files.navigation.RecentLocation
 import me.zhanghai.android.files.navigation.StandardDirectorySettings
 import me.zhanghai.android.files.provider.root.RootStrategy
 import me.zhanghai.android.files.storage.FileSystemRoot
@@ -37,6 +38,12 @@ object Settings {
             R.string.pref_key_home_shortcut_storage_ids,
             R.array.pref_default_value_home_shortcut_storage_ids
         )
+
+    val HOME_ITEM_ORDER: SettingLiveData<String> =
+        StringSettingLiveData(R.string.pref_key_home_item_order, R.string.pref_default_value_empty)
+
+    val RECENT_LOCATIONS: SettingLiveData<List<RecentLocation>> =
+        ParcelValueSettingLiveData(R.string.pref_key_recent_locations, emptyList())
 
     val FILE_LIST_DEFAULT_DIRECTORY: SettingLiveData<Path> =
         ParcelValueSettingLiveData(

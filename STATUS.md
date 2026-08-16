@@ -1,6 +1,6 @@
 # Status
 
-- Phase: validated first SMB transfer optimization
+- Phase: Home/navigation UI checkpoint complete; returning to SMB optimization
 - Branch: `codex/private-derivative`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Identity: File Manager Plus Ultra; debug package
@@ -15,10 +15,9 @@
   retaining the same resumed process/activity with no fatal exception
 - Synthetic local actions: rename and copy-then-delete results verified; move
   remains unverified because the synthetic source and destination both remain
-- Known UX defect: inherited `scroll|enterAlways` flags collapse the entire
-  file-list toolbar during upward scrolling; top controls must be pinned
-- Required navigation workflow: persistent Home plus an expandable list of
-  previously opened local/remote folders, without losing pending copy/move state
+- Navigation/UI: installed Home dashboard has reorderable shortcuts, native
+  Back transitions, one Remote entry, drawer recent subfolders (maximum five),
+  pinned controls, readable sort options, and divided file rows.
 - SMB transfer: increasing the generic copy buffer from 8 KiB to 256 KiB was
   physically validated at 6.7x to 9.8x faster upload with a byte-correct round
   trip.
@@ -29,4 +28,4 @@
 - Push/publication: none
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
-- Next work: reduce notification churn, then build the in-app transfer model.
+- Next work: benchmark and optimize SMB beyond the validated 256 KiB buffer win.

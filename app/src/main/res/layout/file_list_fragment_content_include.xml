@@ -70,44 +70,34 @@
         </androidx.swiperefreshlayout.widget.ThemedSwipeRefreshLayout>
         </FrameLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/homeRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?colorSurface"
-            android:clipToPadding="false"
-            android:paddingStart="8dp"
-            android:paddingTop="8dp"
-            android:paddingEnd="8dp"
-            android:paddingBottom="@dimen/list_bottom_padding_with_fab"
-            android:visibility="gone"
-            tools:listitem="@layout/home_dashboard_item" />
-
         <FrameLayout
-            android:id="@+id/recentActivityLayout"
+            android:id="@+id/homeLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="?colorSurface"
             android:visibility="gone">
 
-            <TextView
-                android:id="@+id/recentActivityEmptyView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="24dp"
-                android:gravity="center"
-                android:text="@string/recent_activity_empty"
-                android:textAppearance="?textAppearanceListItem" />
-
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recentActivityRecyclerView"
+                android:id="@+id/homeRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clipToPadding="false"
+                android:paddingStart="8dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="8dp"
                 android:paddingBottom="@dimen/list_bottom_padding_with_fab"
-                android:visibility="gone"
-                tools:listitem="@layout/recent_activity_item" />
+                tools:listitem="@layout/home_dashboard_item" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/homeEditButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:layout_margin="16dp"
+                android:contentDescription="@string/home_rearrange"
+                app:fabSize="mini"
+                app:srcCompat="@drawable/edit_icon_white_24dp" />
         </FrameLayout>
+
     </me.zhanghai.android.files.ui.CoordinatorScrollingFrameLayout>
 </merge>

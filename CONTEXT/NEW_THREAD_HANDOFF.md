@@ -32,12 +32,13 @@
   same resumed process/activity and produced no fatal exception.
 - Synthetic local rename and copy-then-delete actions are verified. The move
   action needs retesting because its source and destination both remained.
-- The inherited file-list app bar uses `scroll|enterAlways`, allowing upward
-  scrolling to hide all top controls. Pin the toolbar/breadcrumb area in the
-  reviewed UI phase.
-- Require a persistent Home control and expandable recent-location/history list
-  for jumping among local and remote folders without retracing directory trees;
-  pending copy/move state must survive those jumps.
+- Installed UI checkpoint: pinned black toolbar, gray clickable breadcrumbs,
+  divided file rows, editable Home shortcut order, one Remote entry, and up to
+  five persistent recent subfolders embedded in the drawer. Navigation roots
+  are excluded from Recent.
+- Home shortcuts open child file activities, giving them the same native Back
+  transition as Remote and preventing one shortcut's rows from flashing in the
+  next. Shared paste state remains process-wide.
 - The first transfer repair changes the generic copy buffer from 8 KiB to
   256 KiB; physical tests showed 6.7x to 9.8x faster upload and a byte-correct
   round trip.
@@ -47,4 +48,5 @@
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: reduce notification churn, then implement the in-app transfer model.
+- Next: run comparable SMB benchmarks, profile the remaining bottleneck, and
+  make the next focused throughput optimization.

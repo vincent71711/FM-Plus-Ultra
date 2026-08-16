@@ -33,18 +33,6 @@ class FileListViewModel : ViewModel() {
             }
         }
 
-    val recentPathsLiveData = MutableLiveData<List<Path>>(emptyList())
-
-    fun recordRecentPath(path: Path) {
-        val paths = recentPathsLiveData.valueCompat.toMutableList()
-        paths.remove(path)
-        paths.add(0, path)
-        if (paths.size > RECENT_PATH_COUNT_MAX) {
-            paths.subList(RECENT_PATH_COUNT_MAX, paths.size).clear()
-        }
-        recentPathsLiveData.value = paths
-    }
-
     private val trailLiveData = TrailLiveData()
     val hasTrail: Boolean
         get() = trailLiveData.value != null
@@ -260,7 +248,6 @@ class FileListViewModel : ViewModel() {
 
     companion object {
         private val _pasteStateLiveData = MutableLiveData(PasteState())
-        private const val RECENT_PATH_COUNT_MAX = 20
     }
 
     private class FileListSwitchMapLiveData(
@@ -310,6 +297,5 @@ class FileListViewModel : ViewModel() {
 
 enum class FileListScreen {
     HOME,
-    FILES,
-    RECENT_ACTIVITY
+    FILES
 }

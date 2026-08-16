@@ -17,6 +17,7 @@ object NavigationItemListLiveData : MediatorLiveData<List<NavigationItem?>>() {
         addSource(StorageVolumeListLiveData) { loadValue() }
         addSource(StandardDirectoriesLiveData) { loadValue() }
         addSource(Settings.BOOKMARK_DIRECTORIES) { loadValue() }
+        addSource(Settings.RECENT_LOCATIONS) { loadValue() }
     }
 
     private fun loadValue() {
@@ -29,6 +30,7 @@ object HomeNavigationItemListLiveData : MediatorLiveData<List<NavigationItem>>()
         loadValue()
         addSource(Settings.STORAGES) { loadValue() }
         addSource(Settings.HOME_SHORTCUT_STORAGE_IDS) { loadValue() }
+        addSource(Settings.HOME_ITEM_ORDER) { loadValue() }
         addSource(StorageVolumeListLiveData) { loadValue() }
         addSource(StandardDirectoriesLiveData) { loadValue() }
         addSource(Settings.BOOKMARK_DIRECTORIES) { loadValue() }

@@ -22,6 +22,7 @@ import me.zhanghai.android.files.compat.isPrimaryCompat
 import me.zhanghai.android.files.compat.pathCompat
 import me.zhanghai.android.files.file.JavaFile
 import me.zhanghai.android.files.file.asFileSize
+import me.zhanghai.android.files.filelist.FileListActivity
 import me.zhanghai.android.files.ftpserver.FtpServerActivity
 import me.zhanghai.android.files.settings.Settings
 import me.zhanghai.android.files.settings.SettingsActivity
@@ -50,7 +51,11 @@ val navigationItems: List<NavigationItem?>
                 addAll(storageVolumeItems)
             }
             add(AddStorageItem())
-            add(RecentActivityItem())
+            val recentLocationItems = recentLocationItems
+            if (recentLocationItems.isNotEmpty()) {
+                add(null)
+                addAll(recentLocationItems)
+            }
             val standardDirectoryItems = standardDirectoryItems
             if (standardDirectoryItems.isNotEmpty()) {
                 add(null)
@@ -89,6 +94,13 @@ val homeNavigationItems: List<NavigationItem>
                     .map { PathStorageItem(it) }
             )
             addAll(bookmarkDirectoryItems)
+        }.let { items ->
+            val positions = Settings.HOME_ITEM_ORDER.valueCompat
+                .split(',')
+                .mapNotNull(String::toLongOrNull)
+                .withIndex()
+                .associate { (position, id) -> id to position }
+            items.sortedBy { positions[it.id] ?: Int.MAX_VALUE }
         }
 
 private class RemoteConnectionsItem : NavigationItem() {
@@ -112,27 +124,16 @@ private class HomeItem : NavigationItem() {
     }
 }
 
-private class RecentActivityItem : NavigationItem() {
-    override val id: Long = R.string.navigation_recent_activity.toLong()
-    override val iconRes: Int = R.drawable.history_icon_white_24dp
-    override fun getTitle(context: Context): String =
-        context.getString(R.string.navigation_recent_activity)
-    override fun isChecked(listener: Listener): Boolean = listener.isRecentActivityScreen
-    override fun onClick(listener: Listener) {
-        listener.showRecentActivity()
-        listener.closeNavigationDrawer()
-    }
-}
-
 private val storageItems: List<NavigationItem>
     @Size(min = 0)
     get() =
-        Settings.STORAGES.valueCompat.filter { it.isVisible }.map {
+        Settings.STORAGES.valueCompat.filter { it.isVisible && it !is FileSystemRoot }.map {
             if (it.path != null) PathStorageItem(it) else IntentStorageItem(it)
         }
 
 private abstract class PathItem(val path: Path) : NavigationItem() {
-    override fun isChecked(listener: Listener): Boolean = listener.currentPath == path
+    override fun isChecked(listener: Listener): Boolean =
+        !listener.isHomeScreen && listener.currentPath == path
 
     override fun onClick(listener: Listener) {
         if (this is NavigationRoot) {
@@ -141,6 +142,10 @@ private abstract class PathItem(val path: Path) : NavigationItem() {
             listener.navigateTo(path)
         }
         listener.closeNavigationDrawer()
+    }
+
+    override fun onHomeClick(listener: Listener) {
+        listener.launchIntent(FileListActivity.createViewIntent(path))
     }
 }
 
@@ -266,6 +271,33 @@ private class AddStorageItem : NavigationItem() {
         listener.launchIntent(AddStorageDialogActivity::class.createIntent())
     }
 }
+
+private val recentLocationItems: List<NavigationItem>
+    get() = Settings.RECENT_LOCATIONS.valueCompat
+        .filterNot { isNavigationRootPath(it.path) }
+        .map { RecentLocationItem(it.path) }
+
+internal fun isNavigationRootPath(path: Path): Boolean {
+    if (path.toString() == FileSystemRoot.LINUX_PATH) {
+        return true
+    }
+    return sequenceOf(storageItems, storageVolumeItems, standardDirectoryItems)
+        .flatten()
+        .filterIsInstance<PathItem>()
+        .any { it.path == path }
+}
+
+private class RecentLocationItem(path: Path) : PathItem(path) {
+    override val id: Long = path.hashCode().toLong() xor RECENT_LOCATION_ID_MASK
+    override val iconRes: Int = R.drawable.history_icon_white_24dp
+
+    override fun getTitle(context: Context): String =
+        path.fileName?.toString() ?: path.toString()
+
+    override fun getSubtitle(context: Context): String = path.toString()
+}
+
+private const val RECENT_LOCATION_ID_MASK = -0x3500000000000000L
 
 private val standardDirectoryItems: List<NavigationItem>
     @Size(min = 0)

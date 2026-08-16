@@ -69,15 +69,8 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
     override val isHomeScreen: Boolean
         get() = listener.isHomeScreen
 
-    override val isRecentActivityScreen: Boolean
-        get() = listener.isRecentActivityScreen
-
     override fun showHome() {
         listener.showHome()
-    }
-
-    override fun showRecentActivity() {
-        listener.showRecentActivity()
     }
 
     override fun navigateTo(path: Path) {
@@ -99,9 +92,7 @@ class NavigationFragment : Fragment(), NavigationItem.Listener {
     interface Listener {
         val currentPath: Path
         val isHomeScreen: Boolean
-        val isRecentActivityScreen: Boolean
         fun showHome()
-        fun showRecentActivity()
         fun navigateTo(path: Path)
         fun navigateToRoot(path: Path)
         fun navigateToDefaultRoot()

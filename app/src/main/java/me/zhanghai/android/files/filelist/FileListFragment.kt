@@ -49,7 +49,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.leinardi.android.speeddial.SpeedDialView
@@ -83,6 +83,7 @@ import me.zhanghai.android.files.navigation.BookmarkDirectory
 import me.zhanghai.android.files.navigation.HomeNavigationItemListLiveData
 import me.zhanghai.android.files.navigation.NavigationFragment
 import me.zhanghai.android.files.navigation.NavigationRootMapLiveData
+import me.zhanghai.android.files.navigation.RecentLocations
 import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.linux.isLinuxPath
@@ -191,7 +192,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     private lateinit var homeDashboardAdapter: HomeDashboardAdapter
 
-    private lateinit var recentActivityAdapter: RecentActivityAdapter
+    private lateinit var homeItemTouchHelper: ItemTouchHelper
 
     private val debouncedSearchRunnable = DebouncedRunnable(Handler(Looper.getMainLooper()), 1000) {
         if (!isResumed || !viewModel.isSearchViewExpanded) {
@@ -269,14 +270,52 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             activity, resources.getInteger(R.integer.home_dashboard_span_count)
         )
         binding.homeRecyclerView.adapter = homeDashboardAdapter
-        recentActivityAdapter = RecentActivityAdapter { navigateToRoot(it) }
-        binding.recentActivityRecyclerView.layoutManager = LinearLayoutManager(activity)
-        binding.recentActivityRecyclerView.adapter = recentActivityAdapter
-        binding.recentActivityRecyclerView.addItemDecoration(
-            DividerItemDecoration(activity, RecyclerView.VERTICAL).apply {
-                setDrawable(activity.getDrawableByAttr(android.R.attr.listDivider))
+        homeItemTouchHelper = ItemTouchHelper(
+            object : ItemTouchHelper.Callback() {
+                override fun getMovementFlags(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ): Int = if (homeDashboardAdapter.isEditing) {
+                    makeMovementFlags(
+                        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.LEFT or
+                            ItemTouchHelper.RIGHT,
+                        0
+                    )
+                } else {
+                    0
+                }
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    val fromPosition = viewHolder.bindingAdapterPosition
+                    val toPosition = target.bindingAdapterPosition
+                    if (fromPosition == RecyclerView.NO_POSITION ||
+                        toPosition == RecyclerView.NO_POSITION) {
+                        return false
+                    }
+                    homeDashboardAdapter.move(fromPosition, toPosition)
+                    return true
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) = Unit
+
+                override fun isLongPressDragEnabled(): Boolean = homeDashboardAdapter.isEditing
+
+                override fun clearView(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder
+                ) {
+                    super.clearView(recyclerView, viewHolder)
+                    saveHomeItemOrder()
+                }
             }
-        )
+        ).also { it.attachToRecyclerView(binding.homeRecyclerView) }
+        binding.homeEditButton.setOnClickListener {
+            setHomeRearranging(!homeDashboardAdapter.isEditing)
+        }
         val fastScroller = ThemedFastScroller.create(binding.recyclerView)
         binding.recyclerView.setOnApplyWindowInsetsListener(
             ScrollingViewOnApplyWindowInsetsListener(binding.recyclerView, fastScroller)
@@ -303,11 +342,14 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                         showHome()
                     }
                 }
+
             }
                 .also { callback ->
                     fun updateEnabled() {
                         callback.isEnabled = viewModel.screen == FileListScreen.FILES &&
-                            (viewModel.canNavigateUpBreadcrumb || viewModel.pickOptions == null)
+                            (viewModel.canNavigateUpBreadcrumb ||
+                                (viewModel.pickOptions == null &&
+                                    args.intent.action == Intent.ACTION_MAIN))
                     }
                     viewModel.breadcrumbLiveData.observe(viewLifecycleOwner) {
                         updateEnabled()
@@ -319,17 +361,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                         updateEnabled()
                     }
                 }
-        )
-        addOnBackPressedCallback(
-            object : OnBackPressedCallback(false) {
-                override fun handleOnBackPressed() {
-                    showHome()
-                }
-            }.also { callback ->
-                viewModel.screenLiveData.observe(viewLifecycleOwner) {
-                    callback.isEnabled = it == FileListScreen.RECENT_ACTIVITY
-                }
-            }
         )
         addOnBackPressedCallback(overlayActionMode.onBackPressedCallback)
         addOnBackPressedCallback(SpeedDialViewOnBackPressedCallback(binding.speedDialView))
@@ -406,12 +437,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         viewModel.screenLiveData.observe(viewLifecycleOwner) { onScreenChanged(it) }
         HomeNavigationItemListLiveData.observe(viewLifecycleOwner) {
             homeDashboardAdapter.replace(it)
-        }
-        viewModel.recentPathsLiveData.observe(viewLifecycleOwner) {
-            recentActivityAdapter.replace(it)
-            val hasRecentActivity = it.isNotEmpty()
-            binding.recentActivityRecyclerView.isVisible = hasRecentActivity
-            binding.recentActivityEmptyView.isVisible = !hasRecentActivity
         }
         viewModel.currentPathLiveData.observe(viewLifecycleOwner) { onCurrentPathChanged(it) }
         viewModel.searchViewExpandedLiveData.observe(viewLifecycleOwner) {
@@ -661,10 +686,12 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     private fun onScreenChanged(screen: FileListScreen) {
         val isFileList = screen == FileListScreen.FILES
         binding.fileContentLayout.isVisible = isFileList
-        binding.homeRecyclerView.isVisible = screen == FileListScreen.HOME
-        binding.recentActivityLayout.isVisible = screen == FileListScreen.RECENT_ACTIVITY
+        binding.homeLayout.isVisible = screen == FileListScreen.HOME
         binding.breadcrumbBar.isVisible = isFileList
         binding.speedDialView.isVisible = isFileList
+        if (screen != FileListScreen.HOME && homeDashboardAdapter.isEditing) {
+            setHomeRearranging(false)
+        }
         if (!isFileList) {
             collapseSearchView()
         }
@@ -674,7 +701,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onCurrentPathChanged(path: Path) {
-        viewModel.recordRecentPath(path)
+        RecentLocations.record(path)
         updateOverlayToolbar()
         updateBottomToolbar()
     }
@@ -866,7 +893,6 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val title = if (pickOptions == null) {
             when (viewModel.screen) {
                 FileListScreen.HOME -> getString(R.string.app_name)
-                FileListScreen.RECENT_ACTIVITY -> getString(R.string.navigation_recent_activity)
                 FileListScreen.FILES ->
                     breadcrumbData?.nameProducers?.firstOrNull()?.invoke(requireContext())
                         ?: getString(R.string.app_name)
@@ -1526,27 +1552,50 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         FileJobService.create(path, true, requireContext())
     }
 
+    private fun setHomeRearranging(rearranging: Boolean) {
+        homeDashboardAdapter.isEditing = rearranging
+        binding.homeEditButton.apply {
+            setImageResource(
+                if (rearranging) R.drawable.check_icon_white_24dp
+                else R.drawable.edit_icon_white_24dp
+            )
+            contentDescription = getString(
+                if (rearranging) R.string.home_rearrange_done else R.string.home_rearrange
+            )
+        }
+        if (rearranging) {
+            showToast(R.string.home_rearrange_hint)
+        } else {
+            saveHomeItemOrder()
+        }
+    }
+
+    private fun saveHomeItemOrder() {
+        val order = homeDashboardAdapter.list.joinToString(",") { it.id.toString() }
+        if (Settings.HOME_ITEM_ORDER.valueCompat != order) {
+            Settings.HOME_ITEM_ORDER.putValue(order)
+        }
+    }
+
     override val currentPath: Path
         get() = viewModel.currentPath
 
     override val isHomeScreen: Boolean
         get() = viewModel.screen == FileListScreen.HOME
 
-    override val isRecentActivityScreen: Boolean
-        get() = viewModel.screen == FileListScreen.RECENT_ACTIVITY
-
     override fun showHome() {
-        viewModel.screen = FileListScreen.HOME
-    }
-
-    override fun showRecentActivity() {
-        viewModel.screen = FileListScreen.RECENT_ACTIVITY
+        if (args.intent.action == Intent.ACTION_VIEW) {
+            requireActivity().finish()
+        } else {
+            viewModel.screen = FileListScreen.HOME
+        }
     }
 
     override fun navigateToRoot(path: Path) {
         collapseSearchView()
-        viewModel.screen = FileListScreen.FILES
+        adapter.clear()
         viewModel.resetTo(path)
+        viewModel.screen = FileListScreen.FILES
     }
 
     override fun navigateToDefaultRoot() {
@@ -1726,6 +1775,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             "me.zhanghai.android.files.intent.action.VIEW_DOWNLOADS"
 
         private const val IMAGE_VIEWER_ACTIVITY_PATH_LIST_SIZE_MAX = 1000
+
     }
 
     private class RequestAllFilesAccessContract : ActivityResultContract<Unit, Boolean>() {
@@ -1772,10 +1822,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val emptyView: View,
         val swipeRefreshLayout: SwipeRefreshLayout,
         val recyclerView: RecyclerView,
+        val homeLayout: View,
         val homeRecyclerView: RecyclerView,
-        val recentActivityLayout: View,
-        val recentActivityEmptyView: View,
-        val recentActivityRecyclerView: RecyclerView,
+        val homeEditButton: com.google.android.material.floatingactionbutton.FloatingActionButton,
         val bottomBarLayout: ViewGroup,
         val bottomToolbar: Toolbar,
         val bottomCreateFileNameEdit: EditText,
@@ -1804,9 +1853,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     contentBinding.fileContentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
-                    contentBinding.homeRecyclerView, contentBinding.recentActivityLayout,
-                    contentBinding.recentActivityEmptyView,
-                    contentBinding.recentActivityRecyclerView,
+                    contentBinding.homeLayout, contentBinding.homeRecyclerView,
+                    contentBinding.homeEditButton,
                     bottomBarBinding.bottomBarLayout, bottomBarBinding.bottomToolbar,
                     bottomBarBinding.bottomCreateFileNameEdit, speedDialBinding.speedDialView
                 )

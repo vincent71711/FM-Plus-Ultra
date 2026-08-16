@@ -28,9 +28,12 @@ no fatal exception. Synthetic rename and copy-then-delete actions were verified;
 the move result still needs a controlled retest because both source and
 destination remain. No changes have been pushed or published.
 
-The file-list app bar currently uses inherited `scroll|enterAlways` flags, which
-allow upward list scrolling to hide all top controls. The required derivative
-behavior is a pinned toolbar and breadcrumb area.
+The installed UI checkpoint has a pinned black toolbar, gray clickable
+breadcrumbs, divided file rows, an editable Home dashboard, a single Remote
+entry, and up to five persistent recent subfolders in the drawer. Top-level
+roots such as `/` and `/storage/emulated/0` are excluded from Recent. Home
+shortcuts use child activities so Android provides the same Back transition as
+Remote and each folder starts with a fresh list instead of stale rows.
 
 The first SMB transfer optimization is physically validated. Increasing the
 generic copy block from 8 KiB to 256 KiB made upload 6.7x to 9.8x faster, and a
@@ -44,10 +47,10 @@ the storage list and discard saved SMB entries after restart.
 
 Immediate next steps:
 
-1. Reduce and stabilize notification updates without coupling notification
-   cadence to the future in-app transfer-state model.
-2. Retest the remaining synthetic local move case, then pin the toolbar and
-   begin the reviewed transfer-panel work.
+1. Re-establish comparable SMB upload and download benchmarks against File
+   Manager Plus using the approved disposable test folder.
+2. Profile the remaining SMB/NIO bottleneck, then implement one focused
+   optimization and verify throughput plus byte correctness.
 
 See `CONTEXT/REVISION_QUEUE.md` for decisions and `INFRASTRUCTURE.md` for exact
 commands and repository conventions.

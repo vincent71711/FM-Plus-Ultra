@@ -30,14 +30,14 @@ abstract class NavigationItem {
 
     abstract fun onClick(listener: Listener)
 
+    open fun onHomeClick(listener: Listener) = onClick(listener)
+
     open fun onLongClick(listener: Listener): Boolean = false
 
     interface Listener {
         val currentPath: Path
         val isHomeScreen: Boolean
-        val isRecentActivityScreen: Boolean
         fun showHome()
-        fun showRecentActivity()
         fun navigateTo(path: Path)
         fun navigateToRoot(path: Path)
         fun launchIntent(intent: Intent)
