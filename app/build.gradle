@@ -9,7 +9,10 @@ apply plugin: 'kotlin-parcelize'
 apply from: '../signing.gradle'
 
 def modApplicationId = 'com.froslabs.filemanagerplusultra'
-def modVersionCode = 1
+// Keep this above the inherited Material Files baseline (39). Its preference upgrader compares
+// BuildConfig.VERSION_CODE against historical migration thresholds, so resetting this to 1 would
+// rerun destructive legacy migrations on every launch.
+def modVersionCode = 40
 def modVersionName = '0.1.0-dev'
 
 android {

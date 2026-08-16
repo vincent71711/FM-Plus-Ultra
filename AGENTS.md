@@ -16,6 +16,9 @@ These instructions apply throughout `/srv/file-manager-app`.
 - The private working identity is `File Manager Plus Ultra`; release ID is
   `com.froslabs.filemanagerplusultra` and development builds use the `.debug`
   suffix. The upstream Kotlin namespace remains unchanged intentionally.
+- The derivative Android version code begins at 40 and must increase
+  monotonically. Never reset it below inherited Material Files migration
+  thresholds; doing so can rerun destructive legacy preference migrations.
 - The working name is not approved for public distribution because it is close
   to an existing commercial product name. Revisit public branding first.
 - The primary physical target is a Samsung Galaxy Z Fold7 connected through

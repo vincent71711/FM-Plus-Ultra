@@ -46,7 +46,10 @@ The derivative identity is:
 - Visible private-use name: `File Manager Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
 - Reserved release ID: `com.froslabs.filemanagerplusultra`
-- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (1)
+- Mod version: `0.1.0-dev`; debug APK version: `0.1.0-dev-debug` (40). Android
+  version codes begin at 40, one above the Material Files baseline (39), and
+  must increase monotonically. Do not reset them independently of the inherited
+  preference-migration thresholds.
 - Upstream code namespace: `me.zhanghai.android.files` (retained intentionally)
 
 The separate IDs coexist with the Play/F-Droid Material Files package. The

@@ -8,6 +8,8 @@ upstream release notes.
 
 ### Mod changes
 
+- Corrected the derivative Android version code to preserve saved storage
+  connections across app updates and restarts.
 - Rebased the project foundation on the full official Material Files history at
   commit `fc1250038496ebf4d4c139f62d16f0071f2c995a`.
 - Expanded the unavailable abbreviated `dav4jvm` JitPack revision to the exact
