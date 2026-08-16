@@ -63,6 +63,12 @@
         <item name="searchViewStyle">@style/Widget.AppCompat.SearchView.ActionBar</item>
     </style>
 
+    <style name="ThemeOverlay.MaterialFiles.FileListActionBar" parent="ThemeOverlay.MaterialFiles.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="android:textColorSecondary">#B3FFFFFF</item>
+        <item name="colorControlNormal">@android:color/white</item>
+    </style>
+
     <style name="ThemeOverlay.MaterialFiles.ActionBarPopup" parent="">
         <item name="colorControlNormal">?android:textColorSecondary</item>
         <item name="searchViewStyle">@style/Widget.AppCompat.SearchView</item>

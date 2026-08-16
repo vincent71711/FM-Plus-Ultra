@@ -209,7 +209,7 @@ private val standardDirectoryItems: List<NavigationItem>
 
 private class StandardDirectoryItem(
     private val standardDirectory: StandardDirectory
-) : PathItem(Paths.get(getExternalStorageDirectory(standardDirectory.relativePath))) {
+) : PathItem(Paths.get(getExternalStorageDirectory(standardDirectory.relativePath))), NavigationRoot {
     init {
         require(standardDirectory.isEnabled)
     }
@@ -222,6 +222,8 @@ private class StandardDirectoryItem(
         get() = standardDirectory.iconRes
 
     override fun getTitle(context: Context): String = standardDirectory.getTitle(context)
+
+    override fun getName(context: Context): String = getTitle(context)
 
     override fun onLongClick(listener: Listener): Boolean {
         listener.launchIntent(StandardDirectoryListActivity::class.createIntent())

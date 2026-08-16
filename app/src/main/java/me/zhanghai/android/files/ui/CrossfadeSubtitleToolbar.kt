@@ -29,6 +29,7 @@ class CrossfadeSubtitleToolbar : Toolbar {
     }
 
     private var nextSubtitle: CharSequence? = null
+    private var hasNextSubtitle = false
 
     constructor(context: Context) : super(context)
 
@@ -38,17 +39,20 @@ class CrossfadeSubtitleToolbar : Toolbar {
         context, attrs, defStyleAttr
     )
 
-    override fun getSubtitle(): CharSequence? = nextSubtitle ?: super.getSubtitle()
+    override fun getSubtitle(): CharSequence? =
+        if (hasNextSubtitle) nextSubtitle else super.getSubtitle()
 
     override fun setSubtitle(subtitle: CharSequence?) {
         if (getSubtitle() == subtitle) {
             return
         }
         nextSubtitle = subtitle
+        hasNextSubtitle = true
         ensureSubtitleAnimatorTarget()
         if (subtitleAnimator.target == null) {
             // Subtitle text view not available (yet), just delegate to super.
             super.setSubtitle(subtitle)
+            hasNextSubtitle = false
             return
         }
         if (!subtitleAnimator.isRunning) {
@@ -84,7 +88,7 @@ class CrossfadeSubtitleToolbar : Toolbar {
 
         override fun onAnimationEnd(animator: Animator) {
             ensureTextUpdated()
-            if (nextSubtitle != null) {
+            if (hasNextSubtitle) {
                 isTextUpdated = false
                 animator.start()
             }
@@ -92,9 +96,10 @@ class CrossfadeSubtitleToolbar : Toolbar {
 
         private fun ensureTextUpdated() {
             if (!isTextUpdated) {
-                if (nextSubtitle != null) {
+                if (hasNextSubtitle) {
                     super@CrossfadeSubtitleToolbar.setSubtitle(nextSubtitle)
                     nextSubtitle = null
+                    hasNextSubtitle = false
                 }
                 isTextUpdated = true
             }

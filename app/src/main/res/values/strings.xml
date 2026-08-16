@@ -265,6 +265,7 @@
     <string name="file_create_directory_title">New folder</string>
 
     <string name="file_list_title">Files</string>
+    <string name="file_list_home">Home</string>
     <plurals name="file_list_title_open_file">
         <item quantity="one">Select a file</item>
         <item quantity="other">Select files</item>

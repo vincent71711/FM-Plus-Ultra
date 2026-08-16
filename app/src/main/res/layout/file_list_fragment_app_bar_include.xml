@@ -14,14 +14,15 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?colorAppBarSurface"
+        android:background="@android:color/black"
         android:theme="?actionBarTheme"
-        app:liftOnScroll="true"
-        app:liftOnScrollTargetViewId="@id/recyclerView">
+        app:liftOnScroll="false">
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/black"
+            android:theme="@style/ThemeOverlay.MaterialFiles.FileListActionBar"
             app:layout_scrollFlags="@integer/file_list_toolbar_scroll_flags">
 
             <me.zhanghai.android.files.ui.CrossfadeSubtitleToolbar
@@ -41,17 +42,33 @@
                 android:layout_height="?actionBarSize"
                 android:paddingStart="@dimen/file_list_toolbar_padding_start"
                 android:paddingEnd="@dimen/file_list_toolbar_padding_end_with_overflow"
-                android:background="?colorAppBarSurface"
+                android:background="@android:color/black"
                 android:visibility="gone"
                 app:navigationIcon="@drawable/close_icon_control_normal_24dp"
                 app:popupTheme="?actionBarPopupTheme" />
         </FrameLayout>
 
-        <me.zhanghai.android.files.filelist.BreadcrumbLayout
-            android:id="@+id/breadcrumbLayout"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="@dimen/content_start_margin_minus_12dp"
-            android:paddingEnd="@dimen/screen_edge_margin_minus_12dp" />
+            android:layout_height="@dimen/tab_layout_height"
+            android:background="?colorSurfaceVariant"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/homeButton"
+                android:layout_width="@dimen/content_start_margin_minus_12dp"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/file_list_home"
+                android:padding="12dp"
+                app:srcCompat="@drawable/home_icon_control_normal_24dp" />
+
+            <me.zhanghai.android.files.filelist.BreadcrumbLayout
+                android:id="@+id/breadcrumbLayout"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:paddingEnd="@dimen/screen_edge_margin_minus_12dp" />
+        </LinearLayout>
     </me.zhanghai.android.files.ui.CoordinatorAppBarLayout>
 </merge>
