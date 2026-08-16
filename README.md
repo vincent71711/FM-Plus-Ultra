@@ -1,5 +1,7 @@
 # FM Plus Ultra
 
+# I have no idea why this isn't a big thing in File Manager apps yet. For anyone who stumbles on this....you're welcome.
+
 FM Plus Ultra is an open-source Android file manager derivative based
 on the official Material Files project. Its goal is to retain Material Files'
 capable local/NAS provider architecture while delivering fast SMB transfers,
@@ -26,8 +28,6 @@ changes made in this fork.
 
 **From an observed 1.1 MB/s inherited upload path to 91.5 MB/s upload and
 119.2 MB/s download at the final tuned checkpoint:**
-
-![Measured SMB transfer checkpoints](docs/smb-performance-comparison.svg)
 
 Material Files already had a sound, compatible SMB implementation, but the
 inherited cross-provider upload path was observed at about **1.1 MB/s**. SMB has
@@ -60,12 +60,15 @@ The mod also keeps directory refresh events from repeatedly redrawing the file
 list during a transfer and provides in-app progress, speed, remaining-size,
 ETA, and cancellation controls.
 
+![Measured SMB transfer checkpoints](docs/smb-performance-comparison.svg)
+
 The earliest 1.1 MB/s figure was the observed inherited cross-provider upload,
-not the same controlled 2 GiB test used for later tuning. It is included to show
-the starting user experience rather than to claim a laboratory-perfect 83x
-comparison. Within the repeatable 2 GiB tests, the final hybrid pipeline was
-about 3.2x faster for uploads and 3.5x faster for downloads than the portable
-Java checkpoint.
+not the same controlled 2 GiB test used for later tuning. The download speed was 
+similarly slow. It is included to show the starting user experience rather than to 
+claim a laboratory-perfect 83x comparison, although I think this is a fair estimation. 
+The starting SMB performance was very poor for a file manager app. Within the repeatable
+2 GiB tests, the final hybrid pipeline was about 3.2x faster for uploads and 3.5x 
+faster for downloads than the portable Java checkpoint.
 
 Development phases:
 
@@ -78,7 +81,36 @@ Development phases:
 See [START_HERE.md](START_HERE.md), [INFRASTRUCTURE.md](INFRASTRUCTURE.md), and
 [docs/UPSTREAM_BASE.md](docs/UPSTREAM_BASE.md) for current status and procedures.
 
+All that and there's still no Ads...
+
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Material Files (upstream documentation)
 
