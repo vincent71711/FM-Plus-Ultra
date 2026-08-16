@@ -6,5 +6,13 @@
 /local.properties
 /signing.jks
 /signing.properties
+*.jks
+*.keystore
+*.apk
+*.aab
+*.apks
+*.pem
+*.p12
+*.log
 .DS_Store
 *.iml

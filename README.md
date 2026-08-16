@@ -1,4 +1,29 @@
-# Material Files
+# File Manager App
+
+File Manager App is a private-use Android file manager derivative based on the
+official Material Files project. Its goal is to retain Material Files' capable
+local/NAS provider architecture while delivering fast SMB transfers, stable and
+detailed transfer monitoring, a visually structured file list, obvious file
+actions, and a dependable unfolded experience on Samsung foldables.
+
+The project preserves Material Files' Git history, GPLv3 license, copyright
+notices, and attribution. Material Files features described below are inherited
+upstream functionality; mod-specific work is recorded in `CHANGELOG.md`.
+
+Development phases:
+
+1. Reproducible upstream bootstrap and private application identity.
+2. Synthetic SMB correctness and performance baseline.
+3. Transfer-engine, refresh-stability, and transfer-monitoring improvements.
+4. Structured visual presentation and direct file-operation workflows.
+5. Folded/unfolded regression testing and private release hardening.
+
+See `START_HERE.md`, `INFRASTRUCTURE.md`, and `docs/UPSTREAM_BASE.md` for current
+status and procedures.
+
+---
+
+# Material Files (upstream documentation)
 
 [本文中文版](README_zh-CN.md)
 
