@@ -120,7 +120,9 @@ local category size/file count), a Remote connection count, and an Access from
 network shortcut to the existing FTP server. It also makes selection and
 clipboard surfaces neutral gray, fixes selected-row long-press to deselect,
 ties the double-Back exit guard to the actual Home screen, and adds haptic
-feedback to the Home edit pencil/check control.
+feedback to the Home edit pencil/check control. The exit-confirmation toast now
+cancels on confirmed exit or activity destruction instead of lingering over the
+launcher; this was physically confirmed on the Fold7.
 
 The derivative Android version code is 52. Version 41 migrated an inherited
 saved Middle filename ellipsis to End without clearing other preferences.
@@ -131,7 +133,7 @@ the storage list and discard saved SMB entries after restart.
 
 Immediate next steps:
 
-1. User-check the Home summaries, edit haptics, deselection, and exit guard.
+1. User-check the Home summaries, edit haptics, and deselection.
 2. Continue file-operation correctness and UI review; use a longer transfer only
    if sustained thermal behavior needs another check.
 

@@ -90,7 +90,9 @@
   fallback, and expected nested watch-cancellation noise is suppressed.
 - Top-level Back now prompts once and requires a second gesture within 2.5 seconds
   to exit; the guard follows the actual Home screen even for restored/non-Main
-  root activities, while nested navigation remains single-Back.
+  root activities, while nested navigation remains single-Back. Its toast is
+  cancelled on confirmed exit or activity destruction and no longer lingers over
+  the launcher; physically confirmed on the Fold7.
 - Version 52 adds Home storage/category statistics, a Remote connection count,
   an Access from network shortcut to FTP Server, neutral progress/selection/
   clipboard surfaces, selected-row long-press deselection, and haptic feedback

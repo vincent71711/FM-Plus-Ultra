@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-16 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filelist
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.view.KeyEvent
 import android.view.View
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.commit
@@ -21,12 +23,12 @@ import me.zhanghai.android.files.file.MimeType
 import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.extraPath
 import me.zhanghai.android.files.util.putArgs
-import me.zhanghai.android.files.util.showToast
 
 class FileListActivity : AppActivity() {
     private lateinit var fragment: FileListFragment
     private lateinit var exitGuardCallback: OnBackPressedCallback
     private var lastBackUptimeMillis = 0L
+    private var exitConfirmationToast: Toast? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,12 +41,19 @@ class FileListActivity : AppActivity() {
                 val now = SystemClock.elapsedRealtime()
                 if (lastBackUptimeMillis != 0L &&
                     now - lastBackUptimeMillis <= EXIT_CONFIRMATION_WINDOW_MILLIS) {
+                    exitConfirmationToast?.cancel()
+                    exitConfirmationToast = null
                     isEnabled = false
                     onBackPressedDispatcher.onBackPressed()
                     isEnabled = true
                 } else {
                     lastBackUptimeMillis = now
-                    showToast(R.string.file_list_exit_confirmation)
+                    exitConfirmationToast?.cancel()
+                    exitConfirmationToast = Toast.makeText(
+                        this@FileListActivity,
+                        R.string.file_list_exit_confirmation,
+                        Toast.LENGTH_SHORT
+                    ).also { it.show() }
                 }
             }
         }
@@ -59,6 +68,12 @@ class FileListActivity : AppActivity() {
             fragment = supportFragmentManager.findFragmentById(android.R.id.content)
                 as FileListFragment
         }
+    }
+
+    override fun onDestroy() {
+        exitConfirmationToast?.cancel()
+        exitConfirmationToast = null
+        super.onDestroy()
     }
 
     override fun onKeyShortcut(keyCode: Int, event: KeyEvent): Boolean {

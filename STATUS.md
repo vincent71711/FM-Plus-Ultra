@@ -74,6 +74,8 @@
 - Top-level Back is guarded: the first swipe shows a short exit prompt and only
   a second Back within 2.5 seconds exits; the guard now follows the displayed
   Home screen even when Android restores or launches it through a non-Main intent.
+  The prompt toast is cancelled on confirmed exit or activity destruction so it
+  no longer lingers over the launcher; physically confirmed on the Fold7.
 - SMB robustness: Android-native Conscrypt/OpenSSL providers are tried per
   primitive before portable Bouncy Castle fallback. Expected nested watcher
   interruptions during remote-folder exit no longer print misleading stacks.
