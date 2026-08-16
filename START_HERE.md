@@ -86,15 +86,6 @@ See the explanation and comparison graph in
 The original immediate implementation and validation work is complete. The next
 phase is presentation and beta feedback:
 
-1. Add current folded, unfolded, Home, SMB, file-list, and transfer-progress
-   screenshots to the public README.
-2. Collect beta feedback and address reproducible correctness or usability
-   issues without reopening completed performance work unnecessarily.
-3. Back up the permanent signing key securely so future APKs can update the
-   installed release.
-4. Decide later whether updates remain manual GitHub APK installs or gain an
-   optional in-app update workflow.
-
 ## Project references
 
 - [README](README.md)
