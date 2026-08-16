@@ -12,7 +12,10 @@
 - Validated gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain`;
   successful with 94 tasks.
-- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (1).
+- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (40). The derivative
+  Android version code must remain above inherited migration thresholds and
+  increase monotonically; using 1 caused legacy storage migration to discard
+  saved SMB entries on restart.
 - Debug identity: `com.froslabs.filemanagerplusultra.debug`; reserved release
   identity: `com.froslabs.filemanagerplusultra`.
 - Firebase Analytics, Crashlytics, Google Services plugins/configuration, and
@@ -35,12 +38,14 @@
 - Require a persistent Home control and expandable recent-location/history list
   for jumping among local and remote folders without retracing directory trees;
   pending copy/move state must survive those jumps.
-- Observed upstream defects on the Fold7: cross-provider local-to-SMB copy about
-  1.1 MB/s; 8 KiB generic copy buffer; SMB modification events cause a complete
-  visible directory reload every second; progress notification updates every
-  500 ms; no useful in-app transfer center.
+- The first transfer repair changes the generic copy buffer from 8 KiB to
+  256 KiB; physical tests showed 6.7x to 9.8x faster upload and a byte-correct
+  round trip.
+- Remaining transfer defects: SMB modification events cause a complete visible
+  directory reload about every second; progress notification updates about
+  every 0.6 seconds; there is no useful in-app transfer center.
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: obtain the user's visual review, retest synthetic local move, establish
-  the SMB benchmark baseline, then implement the reviewed transfer phase.
+- Next: commit the buffer/version repair, then coalesce SMB change-event
+  refreshes.

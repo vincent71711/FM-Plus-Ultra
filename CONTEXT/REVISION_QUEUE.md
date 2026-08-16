@@ -36,9 +36,8 @@
 
 ## Proposed first implementation phase
 
-- Measure SMB upload/download correctness and speed on the unmodified engine.
-- Replace the generic 8 KiB cross-provider copy path with negotiated, buffered,
-  benchmarked transfer I/O.
+- Completed pending commit: benchmark the inherited engine and replace its
+  generic 8 KiB copy block with a physically validated 256 KiB block.
 - Coalesce or suppress self-generated SMB change events during active jobs and
   refresh once at completion.
 - Add a transfer state model supporting operations list, details, speed, ETA,

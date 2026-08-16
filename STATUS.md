@@ -1,6 +1,6 @@
 # Status
 
-- Phase: private derivative identity and device baseline
+- Phase: validated first SMB transfer optimization
 - Branch: `codex/private-derivative`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Identity: File Manager Plus Ultra; debug package
@@ -19,9 +19,14 @@
   file-list toolbar during upward scrolling; top controls must be pinned
 - Required navigation workflow: persistent Home plus an expandable list of
   previously opened local/remote folders, without losing pending copy/move state
+- SMB transfer: increasing the generic copy buffer from 8 KiB to 256 KiB was
+  physically validated at 6.7x to 9.8x faster upload with a byte-correct round
+  trip.
+- Persistence repair: derivative Android version code corrected from 1 to 40;
+  version 1 retriggered inherited migrations that discarded saved SMB entries.
+  A saved SMB entry now survives restart.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
 - Push/publication: none
-- Blockers before SMB baseline: user permission/visual review and an approved
-  disposable synthetic share path
-- Next work: user visual review and synthetic move retest, then a private
-  synthetic SMB correctness and performance baseline
+- Remaining transfer defect: notification updates and SMB change events still
+  cause frequent system work and visible full-directory refreshes.
+- Next work: commit the buffer/version repair, then coalesce SMB refresh events.

@@ -10,6 +10,11 @@ import java.io.InputStream
 import java.io.InterruptedIOException
 import java.io.OutputStream
 
+// File Manager Plus Ultra modification (2026): Avoid issuing one synchronous provider write for
+// every Kotlin default 8 KiB chunk. Remote providers such as SMB split this larger block according
+// to their negotiated request size.
+private const val TRANSFER_BUFFER_SIZE = 256 * 1024
+
 // Can handle ProgressCopyOption.
 @Throws(IOException::class)
 fun InputStream.copyTo(
@@ -17,7 +22,7 @@ fun InputStream.copyTo(
     intervalMillis: Long,
     listener: ((Long) -> Unit)?
 ) {
-    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    val buffer = ByteArray(TRANSFER_BUFFER_SIZE)
     var lastProgressMillis = System.currentTimeMillis()
     var copiedSize = 0L
     while (true) {
