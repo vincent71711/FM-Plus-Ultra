@@ -32,6 +32,9 @@
 - The inherited file-list app bar uses `scroll|enterAlways`, allowing upward
   scrolling to hide all top controls. Pin the toolbar/breadcrumb area in the
   reviewed UI phase.
+- Require a persistent Home control and expandable recent-location/history list
+  for jumping among local and remote folders without retracing directory trees;
+  pending copy/move state must survive those jumps.
 - Observed upstream defects on the Fold7: cross-provider local-to-SMB copy about
   1.1 MB/s; 8 KiB generic copy buffer; SMB modification events cause a complete
   visible directory reload every second; progress notification updates every

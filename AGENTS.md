@@ -36,6 +36,10 @@ These instructions apply throughout `/srv/file-manager-app`.
 - The file-list toolbar, navigation controls, selection actions, and breadcrumb
   area must remain pinned and reachable while the file list scrolls. List
   scrolling must never collapse all top controls offscreen.
+- Provide a persistent Home control with an expandable recent-location/history
+  selector. Users must be able to jump among previously opened local and remote
+  folders without retracing each directory tree; preserve pending copy/move
+  operations during those jumps.
 - Transfers require an in-app operations overview, an expandable detailed view,
   and a stable Android notification.
 

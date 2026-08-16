@@ -46,6 +46,8 @@
 - Keep the Android notification stable and substantially less frequent.
 - Pin the file-list toolbar and breadcrumbs by removing the inherited
   `scroll|enterAlways` collapse behavior; list scrolling must not hide controls.
+- Add a persistent Home control and expandable recent-location/history selector
+  spanning local and remote folders, while preserving pending paste operations.
 - Add structured row dividers and direct Copy/Move/Rename/Delete actions after
   transfer correctness is established.
 

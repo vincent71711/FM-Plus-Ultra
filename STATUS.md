@@ -17,6 +17,8 @@
   remains unverified because the synthetic source and destination both remain
 - Known UX defect: inherited `scroll|enterAlways` flags collapse the entire
   file-list toolbar during upward scrolling; top controls must be pinned
+- Required navigation workflow: persistent Home plus an expandable list of
+  previously opened local/remote folders, without losing pending copy/move state
 - Coexistence: Play Store Material Files remains installed under its upstream ID
 - Push/publication: none
 - Blockers before SMB baseline: user permission/visual review and an approved
