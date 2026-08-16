@@ -12,7 +12,7 @@
 - Validated gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain`;
   successful with 94 tasks.
-- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (40). The derivative
+- Upstream app version: 1.7.4 (39); mod version: 0.1.0-dev (41). The derivative
   Android version code must remain above inherited migration thresholds and
   increase monotonically; using 1 caused legacy storage migration to discard
   saved SMB entries on restart.
@@ -33,20 +33,29 @@
 - Synthetic local rename and copy-then-delete actions are verified. The move
   action needs retesting because its source and destination both remained.
 - Installed UI checkpoint: pinned black toolbar, gray clickable breadcrumbs,
-  divided file rows, editable Home shortcut order, one Remote entry, and up to
-  five persistent recent subfolders embedded in the drawer. Navigation roots
-  are excluded from Recent.
+  divided file rows, editable Home shortcut order, and one Remote entry. Recent
+  keeps up to five unique storage sources, each labeled with its friendly source
+  name and latest relative folder; raw navigation roots are excluded.
 - Home shortcuts open child file activities, giving them the same native Back
   transition as Remote and preventing one shortcut's rows from flashing in the
   next. Shared paste state remains process-wide.
 - The first transfer repair changes the generic copy buffer from 8 KiB to
   256 KiB; physical tests showed 6.7x to 9.8x faster upload and a byte-correct
   round trip.
+- Current uncommitted test build adds a bounded four-block asynchronous SMB
+  upload pipeline. A 256 MiB upload/download round trip matched byte count and
+  SHA-256. An app-timed upload completed in 12.074 seconds: 21.20 MiB/s
+  (22.23 MB/s). The installed debug build logs exact start, finish, and elapsed
+  time as `FMPU.TransferTiming`.
+- The same test build draws dividers inside animated rows, uses clicked sidebar
+  item identity to prevent same-path double highlights, and defaults long file
+  names to end truncation. Version 41 migrates an existing saved Middle value
+  to End; the installed preference was verified as `2`. Visual confirmation is pending.
 - Provider event bursts now use trailing-edge coalescing; the installed build
   stayed visually stable during an SMB upload. Progress notifications still
   update about every 0.6 seconds, and there is no useful in-app transfer center.
 - UX reference: structured divided rows, explicit selection/paste controls, a
   compact operations list, detailed progress (paths, bytes, speed, ETA, count,
   cancel), stable notification, conflict actions, and stable browsing.
-- Next: run comparable SMB benchmarks, profile the remaining bottleneck, and
-  make the next focused throughput optimization.
+- Next: confirm the three UI fixes and plan the next SMB optimization against
+  the 21.20 MiB/s baseline.

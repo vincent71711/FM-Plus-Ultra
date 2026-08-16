@@ -30,16 +30,28 @@ destination remain. No changes have been pushed or published.
 
 The installed UI checkpoint has a pinned black toolbar, gray clickable
 breadcrumbs, divided file rows, an editable Home dashboard, a single Remote
-entry, and up to five persistent recent subfolders in the drawer. Top-level
-roots such as `/` and `/storage/emulated/0` are excluded from Recent. Home
+entry, and up to five persistent recent storage sources in the drawer. Each
+source appears once with its friendly name and latest relative folder;
+top-level roots such as `/` and `/storage/emulated/0` are excluded. Home
 shortcuts use child activities so Android provides the same Back transition as
 Remote and each folder starts with a fresh list instead of stale rows.
+
+The current uncommitted test build also moves dividers with row animations,
+uses clicked-item identity to prevent two same-path drawer rows highlighting,
+and truncates long filenames at the end. These need quick physical confirmation.
 
 The first SMB transfer optimization is physically validated. Increasing the
 generic copy block from 8 KiB to 256 KiB made upload 6.7x to 9.8x faster, and a
 fresh round trip matched the source byte count and SHA-256.
 
-The derivative Android version code is 40, one above the upstream baseline.
+The installed test build adds a bounded four-block asynchronous SMB upload
+pipeline. A 256 MiB upload/download round trip matched the source byte count and
+SHA-256. An app-timed upload completed in 12.074 seconds: 21.20 MiB/s
+(22.23 MB/s). The debug build logs exact transfer start, finish, and elapsed time
+as `FMPU.TransferTiming`.
+
+The derivative Android version code is 41. Version 41 migrates an inherited
+saved Middle filename ellipsis to End without clearing other preferences.
 Do not reset it: version code 1 caused inherited legacy migrations to rebuild
 the storage list and discard saved SMB entries after restart.
 
@@ -47,10 +59,8 @@ the storage list and discard saved SMB entries after restart.
 
 Immediate next steps:
 
-1. Re-establish comparable SMB upload and download benchmarks against File
-   Manager Plus using the approved disposable test folder.
-2. Profile the remaining SMB/NIO bottleneck, then implement one focused
-   optimization and verify throughput plus byte correctness.
+1. Confirm the row-divider animation, end ellipsis, and single drawer highlight.
+2. Plan and measure the next SMB optimization against the 21.20 MiB/s baseline.
 
 See `CONTEXT/REVISION_QUEUE.md` for decisions and `INFRASTRUCTURE.md` for exact
 commands and repository conventions.
