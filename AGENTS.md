@@ -25,27 +25,6 @@ These instructions apply throughout `/srv/file-manager-app`.
   wireless ADB. Select its explicit current serial; never assume the first ADB
   device.
 
-## Product requirements
-
-- Preserve local browsing and obvious copy, move, rename, delete, create, and
-  cross-provider workflows.
-- An SMB connection without a share path must enumerate accessible shares.
-- SMB transfer correctness and competitive throughput are baseline concerns.
-- File lists must remain visually stable during transfers; automatic provider
-  events must not trigger visible full-list refresh loops.
-- The default list presentation must have strong row structure and dividers,
-  clear metadata columns, familiar folder/file visuals, and direct selection
-  actions. Use original assets; do not copy proprietary application assets.
-- The file-list toolbar, navigation controls, selection actions, and breadcrumb
-  area must remain pinned and reachable while the file list scrolls. List
-  scrolling must never collapse all top controls offscreen.
-- Provide a persistent Home control with an expandable recent-location/history
-  selector. Users must be able to jump among previously opened local and remote
-  folders without retracing each directory tree; preserve pending copy/move
-  operations during those jumps.
-- Transfers require an in-app operations overview, an expandable detailed view,
-  and a stable Android notification.
-
 ## Authorization and safety
 
 - Never push, force-push, publish, release, upload an APK/AAB, or contact
