@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filejob
@@ -353,10 +354,12 @@ private fun FileJob.postTransferSizeNotification(
     val target = transferInfo.target!!
     val size = transferInfo.size
     val transferredSize = transferInfo.transferredSize
+    transferInfo.setCurrentFile(currentSource)
     val currentFileIndex = (transferInfo.transferredFileCount + 1)
         .coerceAtMost(fileCount)
+    val progressTitle = getString(titleOneRes, getFileName(currentSource), getFileName(target))
     if (fileCount == 1) {
-        title = getString(titleOneRes, getFileName(currentSource), getFileName(target))
+        title = progressTitle
         val sizeString = size.asFileSize().formatHumanReadable(service)
         val transferredSizeString = transferredSize.asFileSize().formatHumanReadable(service)
         text = getString(
@@ -371,8 +374,9 @@ private fun FileJob.postTransferSizeNotification(
         )
     }
     FileJobProgressStore.updateTransfer(
-        id, title, getFileName(currentSource), getFileName(target), fileCount, currentFileIndex,
-        size, transferredSize
+        id, progressTitle, getFileName(currentSource), getFileName(target), fileCount,
+        currentFileIndex, size, transferredSize, transferInfo.currentFileSize,
+        transferInfo.currentFileTransferredSize
     )
     if (!transferInfo.shouldPostNotification()) {
         return
@@ -440,11 +444,20 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
         private set
     var transferredSize = 0L
         private set
+    var currentFileSize = 0L
+        private set
+    var currentFileTransferredSize = 0L
+        private set
+
+    private var currentFile: Path? = null
 
     private var lastNotificationTimeMillis = 0L
 
     fun incrementTransferredFileCount() {
         ++transferredFileCount
+        if (currentFileSize > 0) {
+            currentFileTransferredSize = currentFileSize
+        }
     }
 
     fun addTransferredFile(path: Path) {
@@ -455,6 +468,9 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
             ).size()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+        if (currentFileSize > 0) {
+            currentFileTransferredSize = currentFileSize
         }
     }
 
@@ -475,6 +491,23 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
 
     fun addToTransferredSize(size: Long) {
         transferredSize += size
+        currentFileTransferredSize += size
+    }
+
+    fun setCurrentFile(path: Path) {
+        if (path == currentFile) {
+            return
+        }
+        currentFile = path
+        currentFileTransferredSize = 0
+        currentFileSize = try {
+            path.readAttributes(
+                BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS
+            ).size()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            0
+        }
     }
 
     fun shouldPostNotification(): Boolean {

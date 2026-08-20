@@ -137,3 +137,11 @@
   the matching cached session, reconnects, and retries once. The documented JDK
   21 `assembleDebug lintVitalRelease` gate passes. The resulting debug APK is on
   both explicitly selected phones; physical behavior remains for Vincent to test.
+- The transfer dialog now renders a meaningful route from configured storage
+  names plus relative paths, rather than duplicating the active filename and
+  destination basename. Its active-file heading auto-sizes within two lines.
+  Multi-file copy/move work tracks real bytes for the active file separately from
+  aggregate job bytes, updates the heading as each file changes, and displays
+  labeled Current file and Overall progress bars. Single-file work keeps one
+  Overall bar. The JDK 21 debug/release-lint gate passes, and the debug update is
+  installed on both explicitly selected phones without scripted interaction.

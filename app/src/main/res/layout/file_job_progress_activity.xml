@@ -23,30 +23,68 @@
             android:textAppearance="?textAppearanceLabelLarge"
             android:textColor="?colorPrimary" />
 
-        <TextView
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/titleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:ellipsize="end"
             android:maxLines="2"
-            android:textAppearance="?textAppearanceTitleLarge" />
+            android:textAppearance="?textAppearanceTitleLarge"
+            app:autoSizeMaxTextSize="22sp"
+            app:autoSizeMinTextSize="12sp"
+            app:autoSizeStepGranularity="1sp"
+            app:autoSizeTextType="uniform" />
 
         <TextView
             android:id="@+id/pathText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:ellipsize="end"
-            android:maxLines="2"
             android:textAppearance="?textAppearanceBodyMedium"
             android:textColor="?android:textColorSecondary" />
+
+        <TextView
+            android:id="@+id/currentFileProgressLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textAppearance="?textAppearanceTitleSmall"
+            android:visibility="gone" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/currentFileProgressIndicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:max="100"
+            android:visibility="gone"
+            app:indicatorColor="@color/fmpu_ruby_primary"
+            app:trackColor="@color/fmpu_progress_track"
+            app:trackThickness="8dp" />
+
+        <TextView
+            android:id="@+id/currentFileProgressText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="end"
+            android:textAppearance="?textAppearanceBodyMedium"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/overallProgressLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/file_job_progress_overall"
+            android:textAppearance="?textAppearanceTitleSmall"
+            android:visibility="gone" />
 
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progressIndicator"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:max="100"
             app:indicatorColor="@color/fmpu_ruby_primary"
             app:trackColor="@color/fmpu_progress_track"
@@ -76,13 +114,6 @@
 
         <TextView
             android:id="@+id/remainingText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textAppearance="?textAppearanceBodyLarge" />
-
-        <TextView
-            android:id="@+id/fileCountText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"

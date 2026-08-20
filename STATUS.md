@@ -119,6 +119,12 @@
   is now classified as a retryable transport failure, so directory browsing
   evicts the matching session, reconnects, and retries once instead of requiring
   a manual pull-to-refresh.
+- Transfer details now use configured storage names and relative paths for the
+  gray source-to-destination route instead of repeating the current filename and
+  target basename. The current-file heading auto-sizes rather than ellipsizing.
+  Multi-file jobs update that heading for each active file and show separate
+  current-file and overall byte-progress bars; single-file jobs retain one
+  overall bar.
 - Validation: Beta 2 passes
   `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
   release signature and version 54 metadata were verified. Basic Fold7 install

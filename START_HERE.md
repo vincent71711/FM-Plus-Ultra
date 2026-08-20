@@ -42,7 +42,9 @@ out, and uses a permanent signing identity stored outside Git.
 - **File-size-aware downloads:** the read pipeline avoids unnecessary requests
   past the expected end of smaller files.
 - **Transfer monitoring:** an in-app panel shows progress, speed, remaining size,
-  ETA, item count, and cancellation while retaining the Android notification.
+  ETA, item count, source/destination route, and cancellation while retaining the
+  Android notification. Multi-file jobs separate current-file byte progress from
+  overall job progress and update the auto-fitting heading for the active file.
 - **Stable browsing during transfers:** provider events are coalesced so active
   SMB transfers do not repeatedly flash or redraw the entire file list.
 - **Home and recent navigation:** the Home dashboard includes reorderable local
@@ -96,9 +98,11 @@ lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
 Newly created items are scrolled into view after the active sort places them.
 The current development build adds app-wide short-tap, accepted pull-to-refresh,
 and successful-transfer completion haptics, plus recovery for SMBJ's explicit
-disconnected-transport state. Version 54 debug is installed on the explicitly
-selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's physical validation;
-these development changes have not been published.
+disconnected-transport state. Transfer details now show configured storage names
+and relative paths, auto-fit long active-file headings, and provide separate
+current-file and overall bars for multi-file jobs. Version 54 debug is installed
+on the explicitly selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's
+physical validation; these development changes have not been published.
 
 ## Project references
 

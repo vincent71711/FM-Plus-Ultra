@@ -126,16 +126,55 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
             binding.sizeText.isVisible = false
             binding.speedText.isVisible = false
             binding.remainingText.isVisible = false
-            binding.fileCountText.isVisible = false
+            binding.currentFileProgressLabel.isVisible = false
+            binding.currentFileProgressIndicator.isVisible = false
+            binding.currentFileProgressText.isVisible = false
+            binding.overallProgressLabel.isVisible = false
             binding.actionButton.setText(android.R.string.ok)
             return
         }
 
         binding.statusText.text = getStatusText(progress.status)
         binding.titleText.text = progress.title
-        binding.pathText.text = listOfNotNull(progress.currentItem, progress.target)
+        binding.pathText.text = listOfNotNull(
+            progress.sourceLocation, progress.targetLocation
+        )
             .joinToString("  →  ")
-        binding.pathText.isVisible = progress.currentItem != null || progress.target != null
+        binding.pathText.isVisible = progress.sourceLocation != null ||
+            progress.targetLocation != null
+
+        val showCurrentFileProgress = progress.fileCount > 1
+        binding.currentFileProgressLabel.text = getString(
+            R.string.file_job_progress_current_file,
+            progress.currentFileIndex,
+            progress.fileCount
+        )
+        binding.currentFileProgressLabel.isVisible = showCurrentFileProgress
+        val currentFilePercent = progress.currentFilePercent
+        binding.currentFileProgressIndicator.isVisible = showCurrentFileProgress
+        binding.currentFileProgressIndicator.isIndeterminate =
+            showCurrentFileProgress && currentFilePercent == null && !progress.status.isFinished
+        if (currentFilePercent != null) {
+            binding.currentFileProgressIndicator.setProgressCompat(currentFilePercent, true)
+        } else if (!binding.currentFileProgressIndicator.isIndeterminate) {
+            binding.currentFileProgressIndicator.setProgressCompat(0, false)
+        }
+        binding.currentFileProgressText.text = currentFilePercent?.let {
+            getString(
+                R.string.file_job_progress_current_file_size,
+                it,
+                Formatter.formatFileSize(
+                    requireContext(),
+                    progress.currentFileTransferredBytes.coerceIn(
+                        0, progress.currentFileTotalBytes
+                    )
+                ),
+                Formatter.formatFileSize(requireContext(), progress.currentFileTotalBytes)
+            )
+        }
+        binding.currentFileProgressText.isVisible =
+            showCurrentFileProgress && currentFilePercent != null
+        binding.overallProgressLabel.isVisible = true
 
         val percent = progress.percent
         val indeterminate = percent == null && !progress.status.isFinished
@@ -164,13 +203,6 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
         }
         binding.remainingText.isVisible = progress.remainingSeconds != null &&
             !progress.status.isFinished
-
-        binding.fileCountText.text = getString(
-            R.string.file_job_progress_file_count,
-            progress.currentFileIndex,
-            progress.fileCount
-        )
-        binding.fileCountText.isVisible = progress.fileCount > 1
 
         binding.actionButton.text = if (progress.status.isFinished) {
             getString(android.R.string.ok)
