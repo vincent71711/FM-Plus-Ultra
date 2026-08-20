@@ -82,6 +82,7 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = FileJobProgressActivityBinding.inflate(requireContext().layoutInflater)
         binding.actionButton.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             val progress = progress
             if (progress == null || progress.status.isFinished) {
                 progress?.let { FileJobProgressStore.dismiss(it.id) }

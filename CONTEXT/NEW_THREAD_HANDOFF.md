@@ -161,3 +161,7 @@
   Cancel, Skip, and positive Replace/Merge/Rename buttons now explicitly perform
   one standard `VIRTUAL_KEY` haptic per click. The JDK 21 debug/release-lint gate
   passes; haptic feel remains for Vincent's physical check.
+- The transfer-progress DialogFragment has the same separate-window boundary.
+  Its shared action button now performs one standard tap haptic in both Cancel
+  and completed OK states. This is separate from the existing one-shot haptic
+  fired automatically when a job first reaches Complete.
