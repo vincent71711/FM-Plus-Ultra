@@ -183,6 +183,13 @@ object Client {
             }
             invalidateSession(path.authority, session)
             openDirectoryIteratorOnce(path, getSession(path.authority))
+        } catch (e: IllegalStateException) {
+            val clientException = ClientException(e)
+            if (!clientException.isRetryableTransportFailure) {
+                throw e
+            }
+            invalidateSession(path.authority, session)
+            openDirectoryIteratorOnce(path, getSession(path.authority))
         }
     }
 

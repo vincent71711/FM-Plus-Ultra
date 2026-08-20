@@ -11,8 +11,10 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.format.Formatter
+import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
@@ -66,9 +68,16 @@ class FileJobProgressActivity : AppActivity() {
 class FileJobProgressDialogFragment : AppCompatDialogFragment() {
     private lateinit var binding: FileJobProgressActivityBinding
     private var progress: FileJobProgress? = null
+    private var hasPerformedCompletionHaptic = false
 
     private val jobId: Int
         get() = requireArguments().getInt(ARG_JOB_ID)
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        hasPerformedCompletionHaptic =
+            savedInstanceState?.getBoolean(STATE_COMPLETION_HAPTIC) ?: false
+    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = FileJobProgressActivityBinding.inflate(requireContext().layoutInflater)
@@ -85,6 +94,19 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
             val progress = progresses.firstOrNull { it.id == jobId }
             this.progress = progress
             render(progress)
+            if (progress?.status == FileJobProgressStatus.COMPLETED &&
+                !hasPerformedCompletionHaptic) {
+                hasPerformedCompletionHaptic = true
+                binding.root.post {
+                    binding.root.performHapticFeedback(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            HapticFeedbackConstants.CONFIRM
+                        } else {
+                            HapticFeedbackConstants.LONG_PRESS
+                        }
+                    )
+                }
+            }
         }
         render(null)
         return MaterialAlertDialogBuilder(requireContext(), theme)
@@ -186,7 +208,13 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
         activity?.finish()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(STATE_COMPLETION_HAPTIC, hasPerformedCompletionHaptic)
+        super.onSaveInstanceState(outState)
+    }
+
     companion object {
         const val ARG_JOB_ID = "jobId"
+        private const val STATE_COMPLETION_HAPTIC = "completionHaptic"
     }
 }

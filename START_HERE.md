@@ -57,7 +57,13 @@ out, and uses a permanent signing identity stored outside Git.
   temporary drawer rather than a permanent sidebar.
 - **Reliability fixes:** saved storage migration, Home transitions, stale-row
   flashes, selection behavior, theme startup, exit confirmation, and expected
-  SMB watcher cancellation have been corrected.
+  SMB watcher cancellation have been corrected. Directory browsing also
+  recognizes SMBJ's disconnected async-transport state and reconnects once
+  automatically instead of requiring a manual refresh.
+- **Haptic feedback:** enabled short taps throughout the app provide standard
+  system-respecting feedback without duplicating long-press feedback, and a
+  successful file operation provides a distinct one-shot completion haptic.
+  Pull-to-refresh confirms only an accepted refresh with a gesture-end haptic.
 - **Privacy:** Firebase Analytics, Crashlytics, Google Services integration, and
   automatic crash reporting were removed without adding replacement telemetry.
 
@@ -88,6 +94,11 @@ a Wi-Fi transition, makes remote Home navigation reach the actual Home
 dashboard, and reduces list-view rows from 72dp to 64dp without smaller text or
 lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
 Newly created items are scrolled into view after the active sort places them.
+The current development build adds app-wide short-tap, accepted pull-to-refresh,
+and successful-transfer completion haptics, plus recovery for SMBJ's explicit
+disconnected-transport state. Version 54 debug is installed on the explicitly
+selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's physical validation;
+these development changes have not been published.
 
 ## Project references
 

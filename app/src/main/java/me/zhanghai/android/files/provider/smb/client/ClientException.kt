@@ -40,6 +40,12 @@ class ClientException : Exception {
                 if (throwable is IOException || throwable is TimeoutException) {
                     return true
                 }
+                // SMBJ's async transport uses this exact state error when a connection closes
+                // between isConnected and the next queued write.
+                if (throwable is IllegalStateException &&
+                    throwable.message == "Transport is not connected") {
+                    return true
+                }
                 throwable = throwable.cause
             }
             return false

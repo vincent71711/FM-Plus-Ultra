@@ -6,7 +6,7 @@
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
-- Work branch: `codex/release-0.1.0-beta.1`; validated checkpoint is on Forgejo
+- Work branch: `codex/beta-feedback-fixes`; validated checkpoint is on Forgejo
   `main` and the public GitHub fork `vincent71711/FM-Plus-Ultra`.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
@@ -28,10 +28,11 @@
   The project must not imply affiliation with similarly named commercial apps.
   Public prerelease `v0.1.0-beta.1` and permanent signing are approved; store
   distribution and non-beta release channels remain undecided.
-- Version 52 debug and permanently signed version 53 release are installed and
-  running on the explicitly selected Fold7. The release passed a cold-launch
-  crash/ANR check and coexists with Play Store Material Files. Do not record the
-  wireless-ADB serial.
+- The latest version 54 development debug is installed on the explicitly selected
+  Fold7 and S23 FE. Vincent requested no scripted functional test after this
+  install and will perform the physical interaction checks. The permanently
+  signed version 53 release remains on the Fold7 and coexists with Play Store
+  Material Files. Do not record either wireless-ADB serial.
 - A live cover (1080x2520) to inner (1968x2184) to cover transition retained the
   same resumed process/activity and produced no fatal exception.
 - Synthetic local rename and copy-then-delete actions are verified. The move
@@ -126,3 +127,13 @@
   Targeted SMB reconnect, remote Home, density, and paste-state checks remain.
 - Vincent approved the `0.1.0-beta.2` (54) source and permanently signed APK for
   GitHub publication on 2026-08-20.
+- Current uncommitted beta-feedback work adds common short-tap haptics for enabled
+  app controls, suppresses them for swipes/cancels/long presses, and performs a
+  gesture-end haptic only when pull-to-refresh crosses its activation threshold.
+  It performs a distinct one-shot haptic when a file job reaches successful
+  completion. It also recognizes SMBJ's exact
+  `IllegalStateException: Transport is not connected` as
+  a retryable stale-transport failure during directory enumeration, evicts only
+  the matching cached session, reconnects, and retries once. The documented JDK
+  21 `assembleDebug lintVitalRelease` gate passes. The resulting debug APK is on
+  both explicitly selected phones; physical behavior remains for Vincent to test.

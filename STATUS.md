@@ -1,15 +1,16 @@
 # Status
 
 - Phase: competitive SMB baseline achieved; continue product validation
-- Branch: `codex/release-0.1.0-beta.1`
+- Branch: `codex/beta-feedback-fixes`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Identity: FM Plus Ultra; debug package
   `com.froslabs.filemanagerplusultra.debug`
 - Telemetry: Firebase/Crashlytics/Google Services removed
 - Branding: approved version-2 librarian source integrated into launcher assets;
   adaptive foreground scaled to 64% so more of the folder is visible
-- Build: version 53 passes the documented JDK 21
-  `assembleDebug lintVitalRelease assembleRelease` gate
+- Build: version 54 passes the documented JDK 21
+  `assembleDebug lintVitalRelease` gate; the existing signed release checkpoint
+  also passed `assembleRelease`
 - Current release: version `0.1.0-beta.2` (54) contains SMB recovery, corrected
   remote Home navigation, denser rows, refreshed Home statistics, and reliable
   reveal of newly created items. Vincent approved its GitHub source and signed
@@ -19,9 +20,10 @@
   `FM-Plus-Ultra-0.1.0-beta.2-54.apk`; it was not installed.
 - Tests: no upstream test source sets found; lint vital, debug assembly, and
   signed release assembly pass
-- Device install: version 52 debug and permanently signed version 53 release are
-  installed on the explicitly selected Fold7; the release passed a cold-launch
-  check without a fatal exception or ANR
+- Device install: the latest version 54 development debug is installed on the
+  explicitly selected Fold7 and S23 FE. Vincent requested no scripted physical
+  testing after this install and will perform the interaction checks. The
+  permanently signed version 53 release remains installed on the Fold7.
 - Fold lifecycle: cover (1080x2520) to inner (1968x2184) to cover passed while
   retaining the same resumed process/activity with no fatal exception
 - Synthetic local actions: rename and copy-then-delete results verified; move
@@ -108,11 +110,20 @@
   file rows are 64dp instead of 72dp without smaller text or lost metadata. Home
   statistics now refresh on resume and through pull-to-refresh. Newly created
   files and folders are revealed at their resulting sorted list/grid position.
+- Latest beta-feedback fixes: all short taps on enabled app controls now provide
+  standard system-respecting haptic feedback while swipes, canceled gestures,
+  and long presses are excluded. Pull-to-refresh provides a gesture-end haptic
+  only after crossing the refresh threshold. A successful file operation provides
+  one distinct completion haptic when its progress dialog changes to Complete. SMBJ's
+  exact `IllegalStateException: Transport is not connected` stale-socket signal
+  is now classified as a retryable transport failure, so directory browsing
+  evicts the matching session, reconnects, and retries once instead of requiring
+  a manual pull-to-refresh.
 - Validation: Beta 2 passes
   `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
   release signature and version 54 metadata were verified. Basic Fold7 install
   and cold launch pass; physical checks for SMB reconnect, remote Home navigation,
   row density, and pending paste retention remain pending.
 - Physical checks for SMB reconnect, remote Home navigation, row density, and
-  pending paste retention remain with Vincent; continue collecting beta
-  correctness and UI feedback.
+  pending paste retention remain with Vincent. Haptic feel and the refined SMB
+  disconnected-transport recovery also remain for Vincent's physical check.
