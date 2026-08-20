@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filejob
@@ -10,6 +11,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
 import android.os.Parcel
+import android.view.HapticFeedbackConstants
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.ImageView
@@ -134,6 +136,9 @@ class FileJobConflictDialogFragment : AppCompatDialogFragment() {
                 if (savedInstanceState != null) {
                     binding.allCheck.isChecked = savedInstanceState.getState<State>().isAllChecked
                 }
+                binding.allCheck.setOnClickListener {
+                    it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+                }
             }
             .setPositiveButton(positiveButtonRes, ::onDialogButtonClick)
             .setNegativeButton(R.string.skip, ::onDialogButtonClick)
@@ -209,6 +214,9 @@ class FileJobConflictDialogFragment : AppCompatDialogFragment() {
     }
 
     private fun onDialogButtonClick(dialog: DialogInterface, which: Int) {
+        (dialog as Dialog).window?.decorView?.performHapticFeedback(
+            HapticFeedbackConstants.VIRTUAL_KEY
+        )
         val action: FileJobConflictAction
         val name: String?
         val all: Boolean

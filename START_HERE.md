@@ -68,6 +68,8 @@ out, and uses a permanent signing identity stored outside Git.
   system-respecting feedback without duplicating long-press feedback, and a
   successful file operation provides a distinct one-shot completion haptic.
   Pull-to-refresh confirms only an accepted refresh with a gesture-end haptic.
+  File-conflict checkbox and action-button taps are covered even though Android
+  renders that dialog in a window separate from the hosting activity.
 - **Privacy:** Firebase Analytics, Crashlytics, Google Services integration, and
   automatic crash reporting were removed without adding replacement telemetry.
 

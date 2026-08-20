@@ -156,3 +156,8 @@
   Debug logs now include every SMB request aged at least one second. The JDK 21
   `assembleDebug lintVitalRelease` gate passes; physical interaction testing is
   intentionally left to Vincent.
+- File-conflict dialogs use a separate Android window that bypasses the hosting
+  activity's global touch-haptic dispatcher. The Apply-to-all checkbox and the
+  Cancel, Skip, and positive Replace/Merge/Rename buttons now explicitly perform
+  one standard `VIRTUAL_KEY` haptic per click. The JDK 21 debug/release-lint gate
+  passes; haptic feel remains for Vincent's physical check.

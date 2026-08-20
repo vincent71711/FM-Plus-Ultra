@@ -114,7 +114,9 @@
   standard system-respecting haptic feedback while swipes, canceled gestures,
   and long presses are excluded. Pull-to-refresh provides a gesture-end haptic
   only after crossing the refresh threshold. A successful file operation provides
-  one distinct completion haptic when its progress dialog changes to Complete. SMBJ's
+  one distinct completion haptic when its progress dialog changes to Complete.
+  The separate file-conflict dialog window now also provides tap feedback for
+  its Apply-to-all checkbox and Cancel, Skip, and Replace/Merge/Rename actions. SMBJ's
   exact `IllegalStateException: Transport is not connected` stale-socket signal
   is now classified as a retryable transport failure, so directory browsing
   evicts the matching session, reconnects, and retries once instead of requiring
