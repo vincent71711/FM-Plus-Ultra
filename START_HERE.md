@@ -61,7 +61,9 @@ out, and uses a permanent signing identity stored outside Git.
   flashes, selection behavior, theme startup, exit confirmation, and expected
   SMB watcher cancellation have been corrected. Directory browsing also
   recognizes SMBJ's disconnected async-transport state and reconnects once
-  automatically instead of requiring a manual refresh.
+  automatically instead of requiring a manual refresh. A stalled SMB download
+  read now times out after 15 seconds, reconnects, and safely restarts the
+  current file once rather than leaving progress frozen indefinitely.
 - **Haptic feedback:** enabled short taps throughout the app provide standard
   system-respecting feedback without duplicating long-press feedback, and a
   successful file operation provides a distinct one-shot completion haptic.
@@ -102,7 +104,9 @@ disconnected-transport state. Transfer details now show configured storage names
 and relative paths, auto-fit long active-file headings, and provide separate
 current-file and overall bars for multi-file jobs. Version 54 debug is installed
 on the explicitly selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's
-physical validation; these development changes have not been published.
+physical validation. The latest development revision also recovers one stalled
+SMB read by restarting only the affected file with corrected progress accounting;
+these development changes have not been publicly published.
 
 ## Project references
 

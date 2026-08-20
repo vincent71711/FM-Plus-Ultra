@@ -125,6 +125,14 @@
   Multi-file jobs update that heading for each active file and show separate
   current-file and overall byte-progress bars; single-file jobs retain one
   overall bar.
+- Fold7 stall diagnosis: a 4 GiB two-file SMB download stopped at 142,344,192
+  bytes for about 60 seconds while the app was still foregrounded, then resumed
+  and completed without an ANR or crash. The optimized SMB channel had bypassed
+  the common 15-second read deadline with an unbounded wait. Reads now enforce
+  that deadline, close a stalled SMB connection, roll back the partial current
+  file's progress, and restart that file once. A repeated stall reaches the
+  existing error flow instead of leaving the transfer apparently frozen. Debug
+  logging now records every SMB request taking at least one second.
 - Validation: Beta 2 passes
   `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
   release signature and version 54 metadata were verified. Basic Fold7 install
@@ -132,4 +140,6 @@
   row density, and pending paste retention remain pending.
 - Physical checks for SMB reconnect, remote Home navigation, row density, and
   pending paste retention remain with Vincent. Haptic feel and the refined SMB
-  disconnected-transport recovery also remain for Vincent's physical check.
+  disconnected-transport recovery also remain for Vincent's physical check. The
+  new stalled-read recovery is build-validated but intentionally not exercised
+  by scripted phone interaction.

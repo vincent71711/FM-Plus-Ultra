@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2024 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.common
@@ -23,6 +24,13 @@ import java.util.ArrayDeque
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+
+class FileReadTimeoutException(
+    val filePosition: Long,
+    val timeoutMillis: Long
+) : IOException("File read at offset $filePosition timed out after $timeoutMillis ms")
 
 abstract class AbstractFileByteChannel(
     private val isAppend: Boolean,
@@ -83,6 +91,8 @@ abstract class AbstractFileByteChannel(
     protected open fun onRead(position: Long, size: Int): ByteBuffer {
         throw NotImplementedError()
     }
+
+    protected open fun onReadTimedOut(position: Long, timeoutMillis: Long) {}
 
     @Throws(IOException::class)
     final override fun write(source: ByteBuffer): Int {
@@ -245,11 +255,17 @@ abstract class AbstractFileByteChannel(
             fillReadPipeline(allowSizeHintProbe = true)
             val pendingRead = pendingReads.removeFirst()
             val newBuffer = try {
-                pendingRead.future.get()
+                pendingRead.future.get(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)
             } catch (e: CancellationException) {
                 throw InterruptedIOException().apply { initCause(e) }
             } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
                 throw InterruptedIOException().apply { initCause(e) }
+            } catch (e: TimeoutException) {
+                onReadTimedOut(pendingRead.position, TIMEOUT_MILLIS)
+                throw FileReadTimeoutException(pendingRead.position, TIMEOUT_MILLIS).apply {
+                    initCause(e)
+                }
             } catch (e: ExecutionException) {
                 val exception = e.cause ?: e
                 if (exception is IOException) {

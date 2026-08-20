@@ -127,7 +127,7 @@
   Targeted SMB reconnect, remote Home, density, and paste-state checks remain.
 - Vincent approved the `0.1.0-beta.2` (54) source and permanently signed APK for
   GitHub publication on 2026-08-20.
-- Current uncommitted beta-feedback work adds common short-tap haptics for enabled
+- Current beta-feedback work adds common short-tap haptics for enabled
   app controls, suppresses them for swipes/cancels/long presses, and performs a
   gesture-end haptic only when pull-to-refresh crosses its activation threshold.
   It performs a distinct one-shot haptic when a file job reaches successful
@@ -145,3 +145,14 @@
   labeled Current file and Overall progress bars. Single-file work keeps one
   Overall bar. The JDK 21 debug/release-lint gate passes, and the debug update is
   installed on both explicitly selected phones without scripted interaction.
+- A Fold7 SMB-to-local copy of two 2 GiB files stalled at 142,344,192 bytes for
+  about 60 seconds while its progress activity was still foregrounded. It later
+  resumed and completed all 4 GiB without an ANR or crash. The optimized SMB
+  channel was waiting on a raw future without the common channel's intended
+  15-second deadline. The current fix enforces that deadline, closes the stuck
+  connection, removes the partial destination through the existing safe-copy
+  cleanup, rolls back only that file's contributed progress, and automatically
+  retries the current file once. A second timeout uses the existing error dialog.
+  Debug logs now include every SMB request aged at least one second. The JDK 21
+  `assembleDebug lintVitalRelease` gate passes; physical interaction testing is
+  intentionally left to Vincent.

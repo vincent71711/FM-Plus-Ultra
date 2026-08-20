@@ -11,6 +11,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.AnyRes
 import androidx.annotation.PluralsRes
@@ -46,6 +47,7 @@ import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.common.ByteString
 import me.zhanghai.android.files.provider.common.ByteStringBuilder
+import me.zhanghai.android.files.provider.common.FileReadTimeoutException
 import me.zhanghai.android.files.provider.common.InvalidFileNameException
 import me.zhanghai.android.files.provider.common.PosixFileModeBit
 import me.zhanghai.android.files.provider.common.PosixFileStore
@@ -86,6 +88,7 @@ import me.zhanghai.android.files.util.createInstallPackageIntent
 import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.createViewIntent
 import me.zhanghai.android.files.util.extraPath
+import me.zhanghai.android.files.util.findCauseByClass
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.putArgs
 import me.zhanghai.android.files.util.showToast
@@ -156,6 +159,10 @@ private fun FileJob.postNotification(
 private const val PROGRESS_INTERVAL_MILLIS = 200L
 
 private const val NOTIFICATION_INTERVAL_MILLIS = 500L
+
+private const val STALLED_READ_RETRY_LIMIT = 1
+
+private const val STALLED_READ_TAG = "FMPU.TransferRecovery"
 
 private fun FileJob.showToast(textRes: Int, duration: Int = Toast.LENGTH_SHORT) {
     service.mainExecutorCompat.execute {
@@ -492,6 +499,11 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
     fun addToTransferredSize(size: Long) {
         transferredSize += size
         currentFileTransferredSize += size
+    }
+
+    fun restartCurrentFile() {
+        transferredSize = (transferredSize - currentFileTransferredSize).coerceAtLeast(0)
+        currentFileTransferredSize = 0
     }
 
     fun setCurrentFile(path: Path) {
@@ -1314,6 +1326,7 @@ private fun FileJob.copyOrMove(
     }
     var target = target
     var replaceExisting = false
+    var stalledReadRetryCount = 0
     var retry: Boolean
     do {
         retry = false
@@ -1418,6 +1431,19 @@ private fun FileJob.copyOrMove(
             throw e
         } catch (e: IOException) {
             e.printStackTrace()
+            if (e.findCauseByClass<FileReadTimeoutException>() != null &&
+                stalledReadRetryCount < STALLED_READ_RETRY_LIMIT) {
+                ++stalledReadRetryCount
+                transferInfo.restartCurrentFile()
+                Log.w(
+                    STALLED_READ_TAG,
+                    "Restarting ${getFileName(source)} after a stalled read " +
+                        "($stalledReadRetryCount/$STALLED_READ_RETRY_LIMIT)"
+                )
+                postCopyMoveNotification(transferInfo, source, type)
+                retry = true
+                continue
+            }
             if (actionAllInfo.skipCopyMoveError) {
                 transferInfo.skipFile(source)
                 postCopyMoveNotification(transferInfo, source, type)
