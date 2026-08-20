@@ -4,7 +4,7 @@ This file records FM Plus Ultra changes separately from inherited
 Material Files functionality. Upstream history remains available in Git and
 upstream release notes.
 
-## 0.1.0-beta.2 candidate — 2026-08-20
+## 0.1.0-beta.2 — 2026-08-20
 
 - Recover SMB directory browsing after an idle, backgrounded, or network-switched
   connection by discarding stale sessions and retrying one safe enumeration on

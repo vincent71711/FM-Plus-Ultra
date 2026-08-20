@@ -50,7 +50,7 @@ class AboutFragment : Fragment() {
 
     companion object {
         private val GITHUB_URI =
-            Uri.parse("https://git.computersmarts.org/vincent/file-manager-app")
+            Uri.parse("https://github.com/vincent71711/FM-Plus-Ultra")
         private val AUTHOR_RESUME_URI = Uri.parse("https://resume.zhanghai.me/")
         private val AUTHOR_GITHUB_URI = Uri.parse("https://github.com/zhanghai")
         private val AUTHOR_TWITTER_URI = Uri.parse("https://twitter.com/zhanghai95")

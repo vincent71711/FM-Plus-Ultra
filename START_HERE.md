@@ -81,29 +81,13 @@ laboratory-perfect comparison. The controlled portable-Java checkpoint measured
 See the explanation and comparison graph in
 [Why SMB transfers are much faster](README.md#why-smb-transfers-are-much-faster).
 
-## Next phase
+## Current release
 
-The original immediate implementation and validation work is complete. The next
-phase is presentation and beta feedback:
-
-1. Add current folded, unfolded, Home, SMB, file-list, and transfer-progress
-   screenshots to the public README.
-2. Collect beta feedback and address reproducible correctness or usability
-   issues without reopening completed performance work unnecessarily.
-3. Back up the permanent signing key securely so future APKs can update the
-   installed release.
-4. Decide later whether updates remain manual GitHub APK installs or gain an
-   optional in-app update workflow.
-
-The current unreleased revision adds SMB session recovery after backgrounding or
+Version `0.1.0-beta.2` (54) adds SMB session recovery after backgrounding or
 a Wi-Fi transition, makes remote Home navigation reach the actual Home
 dashboard, and reduces list-view rows from 72dp to 64dp without smaller text or
 lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
 Newly created items are scrolled into view after the active sort places them.
-It is being built locally as `0.1.0-beta.2` (54); this candidate
-has not been approved for publication. Its debug build is installed on the Fold7,
-and its signed release APK is in Downloads but is not installed. Targeted SMB and
-UI validation remains pending.
 
 ## Project references
 

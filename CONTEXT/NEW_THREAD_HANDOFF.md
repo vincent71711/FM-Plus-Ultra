@@ -12,8 +12,8 @@
   to the same commit's full SHA because JitPack no longer serves the short form.
 - Validated release gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease assembleRelease --stacktrace --console=plain`.
-- Upstream app version: 1.7.4 (39); public release: 0.1.0-beta.1 (53); current
-  local candidate: 0.1.0-beta.2 (54). The derivative Android version code must
+- Upstream app version: 1.7.4 (39); current release: 0.1.0-beta.2 (54). The
+  derivative Android version code must
   remain above inherited migration thresholds and increase monotonically; using
   1 caused legacy storage migration to discard saved SMB entries on restart.
 - Debug identity: `com.froslabs.filemanagerplusultra.debug`; reserved release
@@ -103,7 +103,7 @@
   permanent certificate SHA-256 is
   `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`;
   the private signing material remains outside Git and requires durable backup.
-- Unreleased beta revision implemented 2026-08-20: Android default-network
+- Beta 2 revision implemented 2026-08-20: Android default-network
   changes invalidate cached SMB sessions. A transport failure during complete
   directory enumeration evicts the matching stale session, reconnects, and
   retries once; writes are not automatically replayed.
@@ -120,10 +120,9 @@
   list/grid and sort settings; navigating elsewhere cancels the pending reveal.
 - Validation: `assembleDebug lintVitalRelease assembleRelease` passes with JDK
   21. The version 54 debug APK is installed on the explicitly selected Fold7 and
-  passed a 784 ms cold launch without a fatal exception or ANR. The permanently
+  passed an 824 ms cold launch without a fatal exception or ANR. The permanently
   signed release APK is in Downloads as
-  `FM-Plus-Ultra-0.1.0-beta.2-54.apk` (10,505,319 bytes) but was not installed.
+  `FM-Plus-Ultra-0.1.0-beta.2-54.apk` but was not installed.
   Targeted SMB reconnect, remote Home, density, and paste-state checks remain.
-- Vincent requested the permanently signed `0.1.0-beta.2` (54) release candidate
-  APK in the Fold7 Downloads folder; that request is complete. This is a private
-  device artifact, not authorization to push or publish the candidate.
+- Vincent approved the `0.1.0-beta.2` (54) source and permanently signed APK for
+  GitHub publication on 2026-08-20.

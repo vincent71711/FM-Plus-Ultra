@@ -10,12 +10,13 @@
   adaptive foreground scaled to 64% so more of the folder is visible
 - Build: version 53 passes the documented JDK 21
   `assembleDebug lintVitalRelease assembleRelease` gate
-- Unreleased candidate: version `0.1.0-beta.2` (54) contains the SMB recovery,
-  remote Home, and denser-row revision. Vincent requested its permanently signed
-  release APK in the Fold7 Downloads folder; it is not approved for publication.
-  Version 54 debug is installed on the explicitly selected Fold7 and passed a
-  784 ms cold launch without a fatal exception or ANR. The signed release APK is
-  present in Downloads as `FM-Plus-Ultra-0.1.0-beta.2-54.apk`; it was not installed.
+- Current release: version `0.1.0-beta.2` (54) contains SMB recovery, corrected
+  remote Home navigation, denser rows, refreshed Home statistics, and reliable
+  reveal of newly created items. Vincent approved its GitHub source and signed
+  APK publication on 2026-08-20. Version 54 debug is installed on the explicitly
+  selected Fold7 and passed an 824 ms cold launch without a fatal exception or
+  ANR. The signed release APK is also present in Downloads as
+  `FM-Plus-Ultra-0.1.0-beta.2-54.apk`; it was not installed.
 - Tests: no upstream test source sets found; lint vital, debug assembly, and
   signed release assembly pass
 - Device install: version 52 debug and permanently signed version 53 release are
@@ -107,10 +108,11 @@
   file rows are 64dp instead of 72dp without smaller text or lost metadata. Home
   statistics now refresh on resume and through pull-to-refresh. Newly created
   files and folders are revealed at their resulting sorted list/grid position.
-- Validation: the candidate passes
+- Validation: Beta 2 passes
   `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
   release signature and version 54 metadata were verified. Basic Fold7 install
   and cold launch pass; physical checks for SMB reconnect, remote Home navigation,
   row density, and pending paste retention remain pending.
-- Next work: complete the physical validation when the Fold7 is connected, then
-  continue collecting beta correctness/UI feedback.
+- Physical checks for SMB reconnect, remote Home navigation, row density, and
+  pending paste retention remain with Vincent; continue collecting beta
+  correctness and UI feedback.

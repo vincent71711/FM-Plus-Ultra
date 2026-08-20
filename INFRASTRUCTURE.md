@@ -10,10 +10,6 @@
 - Baseline commit: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Baseline tag: `mod-baseline/2026-08-16-material-files-fc12500`
 
-Private mirrors, workstation paths, device serials, credentials, and internal
-host names are intentionally omitted from public documentation. Contributors
-may add their own local remotes without changing the public repository layout.
-
 ## Toolchain and baseline validation
 
 - JDK: Temurin 21

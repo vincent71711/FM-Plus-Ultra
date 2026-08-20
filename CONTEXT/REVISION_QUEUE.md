@@ -32,11 +32,10 @@
 - **First public binary:** GitHub prerelease `v0.1.0-beta.1`, version code 53,
   is approved with the signed APK, checksum, tagged corresponding source, GPLv3
   license, notices, and attribution.
-- **Private Beta 2 candidate artifact:** Vincent requested the permanently signed
-  `0.1.0-beta.2` (54) APK in the Fold7 Downloads folder on 2026-08-20. This does
-  not authorize pushing or publishing the candidate. Completed: version 54 debug
-  was installed for testing and the signed release APK was copied to Downloads
-  without installing the release package.
+- **Second public beta:** Vincent approved publishing `0.1.0-beta.2` (54) to
+  GitHub with its signed APK on 2026-08-20. Version 54 debug was installed for
+  testing and the signed release APK was also copied to the Fold7 Downloads
+  folder without installing the release package.
 
 ## Decisions still required
 
@@ -55,7 +54,7 @@
 - Add synthetic automated tests; upstream currently has no checked-in test
   source sets.
 
-## Beta feedback implemented, awaiting physical validation
+## Beta feedback implemented
 
 - **Recover stale SMB connections:** implemented 2026-08-20. SMB browsing
   frequently became unusable

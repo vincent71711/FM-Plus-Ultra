@@ -25,27 +25,6 @@ These instructions apply throughout `/srv/file-manager-app`.
   wireless ADB. Select its explicit current serial; never assume the first ADB
   device.
 
-## Product requirements
-
-- Preserve local browsing and obvious copy, move, rename, delete, create, and
-  cross-provider workflows.
-- An SMB connection without a share path must enumerate accessible shares.
-- SMB transfer correctness and competitive throughput are baseline concerns.
-- File lists must remain visually stable during transfers; automatic provider
-  events must not trigger visible full-list refresh loops.
-- The default list presentation must have strong row structure and dividers,
-  clear metadata columns, familiar folder/file visuals, and direct selection
-  actions. Use original assets; do not copy proprietary application assets.
-- The file-list toolbar, navigation controls, selection actions, and breadcrumb
-  area must remain pinned and reachable while the file list scrolls. List
-  scrolling must never collapse all top controls offscreen.
-- Provide a persistent Home control with an expandable recent-location/history
-  selector. Users must be able to jump among previously opened local and remote
-  folders without retracing each directory tree; preserve pending copy/move
-  operations during those jumps.
-- Transfers require an in-app operations overview, an expandable detailed view,
-  and a stable Android notification.
-
 ## Authorization and safety
 
 - Never push, force-push, publish, release, upload an APK/AAB, or contact
@@ -64,7 +43,8 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 ## Git practice
 
-- `origin` is Vincent's Forgejo repository and `upstream` is Material Files.
+- `origin` is the owner's private integration repository and `upstream` is
+  Material Files.
 - Keep commits focused and leave the project buildable.
 - Never rewrite or force-push shared history.
 - Integrate future upstream changes on a dedicated branch using
@@ -83,8 +63,8 @@ The upstream CI gate, validated locally with JDK 21 after expanding the pinned
 `dav4jvm` coordinate to its full SHA, is:
 
 ```bash
-export JAVA_HOME=/home/vincent/.cache/codex-jdks/temurin-21
-export ANDROID_HOME=/home/vincent/Android/Sdk
+export JAVA_HOME="${JAVA_HOME:?Set JAVA_HOME to JDK 21}"
+export ANDROID_HOME="${ANDROID_HOME:?Set ANDROID_HOME to the Android SDK}"
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
 ./gradlew assembleDebug lintVitalRelease --stacktrace --console=plain
 ```
