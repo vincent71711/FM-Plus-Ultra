@@ -27,8 +27,11 @@ These instructions apply throughout `/srv/file-manager-app`.
 
 ## Authorization and safety
 
-- Never push, force-push, publish, release, upload an APK/AAB, or contact
-  external parties unless Vincent explicitly requests it.
+- Vincent granted standing approval on 2026-08-20 for ordinary commits and
+  non-force pushes to the private Forgejo `origin` without per-push confirmation.
+  Never force-push, push to GitHub or another public remote, publish, release,
+  upload an APK/AAB, or contact external parties unless Vincent explicitly
+  requests that specific action.
 - Do not change the recorded branding/application IDs, or choose signing, an
   update channel, binary distribution, or release terms without recording the
   decision in `CONTEXT/REVISION_QUEUE.md`.

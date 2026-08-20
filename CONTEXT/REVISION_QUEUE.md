@@ -36,6 +36,10 @@
   GitHub with its signed APK on 2026-08-20. Version 54 debug was installed for
   testing and the signed release APK was also copied to the Fold7 Downloads
   folder without installing the release package.
+- **Private Forgejo pushes:** Vincent granted standing approval on 2026-08-20
+  for ordinary commits and non-force pushes to the private `origin` without
+  per-push confirmation. GitHub/public pushes, releases, binary uploads, and
+  force-pushes still require explicit authorization for the specific action.
 
 ## Decisions still required
 
