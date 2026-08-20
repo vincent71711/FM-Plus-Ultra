@@ -3,6 +3,7 @@
 <!--
   ~ Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
   ~ All Rights Reserved.
+  ~ Modified 2026-08-20 for FM Plus Ultra.
   -->
 
 <me.zhanghai.android.files.ui.DividedCheckableForegroundLinearLayout
@@ -10,7 +11,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/itemLayout"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/two_line_list_item_height"
+    android:layout_height="@dimen/file_list_item_height"
     android:foreground="?selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal">

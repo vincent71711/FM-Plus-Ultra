@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.app
@@ -66,6 +67,7 @@ private fun initializeFileSystemProviders() {
     FtpClient.authenticator = FtpServerAuthenticator
     SftpClient.authenticator = SftpServerAuthenticator
     SmbClient.authenticator = SmbServerAuthenticator
+    SmbClient.initializeNetworkMonitoring(application)
     WebDavClient.authenticator = WebDavServerAuthenticator
 }
 

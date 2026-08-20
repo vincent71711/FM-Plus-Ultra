@@ -95,6 +95,16 @@ phase is presentation and beta feedback:
 4. Decide later whether updates remain manual GitHub APK installs or gain an
    optional in-app update workflow.
 
+The current unreleased revision adds SMB session recovery after backgrounding or
+a Wi-Fi transition, makes remote Home navigation reach the actual Home
+dashboard, and reduces list-view rows from 72dp to 64dp without smaller text or
+lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
+Newly created items are scrolled into view after the active sort places them.
+It is being built locally as `0.1.0-beta.2` (54); this candidate
+has not been approved for publication. Its debug build is installed on the Fold7,
+and its signed release APK is in Downloads but is not installed. Targeted SMB and
+UI validation remains pending.
+
 ## Project references
 
 - [README](README.md)

@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filelist
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.zhanghai.android.files.R
+import me.zhanghai.android.files.app.application
 import me.zhanghai.android.files.databinding.HomeDashboardItemBinding
 import me.zhanghai.android.files.navigation.NavigationItem
 import me.zhanghai.android.files.ui.SimpleAdapter
@@ -28,6 +30,8 @@ class HomeDashboardAdapter(
     private val listener: NavigationItem.Listener
 ) : SimpleAdapter<NavigationItem, HomeDashboardAdapter.ViewHolder>() {
     private val subtitleCache = mutableMapOf<Long, String?>()
+    private var subtitleGeneration = 0
+    private var refreshJob: Job? = null
     var onStartDrag: ((ViewHolder) -> Unit)? = null
 
     var isEditing: Boolean = false
@@ -70,6 +74,7 @@ class HomeDashboardAdapter(
         )
         binding.titleText.text = item.getTitle(binding.titleText.context)
         holder.subtitleJob?.cancel()
+        val subtitleGeneration = subtitleGeneration
         val context = binding.subtitleText.context
         binding.subtitleText.text = if (subtitleCache.containsKey(item.id)) {
             subtitleCache[item.id]
@@ -78,6 +83,9 @@ class HomeDashboardAdapter(
         }
         holder.subtitleJob = lifecycleOwner.lifecycleScope.launch {
             val subtitle = item.getHomeSubtitle(context)
+            if (this@HomeDashboardAdapter.subtitleGeneration != subtitleGeneration) {
+                return@launch
+            }
             subtitleCache[item.id] = subtitle
             if (holder.boundItemId == item.id) {
                 binding.subtitleText.text = subtitle
@@ -85,9 +93,20 @@ class HomeDashboardAdapter(
         }
     }
 
-    fun refreshSubtitles() {
-        subtitleCache.clear()
-        notifyItemRangeChanged(0, itemCount)
+    fun refreshSubtitles(onComplete: (() -> Unit)? = null) {
+        val items = list.toList()
+        val generation = ++subtitleGeneration
+        refreshJob?.cancel()
+        refreshJob = lifecycleOwner.lifecycleScope.launch {
+            val subtitles = items.associate { it.id to it.getHomeSubtitle(application) }
+            if (subtitleGeneration != generation) {
+                return@launch
+            }
+            subtitleCache.clear()
+            subtitleCache.putAll(subtitles)
+            notifyItemRangeChanged(0, itemCount)
+            onComplete?.invoke()
+        }
     }
 
     override fun onViewRecycled(holder: ViewHolder) {

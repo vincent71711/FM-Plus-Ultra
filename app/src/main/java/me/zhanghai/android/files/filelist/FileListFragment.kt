@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filelist
@@ -263,6 +264,11 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             )
         }
         binding.swipeRefreshLayout.setOnRefreshListener { this.refresh() }
+        binding.homeSwipeRefreshLayout.setOnRefreshListener {
+            homeDashboardAdapter.refreshSubtitles {
+                binding.homeSwipeRefreshLayout.isRefreshing = false
+            }
+        }
         layoutManager = GridLayoutManager(activity, 1)
         binding.recyclerView.layoutManager = layoutManager
         adapter = FileListAdapter(this)
@@ -522,6 +528,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     override fun onResume() {
         super.onResume()
 
+        if (viewModel.screen == FileListScreen.HOME) {
+            homeDashboardAdapter.refreshSubtitles()
+        }
         if (!viewModel.isNotificationPermissionRequested) {
             ensureStorageAccess()
         }
@@ -739,6 +748,9 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
     }
 
     private fun onCurrentPathChanged(path: Path) {
+        if (viewModel.pendingRevealPath?.parent != path) {
+            viewModel.pendingRevealPath = null
+        }
         RecentLocations.record(path)
         updateOverlayToolbar()
         updateBottomToolbar()
@@ -863,6 +875,14 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             files = files.filterNot { it.isHidden }
         }
         adapter.replaceListAndIsSearching(files, viewModel.searchState.isSearching)
+        val pendingRevealPath = viewModel.pendingRevealPath
+        if (pendingRevealPath != null) {
+            val position = adapter.findPosition(pendingRevealPath)
+            if (position != RecyclerView.NO_POSITION) {
+                layoutManager.scrollToPosition(position)
+                viewModel.pendingRevealPath = null
+            }
+        }
     }
 
     private fun updateShowHiddenFilesMenuItem() {
@@ -1583,6 +1603,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     override fun createFile(name: String) {
         val path = currentPath.resolve(name)
+        viewModel.pendingRevealPath = path
         FileJobService.create(path, false, requireContext())
     }
 
@@ -1592,6 +1613,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
 
     override fun createDirectory(name: String) {
         val path = currentPath.resolve(name)
+        viewModel.pendingRevealPath = path
         FileJobService.create(path, true, requireContext())
     }
 
@@ -1627,7 +1649,10 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         get() = viewModel.screen == FileListScreen.HOME
 
     override fun showHome() {
-        if (args.intent.action == Intent.ACTION_VIEW && !requireActivity().isTaskRoot) {
+        if (currentPath.isRemotePath && args.intent.action == Intent.ACTION_VIEW &&
+            !requireActivity().isTaskRoot) {
+            startActivitySafe(FileListActivity.createHomeIntent())
+        } else if (args.intent.action == Intent.ACTION_VIEW && !requireActivity().isTaskRoot) {
             requireActivity().finish()
         } else {
             viewModel.screen = FileListScreen.HOME
@@ -1865,6 +1890,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
         val swipeRefreshLayout: SwipeRefreshLayout,
         val recyclerView: RecyclerView,
         val homeLayout: View,
+        val homeSwipeRefreshLayout: SwipeRefreshLayout,
         val homeRecyclerView: RecyclerView,
         val homeEditButton: com.google.android.material.floatingactionbutton.FloatingActionButton,
         val bottomBarLayout: ViewGroup,
@@ -1899,7 +1925,8 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
                     contentBinding.fileContentLayout,
                     contentBinding.progress, contentBinding.errorText, contentBinding.emptyView,
                     contentBinding.swipeRefreshLayout, contentBinding.recyclerView,
-                    contentBinding.homeLayout, contentBinding.homeRecyclerView,
+                    contentBinding.homeLayout, contentBinding.homeSwipeRefreshLayout,
+                    contentBinding.homeRecyclerView,
                     contentBinding.homeEditButton,
                     bottomBarBinding.bottomBarLayout, bottomBarBinding.bottomToolbar,
                     bottomBarBinding.bottomCreateFileNameEdit, speedDialBinding.speedDialView,

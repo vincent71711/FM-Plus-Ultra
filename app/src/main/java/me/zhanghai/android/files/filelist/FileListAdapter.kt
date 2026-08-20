@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filelist
@@ -168,6 +169,8 @@ class FileListAdapter(
             filePositionMap[file.path] = index
         }
     }
+
+    fun findPosition(path: Path): Int = filePositionMap[path] ?: RecyclerView.NO_POSITION
 
     override fun getItemViewType(position: Int): Int = viewType.ordinal
 

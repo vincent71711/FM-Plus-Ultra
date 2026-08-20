@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
- * Modified 2026-08-16 for FM Plus Ultra.
+ * Modified 2026-08-16 through 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filelist
@@ -92,6 +92,12 @@ class FileListActivity : AppActivity() {
 
     companion object {
         private const val EXIT_CONFIRMATION_WINDOW_MILLIS = 2500L
+
+        fun createHomeIntent(): Intent =
+            FileListActivity::class.createIntent()
+                .setAction(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_LAUNCHER)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
         fun createViewIntent(path: Path): Intent =
             FileListActivity::class.createIntent()

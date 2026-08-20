@@ -32,6 +32,11 @@
 - **First public binary:** GitHub prerelease `v0.1.0-beta.1`, version code 53,
   is approved with the signed APK, checksum, tagged corresponding source, GPLv3
   license, notices, and attribution.
+- **Private Beta 2 candidate artifact:** Vincent requested the permanently signed
+  `0.1.0-beta.2` (54) APK in the Fold7 Downloads folder on 2026-08-20. This does
+  not authorize pushing or publishing the candidate. Completed: version 54 debug
+  was installed for testing and the signed release APK was copied to Downloads
+  without installing the release package.
 
 ## Decisions still required
 
@@ -49,6 +54,34 @@
   `dav4jvm` build dependency but is not involved in SMB.
 - Add synthetic automated tests; upstream currently has no checked-in test
   source sets.
+
+## Beta feedback implemented, awaiting physical validation
+
+- **Recover stale SMB connections:** implemented 2026-08-20. SMB browsing
+  frequently became unusable
+  with an SMBJ `TimeoutException` after the app has been open for a few minutes,
+  returns from the background, or leaves and rejoins Wi-Fi. The current client
+  caches sessions and treats `connection.isConnected` as sufficient even when
+  the underlying TCP connection may be half-dead. Invalidate cached SMB
+  sessions are now invalidated when the active Android network changes or is
+  lost and evicted after a transport timeout/failure. Complete directory
+  enumeration reconnects and retries once; writes are never blindly replayed.
+- **Make remote Home navigation reach the actual Home dashboard:** implemented
+  2026-08-20. Home from a remote child browser now clears the intermediate
+  Remote page and returns to the launcher Home activity, preserving the
+  process-wide pending copy/move state.
+- **Reduce file-list row height without reducing information:** implemented
+  2026-08-20. List-view rows use a dedicated 64dp height instead of 72dp while
+  retaining existing font sizes, primary and metadata text, icons, direct
+  actions, dividers, and 48dp action targets.
+- **Keep Home statistics current:** implemented 2026-08-20. Refresh Home
+  statistics when an already-visible Home screen resumes and provide a
+  pull-to-refresh gesture whose indicator remains active until all dashboard
+  subtitles have been recalculated.
+- **Reveal newly created items:** implemented 2026-08-20. Track the requested
+  create path until it appears in the refreshed adapter, then scroll directly to
+  its position under the current list/grid and sort settings. Clear the pending
+  reveal if the user navigates elsewhere.
 
 ## Proposed first implementation phase
 

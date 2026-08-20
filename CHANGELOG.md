@@ -4,6 +4,21 @@ This file records FM Plus Ultra changes separately from inherited
 Material Files functionality. Upstream history remains available in Git and
 upstream release notes.
 
+## 0.1.0-beta.2 candidate — 2026-08-20
+
+- Recover SMB directory browsing after an idle, backgrounded, or network-switched
+  connection by discarding stale sessions and retrying one safe enumeration on
+  a fresh connection. Active SMB sessions are also invalidated when Android's
+  default network changes; writes are not automatically replayed.
+- Make the persistent Home button return from remote browsing to the actual Home
+  dashboard instead of exposing the intermediate Remote connections page.
+- Reduce list-view file rows from 72dp to 64dp while preserving text sizes,
+  metadata, icons, dividers, and 48dp action targets.
+- Refresh Home storage/category statistics whenever an already-visible Home
+  screen resumes, and add pull-to-refresh to the Home dashboard.
+- Reveal a newly created file or folder after the refreshed list places it under
+  the active view and sort order, including items sorted above the viewport.
+
 ## 0.1.0-beta.1 — 2026-08-16
 
 ### What changed in FM Plus Ultra

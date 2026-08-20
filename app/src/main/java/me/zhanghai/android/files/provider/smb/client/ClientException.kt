@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
@@ -17,6 +18,8 @@ import java8.nio.file.NotDirectoryException
 import java8.nio.file.NotLinkException
 import me.zhanghai.android.files.provider.common.InvalidFileNameException
 import me.zhanghai.android.files.provider.common.IsDirectoryException
+import java.io.IOException
+import java.util.concurrent.TimeoutException
 
 class ClientException : Exception {
     constructor() : super()
@@ -29,6 +32,18 @@ class ClientException : Exception {
 
     private val status: NtStatus? = (cause as? SMBApiException)?.status
     private val statusCode: Long? = (cause as? SMBApiException)?.statusCode
+
+    val isRetryableTransportFailure: Boolean
+        get() {
+            var throwable: Throwable? = this
+            while (throwable != null) {
+                if (throwable is IOException || throwable is TimeoutException) {
+                    return true
+                }
+                throwable = throwable.cause
+            }
+            return false
+        }
 
     @Throws(AtomicMoveNotSupportedException::class)
     fun maybeThrowAtomicMoveNotSupportedException(file: String?, other: String?) {

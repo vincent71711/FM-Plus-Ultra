@@ -1,10 +1,18 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.ConnectivityManager
+import android.net.Network
+import android.os.Build
 import android.util.Log
 import com.hierynomus.msdtyp.AccessMask
 import com.hierynomus.mserref.NtStatus
@@ -45,7 +53,6 @@ import me.zhanghai.android.files.provider.common.newOutputStream
 import me.zhanghai.android.files.util.closeSafe
 import me.zhanghai.android.files.util.enumSetOf
 import me.zhanghai.android.files.util.hasBits
-import java.io.Closeable
 import java.io.IOException
 import java.net.Inet4Address
 import java.net.UnknownHostException
@@ -69,8 +76,65 @@ object Client {
 
     private val sessions = mutableMapOf<Authority, Session>()
 
+    private val networkLock = Any()
+
+    private var activeNetwork: Network? = null
+
+    private var isNetworkMonitoringInitialized = false
+
     private val directoryFileInformationCache =
         Collections.synchronizedMap(WeakHashMap<Path, FileInformation>())
+
+    fun initializeNetworkMonitoring(context: Context) {
+        synchronized(networkLock) {
+            if (isNetworkMonitoringInitialized) {
+                return
+            }
+            val connectivityManager =
+                context.getSystemService(ConnectivityManager::class.java)
+            activeNetwork = connectivityManager.activeNetwork
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                connectivityManager.registerDefaultNetworkCallback(
+                    object : ConnectivityManager.NetworkCallback() {
+                        override fun onAvailable(network: Network) {
+                            onActiveNetworkChanged(network)
+                        }
+
+                        override fun onLost(network: Network) {
+                            synchronized(networkLock) {
+                                if (activeNetwork != network) {
+                                    return
+                                }
+                                activeNetwork = null
+                            }
+                            invalidateSessions()
+                        }
+                    }
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                context.registerReceiver(
+                    object : BroadcastReceiver() {
+                        override fun onReceive(context: Context, intent: Intent) {
+                            onActiveNetworkChanged(connectivityManager.activeNetwork)
+                        }
+                    },
+                    IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+                )
+            }
+            isNetworkMonitoringInitialized = true
+        }
+    }
+
+    private fun onActiveNetworkChanged(network: Network?) {
+        synchronized(networkLock) {
+            if (activeNetwork == network) {
+                return
+            }
+            activeNetwork = network
+        }
+        invalidateSessions()
+    }
 
     @Throws(ClientException::class)
     fun openByteChannel(
@@ -109,7 +173,24 @@ object Client {
 
     @Throws(ClientException::class)
     fun openDirectoryIterator(path: Path): CloseableIterator<Path> {
-        val session = getSession(path.authority)
+        var session: Session? = null
+        return try {
+            session = getSession(path.authority)
+            openDirectoryIteratorOnce(path, session)
+        } catch (e: ClientException) {
+            if (!e.isRetryableTransportFailure) {
+                throw e
+            }
+            invalidateSession(path.authority, session)
+            openDirectoryIteratorOnce(path, getSession(path.authority))
+        }
+    }
+
+    @Throws(ClientException::class)
+    private fun openDirectoryIteratorOnce(
+        path: Path,
+        session: Session
+    ): CloseableIterator<Path> {
         val sharePath = path.sharePath
         if (sharePath == null) {
             val transport = try {
@@ -151,19 +232,27 @@ object Client {
             } catch (e: SMBRuntimeException) {
                 throw ClientException(e)
             }
-            val directoryIterator = directory.iterator(FileIdFullDirectoryInformation::class.java)
-                .asSequence()
-                .filter { fileInformation ->
-                    !fileInformation.fileName.let { it == "." || it == ".." }
+            val paths = try {
+                directory.use {
+                    it.iterator(FileIdFullDirectoryInformation::class.java)
+                        .asSequence()
+                        .filter { fileInformation ->
+                            !fileInformation.fileName.let { name -> name == "." || name == ".." }
+                        }
+                        .map { fileInformation ->
+                            path.resolve(fileInformation.fileName).also { child ->
+                                directoryFileInformationCache[child] =
+                                    fileInformation.toFileInformation()
+                            }
+                        }
+                        .toList()
                 }
-                .map { fileInformation ->
-                    path.resolve(fileInformation.fileName).also {
-                        directoryFileInformationCache[it] = fileInformation.toFileInformation()
-                    }
-                }
-                .iterator()
-            return object : CloseableIterator<Path>, Iterator<Path> by directoryIterator,
-                Closeable by directory {}
+            } catch (e: SMBRuntimeException) {
+                throw ClientException(e)
+            }
+            return object : CloseableIterator<Path>, Iterator<Path> by paths.iterator() {
+                override fun close() {}
+            }
         }
     }
 
@@ -658,6 +747,30 @@ object Client {
             sessions[authority] = session
             return session
         }
+    }
+
+    private fun invalidateSession(authority: Authority, expectedSession: Session?) {
+        val session = synchronized(sessions) {
+            sessions[authority]?.takeIf { expectedSession == null || it === expectedSession }
+                ?.also { sessions.remove(authority) }
+        } ?: return
+        try {
+            session.connection.close(true)
+        } catch (_: IOException) {
+        }
+    }
+
+    private fun invalidateSessions() {
+        val sessions = synchronized(sessions) {
+            this.sessions.values.toList().also { this.sessions.clear() }
+        }
+        for (session in sessions) {
+            try {
+                session.connection.close(true)
+            } catch (_: IOException) {
+            }
+        }
+        directoryFileInformationCache.clear()
     }
 
     private const val SMB_NEGOTIATION_TAG = "FMPU.SmbNegotiation"

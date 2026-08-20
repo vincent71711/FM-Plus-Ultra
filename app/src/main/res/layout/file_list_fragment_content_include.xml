@@ -3,6 +3,7 @@
 <!--
   ~ Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
   ~ All Rights Reserved.
+  ~ Modified 2026-08-20 for FM Plus Ultra.
   -->
 
 <merge
@@ -77,16 +78,22 @@
             android:background="?colorSurface"
             android:visibility="gone">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/homeRecyclerView"
+            <androidx.swiperefreshlayout.widget.ThemedSwipeRefreshLayout
+                android:id="@+id/homeSwipeRefreshLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:paddingStart="8dp"
-                android:paddingTop="8dp"
-                android:paddingEnd="8dp"
-                android:paddingBottom="@dimen/list_bottom_padding_with_fab"
-                tools:listitem="@layout/home_dashboard_item" />
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/homeRecyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clipToPadding="false"
+                    android:paddingStart="8dp"
+                    android:paddingTop="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="@dimen/list_bottom_padding_with_fab"
+                    tools:listitem="@layout/home_dashboard_item" />
+            </androidx.swiperefreshlayout.widget.ThemedSwipeRefreshLayout>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/homeEditButton"
