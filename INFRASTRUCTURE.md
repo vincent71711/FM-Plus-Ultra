@@ -48,7 +48,7 @@ The derivative identity is:
 - Visible and public source-fork name: `FM Plus Ultra`
 - Debug ID: `com.froslabs.filemanagerplusultra.debug`
 - Release ID: `com.froslabs.filemanagerplusultra`
-- Mod version: `0.1.0-beta.1`; debug APK version: `0.1.0-beta.1-debug` (53). Android
+- Mod version: `0.1.0-beta.3`; debug APK version: `0.1.0-beta.3-debug` (55). Android
   version codes begin at 40, one above the Material Files baseline (39), and
   must increase monotonically. Do not reset them independently of the inherited
   preference-migration thresholds.
@@ -69,7 +69,8 @@ not use upstream signing configuration for derivative distribution.
 The permanent release key is stored outside Git. Its public certificate SHA-256 is
 `b67ccd0f0e90510cc631058644dcb653fb47eaf0636d484fb2db8e2ff87cc5d7`.
 Ignored local signing properties and the private keystore must never be
-committed. Version `0.1.0-beta.1` (53) is the first public GitHub prerelease.
+committed. Version `0.1.0-beta.1` (53) is the first public GitHub prerelease;
+`0.1.0-beta.3` (55) is the current release version.
 
 ## Analytics and external services
 

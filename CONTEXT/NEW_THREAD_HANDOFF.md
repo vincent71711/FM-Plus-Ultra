@@ -6,13 +6,13 @@
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
-- Work branch: `codex/beta-feedback-fixes`; validated checkpoint is on Forgejo
-  `main` and the public GitHub fork `vincent71711/FM-Plus-Ultra`.
+- Work branch: `codex/beta-feedback-fixes`; Beta 3 release work is on this
+  branch, with Forgejo and public GitHub publication authorized.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
 - Validated release gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease assembleRelease --stacktrace --console=plain`.
-- Upstream app version: 1.7.4 (39); current release: 0.1.0-beta.2 (54). The
+- Upstream app version: 1.7.4 (39); current release: 0.1.0-beta.3 (55). The
   derivative Android version code must
   remain above inherited migration thresholds and increase monotonically; using
   1 caused legacy storage migration to discard saved SMB entries on restart.
@@ -165,3 +165,15 @@
   Its shared action button now performs one standard tap haptic in both Cancel
   and completed OK states. This is separate from the existing one-shot haptic
   fired automatically when a job first reaches Complete.
+- Beta 3 is version `0.1.0-beta.3` (55). The full JDK 21
+  `assembleDebug lintVitalRelease assembleRelease` gate passes. The minified
+  release APK has the correct release application ID and version metadata,
+  verifies under APK signature schemes v1/v2 with the permanent certificate,
+  and has SHA-256
+  `a5baec22e77b787fd47705aecb7003c2714ada5944f1fa78dd29e4f0b853e954`.
+  Vincent authorized publishing its source and APK to GitHub on 2026-08-20.
+- Known issue: SMB downloads can randomly enter a foreground stale state. The
+  observed Fold7 transfer resumed automatically after about 60 seconds and
+  completed, but the trigger and root cause remain under diagnosis. Beta 3's
+  15-second timeout and one-file retry are defensive recovery, not a confirmed
+  root-cause fix.

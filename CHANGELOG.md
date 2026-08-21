@@ -4,6 +4,27 @@ This file records FM Plus Ultra changes separately from inherited
 Material Files functionality. Upstream history remains available in Git and
 upstream release notes.
 
+## 0.1.0-beta.3 — 2026-08-20
+
+- Add system-respecting haptic feedback to normal app control taps, accepted
+  pull-to-refresh gestures, file-conflict actions, transfer Cancel/OK actions,
+  and successful transfer completion.
+- Improve multi-file transfer details with changing current-file headings,
+  storage-aware source and destination paths, auto-fitting long headings, and
+  separate current-file and overall progress bars.
+- Recover SMB directory browsing from SMBJ's explicit disconnected-transport
+  error by evicting the matching stale session and retrying enumeration once.
+- Add a defensive 15-second timeout around SMB reads and retry the affected file
+  once with corrected progress accounting if a read stalls.
+
+### Known issues
+
+- An SMB download can randomly stop making visible progress while the app is
+  still foregrounded. The observed Fold7 transfer resumed automatically after
+  about 60 seconds and completed. The trigger and root cause remain under
+  diagnosis; the new timeout/retry behavior is a recovery measure, not a
+  confirmed root-cause fix.
+
 ## 0.1.0-beta.2 — 2026-08-20
 
 - Recover SMB directory browsing after an idle, backgrounded, or network-switched

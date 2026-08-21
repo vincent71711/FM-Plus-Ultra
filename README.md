@@ -15,6 +15,15 @@ named commercial applications.
 Public beta APKs and their checksums are available from
 [GitHub Releases](https://github.com/vincent71711/FM-Plus-Ultra/releases).
 
+## Known Issues
+
+- An SMB download can randomly enter a stale state in which transfer progress
+  stops even though the app remains in the foreground. In the observed Galaxy Z
+  Fold7 case, the transfer resumed automatically after about 60 seconds and
+  completed. The trigger and root cause have not yet been isolated and are being
+  diagnosed. Beta 3 adds a defensive read timeout and one retry of the affected
+  file, but that is a recovery measure rather than a confirmed root-cause fix.
+
 The project preserves Material Files' Git history, GPLv3 license, copyright
 notices, and attribution. The app's About screen identifies the upstream author
 and the modified version. Material Files features described below are inherited

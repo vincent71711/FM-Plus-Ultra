@@ -8,16 +8,17 @@
 - Telemetry: Firebase/Crashlytics/Google Services removed
 - Branding: approved version-2 librarian source integrated into launcher assets;
   adaptive foreground scaled to 64% so more of the folder is visible
-- Build: version 54 passes the documented JDK 21
-  `assembleDebug lintVitalRelease` gate; the existing signed release checkpoint
-  also passed `assembleRelease`
-- Current release: version `0.1.0-beta.2` (54) contains SMB recovery, corrected
-  remote Home navigation, denser rows, refreshed Home statistics, and reliable
-  reveal of newly created items. Vincent approved its GitHub source and signed
-  APK publication on 2026-08-20. Version 54 debug is installed on the explicitly
-  selected Fold7 and passed an 824 ms cold launch without a fatal exception or
-  ANR. The signed release APK is also present in Downloads as
-  `FM-Plus-Ultra-0.1.0-beta.2-54.apk`; it was not installed.
+- Build: version 55 passes the documented JDK 21
+  `assembleDebug lintVitalRelease assembleRelease` gate. The minified release
+  APK reports `0.1.0-beta.3` (55), verifies under v1/v2 signing, and matches the
+  permanent release certificate.
+- Current release: version `0.1.0-beta.3` (55) adds broad haptic feedback,
+  clearer multi-file transfer progress, stale SMB browsing recovery, and a
+  defensive stalled-read timeout/retry. Vincent approved its GitHub source and
+  signed APK publication on 2026-08-20. The underlying random SMB stale state
+  that self-resumed after about 60 seconds in one foreground Fold7 run remains
+  under diagnosis; the new timeout/retry is mitigation rather than a confirmed
+  root-cause fix.
 - Tests: no upstream test source sets found; lint vital, debug assembly, and
   signed release assembly pass
 - Device install: the latest version 54 development debug is installed on the
@@ -44,9 +45,9 @@
 - Filename preference migration: version 41 converts the inherited saved Middle
   ellipsis default to End; the installed preference was verified as value `2`.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
-- Push/publication: validated source checkpoint pushed to private Forgejo and
-  the public GitHub fork `vincent71711/FM-Plus-Ultra`; the first public APK is
-  version `0.1.0-beta.1` (53), published as a GitHub prerelease
+- Push/publication: Beta 1 and Beta 2 source and prerelease APKs are on the
+  public GitHub fork `vincent71711/FM-Plus-Ultra`; Beta 3 publication is
+  explicitly authorized and its signed release candidate is validated.
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
 - SMB packet findings: File Manager Plus held its captured 4 GiB upload near
@@ -129,7 +130,7 @@
   Multi-file jobs update that heading for each active file and show separate
   current-file and overall byte-progress bars; single-file jobs retain one
   overall bar.
-- Fold7 stall diagnosis: a 4 GiB two-file SMB download stopped at 142,344,192
+- Known issue / Fold7 stall diagnosis: a 4 GiB two-file SMB download stopped at 142,344,192
   bytes for about 60 seconds while the app was still foregrounded, then resumed
   and completed without an ANR or crash. The optimized SMB channel had bypassed
   the common 15-second read deadline with an unbounded wait. Reads now enforce
@@ -137,11 +138,12 @@
   file's progress, and restart that file once. A repeated stall reaches the
   existing error flow instead of leaving the transfer apparently frozen. Debug
   logging now records every SMB request taking at least one second.
-- Validation: Beta 2 passes
-  `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
-  release signature and version 54 metadata were verified. Basic Fold7 install
-  and cold launch pass; physical checks for SMB reconnect, remote Home navigation,
-  row density, and pending paste retention remain pending.
+- Validation: Beta 3 passes
+  `assembleDebug lintVitalRelease assembleRelease` with JDK 21. Its permanent
+  release signature, package identity, and version 55 metadata are verified;
+  SHA-256 is `a5baec22e77b787fd47705aecb7003c2714ada5944f1fa78dd29e4f0b853e954`.
+  Per Vincent's request, Beta 3 was not installed or interaction-tested as part
+  of publication.
 - Physical checks for SMB reconnect, remote Home navigation, row density, and
   pending paste retention remain with Vincent. Haptic feel and the refined SMB
   disconnected-transport recovery also remain for Vincent's physical check. The

@@ -96,20 +96,19 @@ See the explanation and comparison graph in
 
 ## Current release
 
-Version `0.1.0-beta.2` (54) adds SMB session recovery after backgrounding or
-a Wi-Fi transition, makes remote Home navigation reach the actual Home
-dashboard, and reduces list-view rows from 72dp to 64dp without smaller text or
-lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
-Newly created items are scrolled into view after the active sort places them.
-The current development build adds app-wide short-tap, accepted pull-to-refresh,
-and successful-transfer completion haptics, plus recovery for SMBJ's explicit
-disconnected-transport state. Transfer details now show configured storage names
-and relative paths, auto-fit long active-file headings, and provide separate
-current-file and overall bars for multi-file jobs. Version 54 debug is installed
+Version `0.1.0-beta.3` (55) packages the latest beta-feedback work: app-wide
+short-tap, accepted pull-to-refresh, conflict-dialog, transfer-action, and
+successful-transfer completion haptics; recovery for SMBJ's explicit
+disconnected-transport state; configured storage names and relative paths in
+transfer details; auto-fitting long active-file headings; and separate
+current-file and overall bars for multi-file jobs. It also defensively times out
+one stalled SMB read and retries only the affected file with corrected progress
+accounting. A randomly observed foreground SMB stall that self-resumed after
+about 60 seconds remains under root-cause diagnosis; the timeout/retry behavior
+is mitigation, not a confirmed root-cause fix. Version 54 debug remains installed
 on the explicitly selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's
-physical validation. The latest development revision also recovers one stalled
-SMB read by restarting only the affected file with corrected progress accounting;
-these development changes have not been publicly published.
+physical validation; the public Beta 3 release APK is not installed by this
+publication task.
 
 ## Project references
 
