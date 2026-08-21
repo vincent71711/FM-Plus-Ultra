@@ -15,9 +15,10 @@
 - Current release: version `0.1.0-beta.3` (55) adds broad haptic feedback,
   clearer multi-file transfer progress, stale SMB browsing recovery, and a
   defensive stalled-read timeout/retry. Vincent approved its GitHub source and
-  signed APK publication on 2026-08-20. The underlying random SMB stale state
-  that self-resumed after about 60 seconds in one foreground Fold7 run remains
-  under diagnosis; the new timeout/retry is mitigation rather than a confirmed
+  signed APK publication on 2026-08-20; prerelease `v0.1.0-beta.3` now contains
+  the signed APK and checksum. The underlying random SMB stale state that
+  self-resumed after about 60 seconds in one foreground Fold7 run remains under
+  diagnosis; the new timeout/retry is mitigation rather than a confirmed
   root-cause fix.
 - Tests: no upstream test source sets found; lint vital, debug assembly, and
   signed release assembly pass
@@ -45,9 +46,10 @@
 - Filename preference migration: version 41 converts the inherited saved Middle
   ellipsis default to End; the installed preference was verified as value `2`.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
-- Push/publication: Beta 1 and Beta 2 source and prerelease APKs are on the
-  public GitHub fork `vincent71711/FM-Plus-Ultra`; Beta 3 publication is
-  explicitly authorized and its signed release candidate is validated.
+- Push/publication: Beta 3 source branch and tag are on private Forgejo and the
+  public GitHub fork `vincent71711/FM-Plus-Ultra`. GitHub prerelease
+  `v0.1.0-beta.3` contains the signed APK and checksum; draft PR #1 tracks the
+  source changes against `main`.
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
 - SMB packet findings: File Manager Plus held its captured 4 GiB upload near

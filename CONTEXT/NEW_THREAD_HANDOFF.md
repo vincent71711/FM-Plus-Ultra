@@ -7,7 +7,8 @@
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
 - Work branch: `codex/beta-feedback-fixes`; Beta 3 release work is on this
-  branch, with Forgejo and public GitHub publication authorized.
+  branch and is pushed to Forgejo and public GitHub. Tag `v0.1.0-beta.3` and
+  draft GitHub PR #1 point to the corresponding source.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
 - Validated release gate: JDK 21 plus
@@ -172,6 +173,8 @@
   and has SHA-256
   `a5baec22e77b787fd47705aecb7003c2714ada5944f1fa78dd29e4f0b853e954`.
   Vincent authorized publishing its source and APK to GitHub on 2026-08-20.
+  The GitHub prerelease is live with the signed APK and checksum. It was not
+  installed on either phone as part of publication.
 - Known issue: SMB downloads can randomly enter a foreground stale state. The
   observed Fold7 transfer resumed automatically after about 60 seconds and
   completed, but the trigger and root cause remain under diagnosis. Beta 3's

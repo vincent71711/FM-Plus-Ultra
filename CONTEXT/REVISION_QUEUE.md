@@ -37,7 +37,8 @@
   testing and the signed release APK was also copied to the Fold7 Downloads
   folder without installing the release package.
 - **Third public beta:** Vincent approved updating GitHub with the latest APK on
-  2026-08-20. Publish it as `0.1.0-beta.3` (55), preserving monotonic Android
+  2026-08-20. Prerelease `v0.1.0-beta.3` (55) is published with its signed APK,
+  checksum, and corresponding source tag, preserving monotonic Android
   versioning and documenting the random SMB stale state as a known issue still
   under diagnosis.
 - **Private Forgejo pushes:** Vincent granted standing approval on 2026-08-20
