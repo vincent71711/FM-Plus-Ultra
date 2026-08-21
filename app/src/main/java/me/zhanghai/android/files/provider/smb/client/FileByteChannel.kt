@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
@@ -81,6 +82,17 @@ class FileByteChannel(
                     ExecutionException(SMBRuntimeException(e).toIOException())
                 }
             )
+    }
+
+    override fun onReadTimedOut(position: Long, timeoutMillis: Long) {
+        Log.w(
+            SMB_IO_TAG,
+            "READ_TIMEOUT offset=$position timeoutMs=$timeoutMillis; closing stalled connection"
+        )
+        try {
+            file.diskShare.treeConnect.session.connection.close(true)
+        } catch (_: IOException) {
+        }
     }
 
     @Throws(IOException::class)
@@ -170,6 +182,10 @@ class FileByteChannel(
             } else {
                 exception.addSuppressed(closeException)
             }
+        } catch (e: IllegalStateException) {
+            if (e.message != TRANSPORT_NOT_CONNECTED_MESSAGE) {
+                throw e
+            }
         }
         exception?.let { throw it }
     }
@@ -224,7 +240,8 @@ class FileByteChannel(
         inFlight: Int,
         requestAgeMillis: Long? = null
     ) {
-        if (!BuildConfig.DEBUG || position % REQUEST_LOG_INTERVAL != 0L) {
+        if (!BuildConfig.DEBUG || position % REQUEST_LOG_INTERVAL != 0L &&
+            (requestAgeMillis == null || requestAgeMillis < SLOW_REQUEST_LOG_MILLIS)) {
             return
         }
         Log.i(
@@ -255,6 +272,8 @@ class FileByteChannel(
         private const val IO_CONFIGURATION =
             "async/native/read:256k-x8-size-aware/write:256k-x4"
         private const val REQUEST_LOG_INTERVAL = 64L * 1024 * 1024
+        private const val SLOW_REQUEST_LOG_MILLIS = 1_000L
+        private const val TRANSPORT_NOT_CONNECTED_MESSAGE = "Transport is not connected"
         private const val SMB_IO_TAG = "FMPU.SmbIo"
     }
 }

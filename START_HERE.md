@@ -42,7 +42,9 @@ out, and uses a permanent signing identity stored outside Git.
 - **File-size-aware downloads:** the read pipeline avoids unnecessary requests
   past the expected end of smaller files.
 - **Transfer monitoring:** an in-app panel shows progress, speed, remaining size,
-  ETA, item count, and cancellation while retaining the Android notification.
+  ETA, item count, source/destination route, and cancellation while retaining the
+  Android notification. Multi-file jobs separate current-file byte progress from
+  overall job progress and update the auto-fitting heading for the active file.
 - **Stable browsing during transfers:** provider events are coalesced so active
   SMB transfers do not repeatedly flash or redraw the entire file list.
 - **Home and recent navigation:** the Home dashboard includes reorderable local
@@ -57,7 +59,18 @@ out, and uses a permanent signing identity stored outside Git.
   temporary drawer rather than a permanent sidebar.
 - **Reliability fixes:** saved storage migration, Home transitions, stale-row
   flashes, selection behavior, theme startup, exit confirmation, and expected
-  SMB watcher cancellation have been corrected.
+  SMB watcher cancellation have been corrected. Directory browsing also
+  recognizes SMBJ's disconnected async-transport state and reconnects once
+  automatically instead of requiring a manual refresh. A stalled SMB download
+  read now times out after 15 seconds, reconnects, and safely restarts the
+  current file once rather than leaving progress frozen indefinitely.
+- **Haptic feedback:** enabled short taps throughout the app provide standard
+  system-respecting feedback without duplicating long-press feedback, and a
+  successful file operation provides a distinct one-shot completion haptic.
+  Pull-to-refresh confirms only an accepted refresh with a gesture-end haptic.
+  File-conflict checkbox and action-button taps are covered even though Android
+  renders that dialog in a window separate from the hosting activity. The
+  transfer dialog's Cancel/OK button has the same explicit coverage.
 - **Privacy:** Firebase Analytics, Crashlytics, Google Services integration, and
   automatic crash reporting were removed without adding replacement telemetry.
 
@@ -83,11 +96,19 @@ See the explanation and comparison graph in
 
 ## Current release
 
-Version `0.1.0-beta.2` (54) adds SMB session recovery after backgrounding or
-a Wi-Fi transition, makes remote Home navigation reach the actual Home
-dashboard, and reduces list-view rows from 72dp to 64dp without smaller text or
-lost metadata. Home statistics also refresh on resume and by pull-to-refresh.
-Newly created items are scrolled into view after the active sort places them.
+Version `0.1.0-beta.3` (55) packages the latest beta-feedback work: app-wide
+short-tap, accepted pull-to-refresh, conflict-dialog, transfer-action, and
+successful-transfer completion haptics; recovery for SMBJ's explicit
+disconnected-transport state; configured storage names and relative paths in
+transfer details; auto-fitting long active-file headings; and separate
+current-file and overall bars for multi-file jobs. It also defensively times out
+one stalled SMB read and retries only the affected file with corrected progress
+accounting. A randomly observed foreground SMB stall that self-resumed after
+about 60 seconds remains under root-cause diagnosis; the timeout/retry behavior
+is mitigation, not a confirmed root-cause fix. Version 54 debug remains installed
+on the explicitly selected Galaxy Z Fold7 and Galaxy S23 FE for Vincent's
+physical validation; the public Beta 3 release APK is not installed by this
+publication task.
 
 ## Project references
 

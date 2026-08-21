@@ -12,8 +12,8 @@ def modApplicationId = 'com.froslabs.filemanagerplusultra'
 // Keep this above the inherited Material Files baseline (39). Its preference upgrader compares
 // BuildConfig.VERSION_CODE against historical migration thresholds, so resetting this to 1 would
 // rerun destructive legacy migrations on every launch.
-def modVersionCode = 54
-def modVersionName = '0.1.0-beta.2'
+def modVersionCode = 55
+def modVersionName = '0.1.0-beta.3'
 
 android {
     namespace 'me.zhanghai.android.files'

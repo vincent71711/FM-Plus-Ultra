@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filejob
@@ -10,6 +11,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.AnyRes
 import androidx.annotation.PluralsRes
@@ -45,6 +47,7 @@ import me.zhanghai.android.files.provider.archive.createArchiveRootPath
 import me.zhanghai.android.files.provider.archive.isArchivePath
 import me.zhanghai.android.files.provider.common.ByteString
 import me.zhanghai.android.files.provider.common.ByteStringBuilder
+import me.zhanghai.android.files.provider.common.FileReadTimeoutException
 import me.zhanghai.android.files.provider.common.InvalidFileNameException
 import me.zhanghai.android.files.provider.common.PosixFileModeBit
 import me.zhanghai.android.files.provider.common.PosixFileStore
@@ -85,6 +88,7 @@ import me.zhanghai.android.files.util.createInstallPackageIntent
 import me.zhanghai.android.files.util.createIntent
 import me.zhanghai.android.files.util.createViewIntent
 import me.zhanghai.android.files.util.extraPath
+import me.zhanghai.android.files.util.findCauseByClass
 import me.zhanghai.android.files.util.getQuantityString
 import me.zhanghai.android.files.util.putArgs
 import me.zhanghai.android.files.util.showToast
@@ -155,6 +159,10 @@ private fun FileJob.postNotification(
 private const val PROGRESS_INTERVAL_MILLIS = 200L
 
 private const val NOTIFICATION_INTERVAL_MILLIS = 500L
+
+private const val STALLED_READ_RETRY_LIMIT = 1
+
+private const val STALLED_READ_TAG = "FMPU.TransferRecovery"
 
 private fun FileJob.showToast(textRes: Int, duration: Int = Toast.LENGTH_SHORT) {
     service.mainExecutorCompat.execute {
@@ -353,10 +361,12 @@ private fun FileJob.postTransferSizeNotification(
     val target = transferInfo.target!!
     val size = transferInfo.size
     val transferredSize = transferInfo.transferredSize
+    transferInfo.setCurrentFile(currentSource)
     val currentFileIndex = (transferInfo.transferredFileCount + 1)
         .coerceAtMost(fileCount)
+    val progressTitle = getString(titleOneRes, getFileName(currentSource), getFileName(target))
     if (fileCount == 1) {
-        title = getString(titleOneRes, getFileName(currentSource), getFileName(target))
+        title = progressTitle
         val sizeString = size.asFileSize().formatHumanReadable(service)
         val transferredSizeString = transferredSize.asFileSize().formatHumanReadable(service)
         text = getString(
@@ -371,8 +381,9 @@ private fun FileJob.postTransferSizeNotification(
         )
     }
     FileJobProgressStore.updateTransfer(
-        id, title, getFileName(currentSource), getFileName(target), fileCount, currentFileIndex,
-        size, transferredSize
+        id, progressTitle, getFileName(currentSource), getFileName(target), fileCount,
+        currentFileIndex, size, transferredSize, transferInfo.currentFileSize,
+        transferInfo.currentFileTransferredSize
     )
     if (!transferInfo.shouldPostNotification()) {
         return
@@ -440,11 +451,20 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
         private set
     var transferredSize = 0L
         private set
+    var currentFileSize = 0L
+        private set
+    var currentFileTransferredSize = 0L
+        private set
+
+    private var currentFile: Path? = null
 
     private var lastNotificationTimeMillis = 0L
 
     fun incrementTransferredFileCount() {
         ++transferredFileCount
+        if (currentFileSize > 0) {
+            currentFileTransferredSize = currentFileSize
+        }
     }
 
     fun addTransferredFile(path: Path) {
@@ -455,6 +475,9 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
             ).size()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+        if (currentFileSize > 0) {
+            currentFileTransferredSize = currentFileSize
         }
     }
 
@@ -475,6 +498,28 @@ private class TransferInfo(scanInfo: ScanInfo, val target: Path?) {
 
     fun addToTransferredSize(size: Long) {
         transferredSize += size
+        currentFileTransferredSize += size
+    }
+
+    fun restartCurrentFile() {
+        transferredSize = (transferredSize - currentFileTransferredSize).coerceAtLeast(0)
+        currentFileTransferredSize = 0
+    }
+
+    fun setCurrentFile(path: Path) {
+        if (path == currentFile) {
+            return
+        }
+        currentFile = path
+        currentFileTransferredSize = 0
+        currentFileSize = try {
+            path.readAttributes(
+                BasicFileAttributes::class.java, LinkOption.NOFOLLOW_LINKS
+            ).size()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            0
+        }
     }
 
     fun shouldPostNotification(): Boolean {
@@ -1281,6 +1326,7 @@ private fun FileJob.copyOrMove(
     }
     var target = target
     var replaceExisting = false
+    var stalledReadRetryCount = 0
     var retry: Boolean
     do {
         retry = false
@@ -1385,6 +1431,19 @@ private fun FileJob.copyOrMove(
             throw e
         } catch (e: IOException) {
             e.printStackTrace()
+            if (e.findCauseByClass<FileReadTimeoutException>() != null &&
+                stalledReadRetryCount < STALLED_READ_RETRY_LIMIT) {
+                ++stalledReadRetryCount
+                transferInfo.restartCurrentFile()
+                Log.w(
+                    STALLED_READ_TAG,
+                    "Restarting ${getFileName(source)} after a stalled read " +
+                        "($stalledReadRetryCount/$STALLED_READ_RETRY_LIMIT)"
+                )
+                postCopyMoveNotification(transferInfo, source, type)
+                retry = true
+                continue
+            }
             if (actionAllInfo.skipCopyMoveError) {
                 transferInfo.skipFile(source)
                 postCopyMoveNotification(transferInfo, source, type)

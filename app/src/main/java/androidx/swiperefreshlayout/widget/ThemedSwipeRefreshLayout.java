@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package androidx.swiperefreshlayout.widget;
@@ -8,7 +9,9 @@ package androidx.swiperefreshlayout.widget;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.ShapeDrawable;
+import android.os.Build;
 import android.util.AttributeSet;
+import android.view.HapticFeedbackConstants;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -49,6 +52,16 @@ public class ThemedSwipeRefreshLayout extends SwipeRefreshLayout {
         ((ShapeDrawable) mCircleView.getBackground()).getPaint().setColor(backgroundColor);
         setColorSchemeColors(ContextExtensionsKt.getColorByAttr(context,
                 androidx.appcompat.R.attr.colorAccent));
+    }
+
+    @Override
+    public void setOnRefreshListener(@Nullable OnRefreshListener listener) {
+        super.setOnRefreshListener(listener == null ? null : () -> {
+            performHapticFeedback(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+                    ? HapticFeedbackConstants.GESTURE_END
+                    : HapticFeedbackConstants.VIRTUAL_KEY);
+            listener.onRefresh();
+        });
     }
 
     @Override

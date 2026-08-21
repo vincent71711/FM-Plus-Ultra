@@ -36,12 +36,21 @@
   GitHub with its signed APK on 2026-08-20. Version 54 debug was installed for
   testing and the signed release APK was also copied to the Fold7 Downloads
   folder without installing the release package.
+- **Third public beta:** Vincent approved updating GitHub with the latest APK on
+  2026-08-20. Prerelease `v0.1.0-beta.3` (55) is published with its signed APK,
+  checksum, and corresponding source tag, preserving monotonic Android
+  versioning and documenting the random SMB stale state as a known issue still
+  under diagnosis.
+- **Private Forgejo pushes:** Vincent granted standing approval on 2026-08-20
+  for ordinary commits and non-force pushes to the private `origin` without
+  per-push confirmation. GitHub/public pushes, releases, binary uploads, and
+  force-pushes still require explicit authorization for the specific action.
 
 ## Decisions still required
 
 - **Updates:** no automatic update channel. Decide later whether updates remain
   manual GitHub APK installs or gain an in-app update workflow.
-- **Distribution:** public source and the first GitHub beta APK are approved.
+- **Distribution:** public source and GitHub beta APKs are approved.
   Store distribution, AAB publication, and non-beta release channels remain
   undecided.
 

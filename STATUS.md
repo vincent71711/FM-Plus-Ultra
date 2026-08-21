@@ -1,27 +1,31 @@
 # Status
 
 - Phase: competitive SMB baseline achieved; continue product validation
-- Branch: `codex/release-0.1.0-beta.1`
+- Branch: `codex/beta-feedback-fixes`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
 - Identity: FM Plus Ultra; debug package
   `com.froslabs.filemanagerplusultra.debug`
 - Telemetry: Firebase/Crashlytics/Google Services removed
 - Branding: approved version-2 librarian source integrated into launcher assets;
   adaptive foreground scaled to 64% so more of the folder is visible
-- Build: version 53 passes the documented JDK 21
-  `assembleDebug lintVitalRelease assembleRelease` gate
-- Current release: version `0.1.0-beta.2` (54) contains SMB recovery, corrected
-  remote Home navigation, denser rows, refreshed Home statistics, and reliable
-  reveal of newly created items. Vincent approved its GitHub source and signed
-  APK publication on 2026-08-20. Version 54 debug is installed on the explicitly
-  selected Fold7 and passed an 824 ms cold launch without a fatal exception or
-  ANR. The signed release APK is also present in Downloads as
-  `FM-Plus-Ultra-0.1.0-beta.2-54.apk`; it was not installed.
+- Build: version 55 passes the documented JDK 21
+  `assembleDebug lintVitalRelease assembleRelease` gate. The minified release
+  APK reports `0.1.0-beta.3` (55), verifies under v1/v2 signing, and matches the
+  permanent release certificate.
+- Current release: version `0.1.0-beta.3` (55) adds broad haptic feedback,
+  clearer multi-file transfer progress, stale SMB browsing recovery, and a
+  defensive stalled-read timeout/retry. Vincent approved its GitHub source and
+  signed APK publication on 2026-08-20; prerelease `v0.1.0-beta.3` now contains
+  the signed APK and checksum. The underlying random SMB stale state that
+  self-resumed after about 60 seconds in one foreground Fold7 run remains under
+  diagnosis; the new timeout/retry is mitigation rather than a confirmed
+  root-cause fix.
 - Tests: no upstream test source sets found; lint vital, debug assembly, and
   signed release assembly pass
-- Device install: version 52 debug and permanently signed version 53 release are
-  installed on the explicitly selected Fold7; the release passed a cold-launch
-  check without a fatal exception or ANR
+- Device install: the latest version 54 development debug is installed on the
+  explicitly selected Fold7 and S23 FE. Vincent requested no scripted physical
+  testing after this install and will perform the interaction checks. The
+  permanently signed version 53 release remains installed on the Fold7.
 - Fold lifecycle: cover (1080x2520) to inner (1968x2184) to cover passed while
   retaining the same resumed process/activity with no fatal exception
 - Synthetic local actions: rename and copy-then-delete results verified; move
@@ -42,9 +46,10 @@
 - Filename preference migration: version 41 converts the inherited saved Middle
   ellipsis default to End; the installed preference was verified as value `2`.
 - Coexistence: Play Store Material Files remains installed under its upstream ID
-- Push/publication: validated source checkpoint pushed to private Forgejo and
-  the public GitHub fork `vincent71711/FM-Plus-Ultra`; the first public APK is
-  version `0.1.0-beta.1` (53), published as a GitHub prerelease
+- Push/publication: Beta 3 source branch and tag are on private Forgejo and the
+  public GitHub fork `vincent71711/FM-Plus-Ultra`. GitHub prerelease
+  `v0.1.0-beta.3` contains the signed APK and checksum; draft PR #1 tracks the
+  source changes against `main`.
 - Refresh stability: provider event bursts are coalesced; the installed build
   remained visually stable during an SMB upload.
 - SMB packet findings: File Manager Plus held its captured 4 GiB upload near
@@ -108,11 +113,41 @@
   file rows are 64dp instead of 72dp without smaller text or lost metadata. Home
   statistics now refresh on resume and through pull-to-refresh. Newly created
   files and folders are revealed at their resulting sorted list/grid position.
-- Validation: Beta 2 passes
-  `assembleDebug lintVitalRelease assembleRelease` with JDK 21, and its permanent
-  release signature and version 54 metadata were verified. Basic Fold7 install
-  and cold launch pass; physical checks for SMB reconnect, remote Home navigation,
-  row density, and pending paste retention remain pending.
+- Latest beta-feedback fixes: all short taps on enabled app controls now provide
+  standard system-respecting haptic feedback while swipes, canceled gestures,
+  and long presses are excluded. Pull-to-refresh provides a gesture-end haptic
+  only after crossing the refresh threshold. A successful file operation provides
+  one distinct completion haptic when its progress dialog changes to Complete.
+  The separate file-conflict dialog window now also provides tap feedback for
+  its Apply-to-all checkbox and Cancel, Skip, and Replace/Merge/Rename actions.
+  The transfer dialog's shared action button likewise provides feedback when it
+  acts as Cancel or OK, independently of the automatic completion haptic. SMBJ's
+  exact `IllegalStateException: Transport is not connected` stale-socket signal
+  is now classified as a retryable transport failure, so directory browsing
+  evicts the matching session, reconnects, and retries once instead of requiring
+  a manual pull-to-refresh.
+- Transfer details now use configured storage names and relative paths for the
+  gray source-to-destination route instead of repeating the current filename and
+  target basename. The current-file heading auto-sizes rather than ellipsizing.
+  Multi-file jobs update that heading for each active file and show separate
+  current-file and overall byte-progress bars; single-file jobs retain one
+  overall bar.
+- Known issue / Fold7 stall diagnosis: a 4 GiB two-file SMB download stopped at 142,344,192
+  bytes for about 60 seconds while the app was still foregrounded, then resumed
+  and completed without an ANR or crash. The optimized SMB channel had bypassed
+  the common 15-second read deadline with an unbounded wait. Reads now enforce
+  that deadline, close a stalled SMB connection, roll back the partial current
+  file's progress, and restart that file once. A repeated stall reaches the
+  existing error flow instead of leaving the transfer apparently frozen. Debug
+  logging now records every SMB request taking at least one second.
+- Validation: Beta 3 passes
+  `assembleDebug lintVitalRelease assembleRelease` with JDK 21. Its permanent
+  release signature, package identity, and version 55 metadata are verified;
+  SHA-256 is `a5baec22e77b787fd47705aecb7003c2714ada5944f1fa78dd29e4f0b853e954`.
+  Per Vincent's request, Beta 3 was not installed or interaction-tested as part
+  of publication.
 - Physical checks for SMB reconnect, remote Home navigation, row density, and
-  pending paste retention remain with Vincent; continue collecting beta
-  correctness and UI feedback.
+  pending paste retention remain with Vincent. Haptic feel and the refined SMB
+  disconnected-transport recovery also remain for Vincent's physical check. The
+  new stalled-read recovery is build-validated but intentionally not exercised
+  by scripted phone interaction.

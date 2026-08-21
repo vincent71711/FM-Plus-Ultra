@@ -6,13 +6,14 @@
 - Upstream: `https://github.com/zhanghai/MaterialFiles.git`, branch `master`.
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a` with local tag
   `mod-baseline/2026-08-16-material-files-fc12500`.
-- Work branch: `codex/release-0.1.0-beta.1`; validated checkpoint is on Forgejo
-  `main` and the public GitHub fork `vincent71711/FM-Plus-Ultra`.
+- Work branch: `codex/beta-feedback-fixes`; Beta 3 release work is on this
+  branch and is pushed to Forgejo and public GitHub. Tag `v0.1.0-beta.3` and
+  draft GitHub PR #1 point to the corresponding source.
 - Minimal bootstrap repair: `dav4jvm` dependency expanded from abbreviated SHA
   to the same commit's full SHA because JitPack no longer serves the short form.
 - Validated release gate: JDK 21 plus
   `./gradlew assembleDebug lintVitalRelease assembleRelease --stacktrace --console=plain`.
-- Upstream app version: 1.7.4 (39); current release: 0.1.0-beta.2 (54). The
+- Upstream app version: 1.7.4 (39); current release: 0.1.0-beta.3 (55). The
   derivative Android version code must
   remain above inherited migration thresholds and increase monotonically; using
   1 caused legacy storage migration to discard saved SMB entries on restart.
@@ -28,10 +29,11 @@
   The project must not imply affiliation with similarly named commercial apps.
   Public prerelease `v0.1.0-beta.1` and permanent signing are approved; store
   distribution and non-beta release channels remain undecided.
-- Version 52 debug and permanently signed version 53 release are installed and
-  running on the explicitly selected Fold7. The release passed a cold-launch
-  crash/ANR check and coexists with Play Store Material Files. Do not record the
-  wireless-ADB serial.
+- The latest version 54 development debug is installed on the explicitly selected
+  Fold7 and S23 FE. Vincent requested no scripted functional test after this
+  install and will perform the physical interaction checks. The permanently
+  signed version 53 release remains on the Fold7 and coexists with Play Store
+  Material Files. Do not record either wireless-ADB serial.
 - A live cover (1080x2520) to inner (1968x2184) to cover transition retained the
   same resumed process/activity and produced no fatal exception.
 - Synthetic local rename and copy-then-delete actions are verified. The move
@@ -126,3 +128,55 @@
   Targeted SMB reconnect, remote Home, density, and paste-state checks remain.
 - Vincent approved the `0.1.0-beta.2` (54) source and permanently signed APK for
   GitHub publication on 2026-08-20.
+- Current beta-feedback work adds common short-tap haptics for enabled
+  app controls, suppresses them for swipes/cancels/long presses, and performs a
+  gesture-end haptic only when pull-to-refresh crosses its activation threshold.
+  It performs a distinct one-shot haptic when a file job reaches successful
+  completion. It also recognizes SMBJ's exact
+  `IllegalStateException: Transport is not connected` as
+  a retryable stale-transport failure during directory enumeration, evicts only
+  the matching cached session, reconnects, and retries once. The documented JDK
+  21 `assembleDebug lintVitalRelease` gate passes. The resulting debug APK is on
+  both explicitly selected phones; physical behavior remains for Vincent to test.
+- The transfer dialog now renders a meaningful route from configured storage
+  names plus relative paths, rather than duplicating the active filename and
+  destination basename. Its active-file heading auto-sizes within two lines.
+  Multi-file copy/move work tracks real bytes for the active file separately from
+  aggregate job bytes, updates the heading as each file changes, and displays
+  labeled Current file and Overall progress bars. Single-file work keeps one
+  Overall bar. The JDK 21 debug/release-lint gate passes, and the debug update is
+  installed on both explicitly selected phones without scripted interaction.
+- A Fold7 SMB-to-local copy of two 2 GiB files stalled at 142,344,192 bytes for
+  about 60 seconds while its progress activity was still foregrounded. It later
+  resumed and completed all 4 GiB without an ANR or crash. The optimized SMB
+  channel was waiting on a raw future without the common channel's intended
+  15-second deadline. The current fix enforces that deadline, closes the stuck
+  connection, removes the partial destination through the existing safe-copy
+  cleanup, rolls back only that file's contributed progress, and automatically
+  retries the current file once. A second timeout uses the existing error dialog.
+  Debug logs now include every SMB request aged at least one second. The JDK 21
+  `assembleDebug lintVitalRelease` gate passes; physical interaction testing is
+  intentionally left to Vincent.
+- File-conflict dialogs use a separate Android window that bypasses the hosting
+  activity's global touch-haptic dispatcher. The Apply-to-all checkbox and the
+  Cancel, Skip, and positive Replace/Merge/Rename buttons now explicitly perform
+  one standard `VIRTUAL_KEY` haptic per click. The JDK 21 debug/release-lint gate
+  passes; haptic feel remains for Vincent's physical check.
+- The transfer-progress DialogFragment has the same separate-window boundary.
+  Its shared action button now performs one standard tap haptic in both Cancel
+  and completed OK states. This is separate from the existing one-shot haptic
+  fired automatically when a job first reaches Complete.
+- Beta 3 is version `0.1.0-beta.3` (55). The full JDK 21
+  `assembleDebug lintVitalRelease assembleRelease` gate passes. The minified
+  release APK has the correct release application ID and version metadata,
+  verifies under APK signature schemes v1/v2 with the permanent certificate,
+  and has SHA-256
+  `a5baec22e77b787fd47705aecb7003c2714ada5944f1fa78dd29e4f0b853e954`.
+  Vincent authorized publishing its source and APK to GitHub on 2026-08-20.
+  The GitHub prerelease is live with the signed APK and checksum. It was not
+  installed on either phone as part of publication.
+- Known issue: SMB downloads can randomly enter a foreground stale state. The
+  observed Fold7 transfer resumed automatically after about 60 seconds and
+  completed, but the trigger and root cause remain under diagnosis. Beta 3's
+  15-second timeout and one-file retry are defensive recovery, not a confirmed
+  root-cause fix.
