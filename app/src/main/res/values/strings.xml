@@ -830,6 +830,13 @@
     <string name="file_job_progress_cancelled">Transfer cancelled</string>
     <string name="file_job_progress_failed">Transfer failed</string>
     <string name="file_job_progress_no_active">No active transfer</string>
+    <plurals name="file_job_progress_source_items">
+        <item quantity="one">%1$s · %2$d selected item</item>
+        <item quantity="other">%1$s · %2$d selected items</item>
+    </plurals>
+    <string name="file_job_progress_current_file">Current file · %1$d of %2$d</string>
+    <string name="file_job_progress_current_file_size">%1$d%% · %2$s of %3$s</string>
+    <string name="file_job_progress_overall">Overall</string>
     <string name="file_job_progress_percent">%1$d%%</string>
     <string name="file_job_progress_size">%1$s of %2$s</string>
     <string name="file_job_progress_speed">%1$s/s</string>

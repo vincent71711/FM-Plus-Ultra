@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra filename display.
  * Modified 2026-08-20 for FM Plus Ultra.
  */
 
@@ -20,7 +21,6 @@ import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
 import android.text.format.Formatter
-import android.view.HapticFeedbackConstants
 import android.view.KeyCharacterMap
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -322,8 +322,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             }
         ).also { it.attachToRecyclerView(binding.homeRecyclerView) }
         homeDashboardAdapter.onStartDrag = { homeItemTouchHelper.startDrag(it) }
-        binding.homeEditButton.setOnClickListener { view ->
-            view.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
+        binding.homeEditButton.setOnClickListener {
             setHomeRearranging(!homeDashboardAdapter.isEditing)
         }
         val fastScroller = ThemedFastScroller.create(binding.recyclerView)
@@ -1437,6 +1436,7 @@ class FileListFragment : Fragment(), BreadcrumbLayout.Listener, FileListAdapter.
             FileJobService.open(path, mimeType, withChooser, requireContext())
         } else {
             val intent = path.fileProviderUri.createViewIntent(mimeType)
+                .putExtra(Intent.EXTRA_TITLE, path.fileName?.toString())
                 .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 .apply {
                     extraPath = path

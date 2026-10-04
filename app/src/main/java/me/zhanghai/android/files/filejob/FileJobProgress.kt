@@ -30,12 +30,16 @@ data class FileJobProgress(
     val operation: String,
     val status: FileJobProgressStatus,
     val title: String = operation,
+    val sourceLocation: String? = null,
+    val targetLocation: String? = null,
     val currentItem: String? = null,
     val target: String? = null,
     val fileCount: Int = 0,
     val currentFileIndex: Int = 0,
     val totalBytes: Long = 0,
     val transferredBytes: Long = 0,
+    val currentFileTotalBytes: Long = 0,
+    val currentFileTransferredBytes: Long = 0,
     val bytesPerSecond: Long = 0,
     val remainingSeconds: Long? = null,
     val error: String? = null
@@ -43,6 +47,14 @@ data class FileJobProgress(
     val percent: Int?
         get() = if (totalBytes > 0) {
             ((transferredBytes.coerceIn(0, totalBytes) * 100) / totalBytes).toInt()
+        } else {
+            null
+        }
+
+    val currentFilePercent: Int?
+        get() = if (currentFileTotalBytes > 0) {
+            ((currentFileTransferredBytes.coerceIn(0, currentFileTotalBytes) * 100) /
+                currentFileTotalBytes).toInt()
         } else {
             null
         }
@@ -91,7 +103,10 @@ object FileJobProgressStore {
     ) {
         synchronized(entries) {
             entries[id] = Entry(
-                FileJobProgress(id, operation, FileJobProgressStatus.PREPARING),
+                FileJobProgress(
+                    id, operation, FileJobProgressStatus.PREPARING,
+                    sourceLocation = source, targetLocation = target
+                ),
                 direction,
                 source,
                 target
@@ -131,7 +146,9 @@ object FileJobProgressStore {
         fileCount: Int,
         currentFileIndex: Int,
         totalBytes: Long,
-        transferredBytes: Long
+        transferredBytes: Long,
+        currentFileTotalBytes: Long,
+        currentFileTransferredBytes: Long
     ) {
         synchronized(entries) {
             val entry = entries[id] ?: return
@@ -204,6 +221,8 @@ object FileJobProgressStore {
                 currentFileIndex = currentFileIndex,
                 totalBytes = totalBytes,
                 transferredBytes = transferredBytes,
+                currentFileTotalBytes = currentFileTotalBytes,
+                currentFileTransferredBytes = currentFileTransferredBytes,
                 bytesPerSecond = bytesPerSecond,
                 remainingSeconds = remainingSeconds
             )
@@ -234,6 +253,13 @@ object FileJobProgressStore {
                 } else {
                     entry.progress.transferredBytes
                 },
+                currentFileTransferredBytes =
+                    if (status == FileJobProgressStatus.COMPLETED &&
+                        entry.progress.currentFileTotalBytes > 0) {
+                        entry.progress.currentFileTotalBytes
+                    } else {
+                        entry.progress.currentFileTransferredBytes
+                    },
                 remainingSeconds = if (status == FileJobProgressStatus.COMPLETED) 0 else null,
                 error = error
             )

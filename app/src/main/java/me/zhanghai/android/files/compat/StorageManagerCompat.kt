@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.compat
@@ -68,7 +69,6 @@ private class PipeWriter(
                     offset += size.toLong()
                     outputStream.write(buffer, 0, size)
                 }
-                runBlocking { callback.awaitOnRelease(handler) }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -76,6 +76,14 @@ private class PipeWriter(
                 pfd.closeWithError(e.message)
             } catch (e2: IOException) {
                 e2.printStackTrace()
+            }
+        } finally {
+            // Release the channel and its callback thread on read failure or early player close,
+            // too, including devices using the pre-Android-8 pipe implementation.
+            try {
+                runBlocking { callback.awaitOnRelease(handler) }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

@@ -11,8 +11,10 @@ import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.text.format.Formatter
+import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.view.isVisible
@@ -66,13 +68,21 @@ class FileJobProgressActivity : AppActivity() {
 class FileJobProgressDialogFragment : AppCompatDialogFragment() {
     private lateinit var binding: FileJobProgressActivityBinding
     private var progress: FileJobProgress? = null
+    private var hasPerformedCompletionHaptic = false
 
     private val jobId: Int
         get() = requireArguments().getInt(ARG_JOB_ID)
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        hasPerformedCompletionHaptic =
+            savedInstanceState?.getBoolean(STATE_COMPLETION_HAPTIC) ?: false
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         binding = FileJobProgressActivityBinding.inflate(requireContext().layoutInflater)
         binding.actionButton.setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
             val progress = progress
             if (progress == null || progress.status.isFinished) {
                 progress?.let { FileJobProgressStore.dismiss(it.id) }
@@ -85,6 +95,19 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
             val progress = progresses.firstOrNull { it.id == jobId }
             this.progress = progress
             render(progress)
+            if (progress?.status == FileJobProgressStatus.COMPLETED &&
+                !hasPerformedCompletionHaptic) {
+                hasPerformedCompletionHaptic = true
+                binding.root.post {
+                    binding.root.performHapticFeedback(
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            HapticFeedbackConstants.CONFIRM
+                        } else {
+                            HapticFeedbackConstants.LONG_PRESS
+                        }
+                    )
+                }
+            }
         }
         render(null)
         return MaterialAlertDialogBuilder(requireContext(), theme)
@@ -104,16 +127,55 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
             binding.sizeText.isVisible = false
             binding.speedText.isVisible = false
             binding.remainingText.isVisible = false
-            binding.fileCountText.isVisible = false
+            binding.currentFileProgressLabel.isVisible = false
+            binding.currentFileProgressIndicator.isVisible = false
+            binding.currentFileProgressText.isVisible = false
+            binding.overallProgressLabel.isVisible = false
             binding.actionButton.setText(android.R.string.ok)
             return
         }
 
         binding.statusText.text = getStatusText(progress.status)
         binding.titleText.text = progress.title
-        binding.pathText.text = listOfNotNull(progress.currentItem, progress.target)
+        binding.pathText.text = listOfNotNull(
+            progress.sourceLocation, progress.targetLocation
+        )
             .joinToString("  →  ")
-        binding.pathText.isVisible = progress.currentItem != null || progress.target != null
+        binding.pathText.isVisible = progress.sourceLocation != null ||
+            progress.targetLocation != null
+
+        val showCurrentFileProgress = progress.fileCount > 1
+        binding.currentFileProgressLabel.text = getString(
+            R.string.file_job_progress_current_file,
+            progress.currentFileIndex,
+            progress.fileCount
+        )
+        binding.currentFileProgressLabel.isVisible = showCurrentFileProgress
+        val currentFilePercent = progress.currentFilePercent
+        binding.currentFileProgressIndicator.isVisible = showCurrentFileProgress
+        binding.currentFileProgressIndicator.isIndeterminate =
+            showCurrentFileProgress && currentFilePercent == null && !progress.status.isFinished
+        if (currentFilePercent != null) {
+            binding.currentFileProgressIndicator.setProgressCompat(currentFilePercent, true)
+        } else if (!binding.currentFileProgressIndicator.isIndeterminate) {
+            binding.currentFileProgressIndicator.setProgressCompat(0, false)
+        }
+        binding.currentFileProgressText.text = currentFilePercent?.let {
+            getString(
+                R.string.file_job_progress_current_file_size,
+                it,
+                Formatter.formatFileSize(
+                    requireContext(),
+                    progress.currentFileTransferredBytes.coerceIn(
+                        0, progress.currentFileTotalBytes
+                    )
+                ),
+                Formatter.formatFileSize(requireContext(), progress.currentFileTotalBytes)
+            )
+        }
+        binding.currentFileProgressText.isVisible =
+            showCurrentFileProgress && currentFilePercent != null
+        binding.overallProgressLabel.isVisible = true
 
         val percent = progress.percent
         val indeterminate = percent == null && !progress.status.isFinished
@@ -142,13 +204,6 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
         }
         binding.remainingText.isVisible = progress.remainingSeconds != null &&
             !progress.status.isFinished
-
-        binding.fileCountText.text = getString(
-            R.string.file_job_progress_file_count,
-            progress.currentFileIndex,
-            progress.fileCount
-        )
-        binding.fileCountText.isVisible = progress.fileCount > 1
 
         binding.actionButton.text = if (progress.status.isFinished) {
             getString(android.R.string.ok)
@@ -186,7 +241,13 @@ class FileJobProgressDialogFragment : AppCompatDialogFragment() {
         activity?.finish()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(STATE_COMPLETION_HAPTIC, hasPerformedCompletionHaptic)
+        super.onSaveInstanceState(outState)
+    }
+
     companion object {
         const val ARG_JOB_ID = "jobId"
+        private const val STATE_COMPLETION_HAPTIC = "completionHaptic"
     }
 }

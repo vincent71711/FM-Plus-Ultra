@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-08-20 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.filejob
@@ -12,6 +13,7 @@ import android.os.IBinder
 import androidx.annotation.MainThread
 import java8.nio.file.Path
 import me.zhanghai.android.files.file.MimeType
+import me.zhanghai.android.files.navigation.findRecentLocationSource
 import me.zhanghai.android.files.provider.common.PosixFileModeBit
 import me.zhanghai.android.files.provider.common.PosixGroup
 import me.zhanghai.android.files.provider.common.PosixUser
@@ -124,9 +126,18 @@ class FileJobService : Service() {
             val targetScheme = targetDirectory.fileSystem.provider().scheme
             val direction = "${sourceSchemes.joinToString("+") { providerLabel(it) }} -> " +
                 providerLabel(targetScheme)
-            val source = sources.firstOrNull()?.let { debugEndpoint(it) } ?: "unknown"
+            val source = if (sources.size == 1) {
+                displayEndpoint(sources.single(), context)
+            } else {
+                context.resources.getQuantityString(
+                    me.zhanghai.android.files.R.plurals.file_job_progress_source_items,
+                    sources.size,
+                    sourceSchemes.joinToString(" + ") { providerLabel(it) },
+                    sources.size
+                )
+            }
             FileJobProgressStore.start(
-                job.id, operation, direction, source, debugEndpoint(targetDirectory)
+                job.id, operation, direction, source, displayEndpoint(targetDirectory, context)
             )
             startJob(job, context)
             FileJobProgressActivity.show(job.id, context)
@@ -134,14 +145,31 @@ class FileJobService : Service() {
 
         private fun providerLabel(scheme: String): String = when (scheme.lowercase()) {
             "smb" -> "SMB"
-            "file", "linux", "root" -> "PHONE"
+            "file", "linux" -> "Internal storage"
+            "root" -> "Root"
             else -> scheme.uppercase()
         }
 
-        private fun debugEndpoint(path: Path): String {
-            val label = providerLabel(path.fileSystem.provider().scheme)
-            val name = path.fileName?.toString() ?: path.fileSystem.separator
-            return "$label:$name"
+        private fun displayEndpoint(path: Path, context: Context): String {
+            val provider = providerLabel(path.fileSystem.provider().scheme)
+            val storage = findRecentLocationSource(path)
+            if (storage != null) {
+                val storageName = storage.getName(context)
+                val label = if (storage.isRemote &&
+                    !storageName.contains(provider, ignoreCase = true)) {
+                    "$storageName ($provider)"
+                } else {
+                    storageName
+                }
+                val relativePath = try {
+                    storage.path!!.relativize(path).toString().trimStart('/', '\\')
+                } catch (_: RuntimeException) {
+                    ""
+                }.replace('\\', '/')
+                return if (relativePath.isEmpty()) label else "$label / $relativePath"
+            }
+            val displayPath = path.toString().trimStart('/', '\\').replace('\\', '/')
+            return if (displayPath.isEmpty()) provider else "$provider / $displayPath"
         }
 
         fun archive(

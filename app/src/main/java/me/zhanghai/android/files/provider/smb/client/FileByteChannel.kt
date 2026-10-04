@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
@@ -52,6 +53,8 @@ class FileByteChannel(
             FileAccessor.readAsync(file, position, size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
             .map(
                 { response ->
@@ -83,6 +86,17 @@ class FileByteChannel(
             )
     }
 
+    override fun onReadTimedOut(position: Long, timeoutMillis: Long) {
+        Log.w(
+            SMB_IO_TAG,
+            "READ_TIMEOUT offset=$position timeoutMs=$timeoutMillis; closing stalled connection"
+        )
+        try {
+            file.diskShare.treeConnect.session.connection.close(true)
+        } catch (_: IOException) {
+        }
+    }
+
     @Throws(IOException::class)
     override fun onWrite(position: Long, source: ByteBuffer) {
         if (pendingWrites.size >= WRITE_PIPELINE_DEPTH) {
@@ -98,6 +112,8 @@ class FileByteChannel(
             file.writeAsync(bytes, position, 0, size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
         pendingWrites += PendingWrite(
             position, size.toLong(), SystemClock.elapsedRealtime(), future
@@ -113,6 +129,8 @@ class FileByteChannel(
             file.setLength(size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
     }
 
@@ -123,6 +141,8 @@ class FileByteChannel(
             file.getFileInformation(FileStandardInformation::class.java).endOfFile
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
 
     @Throws(IOException::class)
@@ -132,7 +152,18 @@ class FileByteChannel(
             file.flush()
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
+    }
+
+    private fun IllegalStateException.toTransportIOException(): IOException {
+        if (message != TRANSPORT_NOT_CONNECTED_MESSAGE) {
+            throw this
+        }
+        // Async SMBJ submission can throw directly, outside its usual SMBRuntimeException.
+        // Proxy callbacks must receive an I/O error rather than lose their handler thread.
+        return IOException(this)
     }
 
     private fun SMBRuntimeException.toIOException(): IOException =
@@ -169,6 +200,10 @@ class FileByteChannel(
                 exception = closeException
             } else {
                 exception.addSuppressed(closeException)
+            }
+        } catch (e: IllegalStateException) {
+            if (e.message != TRANSPORT_NOT_CONNECTED_MESSAGE) {
+                throw e
             }
         }
         exception?.let { throw it }
@@ -224,7 +259,8 @@ class FileByteChannel(
         inFlight: Int,
         requestAgeMillis: Long? = null
     ) {
-        if (!BuildConfig.DEBUG || position % REQUEST_LOG_INTERVAL != 0L) {
+        if (!BuildConfig.DEBUG || position % REQUEST_LOG_INTERVAL != 0L &&
+            (requestAgeMillis == null || requestAgeMillis < SLOW_REQUEST_LOG_MILLIS)) {
             return
         }
         Log.i(
@@ -255,6 +291,8 @@ class FileByteChannel(
         private const val IO_CONFIGURATION =
             "async/native/read:256k-x8-size-aware/write:256k-x4"
         private const val REQUEST_LOG_INTERVAL = 64L * 1024 * 1024
+        private const val SLOW_REQUEST_LOG_MILLIS = 1_000L
+        private const val TRANSPORT_NOT_CONNECTED_MESSAGE = "Transport is not connected"
         private const val SMB_IO_TAG = "FMPU.SmbIo"
     }
 }

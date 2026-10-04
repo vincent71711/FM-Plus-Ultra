@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2018 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.file
@@ -59,19 +60,7 @@ import java.nio.ByteBuffer
 import java.nio.channels.ClosedByInterruptException
 
 class FileProvider : ContentProvider() {
-    private lateinit var callbackThread: HandlerThread
-    private lateinit var callbackHandler: Handler
-
-    override fun onCreate(): Boolean {
-        callbackThread = HandlerThread("FileProvider.CallbackThread")
-        callbackThread.start()
-        callbackHandler = Handler(callbackThread.looper)
-        return true
-    }
-
-    override fun shutdown() {
-        callbackThread.quitSafely()
-    }
+    override fun onCreate(): Boolean = true
 
     override fun attachInfo(context: Context, info: ProviderInfo) {
         super.attachInfo(context, info)
@@ -202,12 +191,22 @@ class FileProvider : ContentProvider() {
         } catch (e: IOException) {
             throw e.toFileNotFoundException()
         }
-        return try {
-            storageManager.openProxyFileDescriptorCompat(
-                modeBits, ChannelCallback(channel), callbackHandler
+        // Keep callbacks ordered per descriptor without letting a stalled remote file block
+        // every player, new open, and release in this process.
+        val callbackThread = HandlerThread("FileProvider.CallbackThread")
+        try {
+            callbackThread.start()
+            return storageManager.openProxyFileDescriptorCompat(
+                modeBits, ChannelCallback(channel, callbackThread), Handler(callbackThread.looper)
             )
-        } catch (e: IOException) {
-            throw e.toFileNotFoundException()
+        } catch (e: Exception) {
+            callbackThread.quitSafely()
+            try {
+                channel.close()
+            } catch (closeException: Exception) {
+                e.addSuppressed(closeException)
+            }
+            throw if (e is IOException) e.toFileNotFoundException() else e
         }
     }
 
@@ -253,7 +252,8 @@ class FileProvider : ContentProvider() {
         }
 
     private class ChannelCallback(
-        private val channel: SeekableByteChannel
+        private val channel: SeekableByteChannel,
+        private val callbackThread: HandlerThread
     ) : ProxyFileDescriptorCallbackCompat() {
         private var offset = 0L
         private var released = false
@@ -338,12 +338,14 @@ class FileProvider : ContentProvider() {
             if (released) {
                 return
             }
+            released = true
             try {
                 channel.close()
             } catch (e: IOException) {
                 e.printStackTrace()
+            } finally {
+                callbackThread.quitSafely()
             }
-            released = true
         }
 
         private fun IOException.toErrnoException(): ErrnoException {
@@ -395,14 +397,16 @@ val Path.fileProviderUri: Uri
             .scheme(ContentResolver.SCHEME_CONTENT)
             .authority(BuildConfig.FILE_PROVIDIER_AUTHORITY)
             .path(uriPath)
+            // Some players use the final URI segment instead of querying DISPLAY_NAME.
+            .appendPath(fileName?.toString() ?: "")
             .build()
     }
 
 private val Uri.fileProviderPath: Path
     get() {
-        // Strip the prepended slash. A slash is always prepended because our Uri path starts with
-        // our URI scheme, which can never start with a slash; but our Uri has an authority so its
-        // path must start with a slash.
-        val uriPath = Uri.decode(path).substring(1)
+        // The first segment identifies the file; the optional filename suffix is display-only.
+        // Keep accepting previously granted one-segment URIs. Decode after splitting so encoded
+        // slashes or percent signs in the original source cannot change the segment boundary.
+        val uriPath = Uri.decode(pathSegments.first())
         return Paths.get(URI.create(uriPath))
     }
