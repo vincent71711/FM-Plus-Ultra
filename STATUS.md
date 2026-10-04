@@ -12,6 +12,13 @@ Public release preparation uses the existing signing identity and application ID
 Private investigation commits, device diagnostics, and personal test details are
 excluded from this release branch. No device installation is part of publication.
 
+GitHub prerelease `v0.1.0-beta.4` is published with the signed APK and checksum.
+The uploaded APK digest matches the locally verified release artifact. Source and
+release tag were pushed to the existing public source branch and private origin;
+the existing draft pull request now describes Beta 4. New publication commits use
+a project identity, and private investigation commits are not ancestors of the
+release tag. Existing attribution and previously published history are preserved.
+
 - Phase: competitive SMB baseline achieved; continue product validation
 - Branch: `codex/beta-feedback-fixes`
 - Baseline: `fc1250038496ebf4d4c139f62d16f0071f2c995a`
