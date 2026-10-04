@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
- * Modified 2026-08-20 for FM Plus Ultra.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
@@ -53,6 +53,8 @@ class FileByteChannel(
             FileAccessor.readAsync(file, position, size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
             .map(
                 { response ->
@@ -110,6 +112,8 @@ class FileByteChannel(
             file.writeAsync(bytes, position, 0, size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
         pendingWrites += PendingWrite(
             position, size.toLong(), SystemClock.elapsedRealtime(), future
@@ -125,6 +129,8 @@ class FileByteChannel(
             file.setLength(size)
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
     }
 
@@ -135,6 +141,8 @@ class FileByteChannel(
             file.getFileInformation(FileStandardInformation::class.java).endOfFile
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
 
     @Throws(IOException::class)
@@ -144,7 +152,18 @@ class FileByteChannel(
             file.flush()
         } catch (e: SMBRuntimeException) {
             throw e.toIOException()
+        } catch (e: IllegalStateException) {
+            throw e.toTransportIOException()
         }
+    }
+
+    private fun IllegalStateException.toTransportIOException(): IOException {
+        if (message != TRANSPORT_NOT_CONNECTED_MESSAGE) {
+            throw this
+        }
+        // Async SMBJ submission can throw directly, outside its usual SMBRuntimeException.
+        // Proxy callbacks must receive an I/O error rather than lose their handler thread.
+        return IOException(this)
     }
 
     private fun SMBRuntimeException.toIOException(): IOException =

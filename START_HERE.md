@@ -1,5 +1,17 @@
 # Start here
 
+## Beta 4 release — 2026-10-04
+
+Version 0.1.0-beta.4 (58) includes SMB dead-session recovery, read-offset and
+future fixes, isolated playback callbacks, and readable streaming filenames.
+JDK 21 debug/release assembly, release lint, and all ten JVM regression tests
+passed. The release APK signature matches the established certificate.
+Ten JVM regression tests cover recovery behavior. Development-build switching
+between videos received user validation; broader playback testing remains pending.
+Public release preparation uses the existing signing identity and application ID.
+Private investigation commits, device diagnostics, and personal test details are
+excluded from this release branch. No device installation is part of publication.
+
 ## What this project is
 
 FM Plus Ultra is a GPLv3 Android file manager derived from

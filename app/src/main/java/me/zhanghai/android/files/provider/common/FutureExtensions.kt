@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2024 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.common
@@ -43,6 +44,13 @@ fun <T, R> Future<T>.map(
         private inline fun transformGet(get: () -> T): R {
             val result = try {
                 get()
+            } catch (e: TimeoutException) {
+                // Waiting failed, not the operation: callers need the original control signal.
+                throw e
+            } catch (e: InterruptedException) {
+                throw e
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 val exception = try {
                     transformException(e)
@@ -73,7 +81,7 @@ fun <T> Deferred<T>.asFuture(): Future<T> =
         }
 
         override fun cancel(mayInterruptIfRunning: Boolean): Boolean {
-            cancel()
+            this@asFuture.cancel()
             return this@asFuture.isCancelled
         }
 
@@ -89,7 +97,9 @@ fun <T> Deferred<T>.asFuture(): Future<T> =
 
         @Throws(ExecutionException::class, InterruptedException::class, TimeoutException::class)
         override fun get(timeout: Long, unit: TimeUnit): T {
-            latch.await(timeout, unit)
+            if (!latch.await(timeout, unit)) {
+                throw TimeoutException()
+            }
             return getCompleted()
         }
 

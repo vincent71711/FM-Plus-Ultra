@@ -116,3 +116,10 @@
 - Pause/resume support, if the underlying provider can make it reliable.
 - Multi-pane foldable navigation beyond a stable responsive single-pane layout.
 - Release automation, store listings, telemetry, servers, or cloud services.
+
+## Beta 4 publication — 2026-10-04
+
+The owner authorized updating the existing GitHub prerelease distribution with
+0.1.0-beta.4 (58), using the established release identity and signing certificate.
+Public changes must exclude private investigation history and personal details.
+No new update channel, signing identity, or distribution terms are introduced.

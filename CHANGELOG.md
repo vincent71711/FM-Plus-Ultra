@@ -4,6 +4,20 @@ This file records FM Plus Ultra changes separately from inherited
 Material Files functionality. Upstream history remains available in Git and
 upstream release notes.
 
+## 0.1.0-beta.4 — 2026-10-04
+
+- Discard disconnected SMB sessions without waiting for network logoff.
+- Preserve timeout and cancellation signals and reset failed reads to the correct offset.
+- Prevent a concurrent read failure and close from deadlocking.
+- Isolate playback callbacks per open file and release resources after early failures.
+- Handle disconnected SMB transport errors as I/O failures.
+- Show readable streaming filenames and provide explicit player title metadata.
+- Add ten automated regression tests for read, future, and session recovery.
+
+Switching between videos has received user validation in the development build.
+Long-duration playback and player-specific title rendering still need broader testing.
+Streams do not automatically reopen after connection loss.
+
 ## 0.1.0-beta.3 — 2026-08-20
 
 - Add system-respecting haptic feedback to normal app control taps, accepted

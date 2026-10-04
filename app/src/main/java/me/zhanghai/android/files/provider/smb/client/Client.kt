@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2020 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
- * Modified 2026-08-20 for FM Plus Ultra.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.smb.client
@@ -711,17 +711,7 @@ object Client {
     @Throws(ClientException::class)
     private fun getSession(authority: Authority): Session {
         synchronized(sessions) {
-            var session = sessions[authority]
-            if (session != null) {
-                val connection = session.connection
-                if (connection.isConnected) {
-                    return session
-                } else {
-                    session.closeSafe()
-                    connection.closeSafe()
-                    sessions -= authority
-                }
-            }
+            sessions.getConnectedSession(authority)?.let { return it }
             val password = authenticator.getPassword(authority)
                 ?: throw ClientException("No password found for $authority")
             val hostAddress = resolveHostName(authority.host)
@@ -740,12 +730,12 @@ object Client {
             }
             val authenticationContext =
                 AuthenticationContext(authority.username, password.toCharArray(), authority.domain)
-            session = try {
+            val session = try {
                 connection.authenticate(authenticationContext)
             } catch (e: SMBRuntimeException) {
                 // We need to close the connection here, otherwise future authentications reusing it
                 // will receive an exception about no available credits.
-                connection.closeSafe()
+                connection.closeForRecovery()
                 throw ClientException(e)
             // TODO: kotlinc: Type mismatch: inferred type is Session? but TypeVariable(V) was
             //  expected

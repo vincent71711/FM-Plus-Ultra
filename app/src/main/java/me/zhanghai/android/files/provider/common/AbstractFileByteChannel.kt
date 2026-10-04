@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2024 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
- * Modified 2026-08-20 for FM Plus Ultra.
+ * Modified 2026-10-04 for FM Plus Ultra.
  */
 
 package me.zhanghai.android.files.provider.common
@@ -64,6 +64,7 @@ abstract class AbstractFileByteChannel(
             return 0
         }
         return synchronized(ioLock) {
+            ensureOpen()
             readBuffer.read(destination).also {
                 if (it != -1) {
                     position += it
@@ -202,10 +203,11 @@ abstract class AbstractFileByteChannel(
                 return
             }
             isOpen = false
-            synchronized(ioLock) {
-                readBuffer.closeSafe()
-                onClose()
-            }
+        }
+        // Never wait for I/O while holding closeLock: a read error may call setClosed().
+        synchronized(ioLock) {
+            readBuffer.closeSafe()
+            onClose()
         }
     }
 
@@ -234,7 +236,18 @@ abstract class AbstractFileByteChannel(
         @Throws(IOException::class)
         fun read(destination: ByteBuffer): Int {
             if (!buffer.hasRemaining()) {
-                readIntoBuffer()
+                try {
+                    readIntoBuffer()
+                } catch (e: Exception) {
+                    // A failed await or speculative submission must not consume an offset.
+                    // SMB requests cannot be cancelled, but their results must be discarded.
+                    cancelPendingReads()
+                    buffer.clear()
+                    buffer.limit(0)
+                    bufferedPosition = position
+                    nextReadPosition = position
+                    throw e
+                }
                 if (!buffer.hasRemaining()) {
                     return -1
                 }

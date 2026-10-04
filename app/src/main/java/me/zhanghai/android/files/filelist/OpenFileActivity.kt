@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2019 Hai Zhang <dreaming.in.code.zh@gmail.com>
  * All Rights Reserved.
+ * Modified 2026-10-04 for FM Plus Ultra filename display.
  */
 
 package me.zhanghai.android.files.filelist
@@ -37,6 +38,7 @@ class OpenFileActivity : AppActivity() {
             FileJobService.open(path, mimeType, false, this)
         } else {
             val intent = path.fileProviderUri.createViewIntent(mimeType)
+                .putExtra(Intent.EXTRA_TITLE, path.fileName?.toString())
                 .addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 .apply { extraPath = path }
             startActivitySafe(intent)
